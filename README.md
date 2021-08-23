@@ -15,12 +15,18 @@ and they will be publish ones after the others every week.
 
   * admin permissions to configure plugin
   * usage,contentadmin permissions to link feeds
-  * Dotclear 2.6
+  * Dotclear 2.19
+
+## NOTICE
+
+This plugin creates a new table on Dotclear database !
 
 ## USAGE
 
 First install periodical, manualy from a zip package or from 
 Dotaddict repository. (See Dotclear's documentation to know how do this)
+
+Main settings are accessible from blog preference page.
 
 When enabled you have a menu in main sidebar menu called "Periodical" 
 under "Plugins" group, follow it to manage periods.
