@@ -29,3 +29,10 @@ When you edit a post you have a new sidebar option called "Periodical"
 to link this post to a period.
 
 You can also add or remove period to multiple posts from posts actions page.
+
+## MORE
+
+ * License : GNU GPL v2
+ * Source & contribution : [GitHub Page](https://github.com/JcDenis/periodical)
+ * Packages & details:  [Dotaddict Page](https://plugins.dotaddict.org/dc2/details/periodical)
+ * Discuss & help: [Dotclear Forum](https://forum.dotclear.org/viewtopic.php?id=42289)
