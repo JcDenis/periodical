@@ -812,9 +812,6 @@ dcPage::helpBlock('periodical');
 # Page footer
 echo 
 '<hr class="clear"/><p class="right modules">
-<a class="module-config" ' .
-'href="plugins.php?module=periodical&amp;conf=1&amp;redir=' .
-urlencode('plugin.php?p=periodical') . '">' . __('Configuration') . '</a> - 
 periodical - '. $core->plugins->moduleInfo('periodical', 'version') . '&nbsp;
 <img alt="' . __('periodical') . '" src="index.php?pf=periodical/icon.png" />
 </p>

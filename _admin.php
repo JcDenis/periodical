@@ -15,7 +15,16 @@ if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
 
-$core->blog->settings->addNamespace('periodical'); 
+$core->blog->settings->addNamespace('periodical');
+
+$core->addBehavior(
+    'adminBlogPreferencesForm',
+    ['adminPeriodical', 'adminBlogPreferencesForm']
+);
+$core->addBehavior(
+    'adminBeforeBlogSettingsUpdate',
+    ['adminPeriodical', 'adminBeforeBlogSettingsUpdate']
+);
 
 if ($core->blog->settings->periodical->periodical_active) {
 
@@ -69,6 +78,73 @@ $core->addBehavior(
 class adminPeriodical
 {
     public static $combo_period = null;
+
+    /**
+     * Add settings to blog preference
+     * 
+     * @param  dcCore       $core           dcCore instance
+     * @param  dcSettings   $blog_settings  dcSettings instance
+     */
+    public static function adminBlogPreferencesForm(dcCore $core, dcSettings $blog_settings)
+    {
+        $sortby_combo = [
+            __('Create date') => 'post_creadt',
+            __('Date') => 'post_dt',
+            __('Id') => 'post_id'
+        ];
+        $order_combo = [
+            __('Descending') => 'desc',
+            __('Ascending') => 'asc'
+        ];
+
+        $s_active = (boolean) $blog_settings->periodical->periodical_active;
+        $s_upddate = (boolean) $blog_settings->periodical->periodical_upddate;
+        $s_updurl = (boolean) $blog_settings->periodical->periodical_updurl;
+        $e_order = (string) $blog_settings->periodical->periodical_pub_order;
+        $e_order = explode(' ', $e_order);
+        $s_sortby = in_array($e_order[0], $sortby_combo) ? $e_order[0] : 'post_dt';
+        $s_order = isset($e_order[1]) && strtolower($e_order[1]) == 'desc' ? 'desc' : 'asc';
+
+        echo
+        '<div class="fieldset"><h4 id="fac_params">' . __('Periodical') . '</h4>' .
+        '<div class="two-cols">' .
+        '<div class="col">' .
+        '<h5>' . __('Activation') . '</h5>' .
+        '<p><label class="classic" for="periodical_active">' .
+        form::checkbox('periodical_active', 1, $s_active) .
+        __('Enable plugin') . '</label></p>' .
+        '<h5>' . __('Dates of published entries') . '</h5>' .
+        '<p><label for="periodical_upddate">' .
+        form::checkbox('periodical_upddate', 1, $s_upddate) .
+        __('Update post date') . '</label></p>' .
+        '<p><label for="periodical_updurl">' .
+        form::checkbox('periodical_updurl', 1, $s_updurl) .
+        __('Update post url') . '</label></p>' .
+        '</div>' .
+        '<div class="col">' .
+        '<h5>' . __('Order of publication of entries') . '</h5>' .
+        '<p><label for="periodical_sortby">'.__('Order by:') . '</label>' .
+        form::combo('periodical_sortby', $sortby_combo, $s_sortby) . '</p>' .
+        '<p><label for="periodical_order">'.__('Sort:').'</label>' .
+        form::combo('periodical_order', $order_combo, $s_order) . '</p>' .
+        '</div>' .
+        '</div>' .
+        '<br class="clear" />' .
+        '</div>';
+    }
+
+    /**
+     * Save blog settings
+     * 
+     * @param  dcSettings   $blog_settings  dcSettings instance
+     */
+    public static function adminBeforeBlogSettingsUpdate(dcSettings $blog_settings)
+    {
+        $blog_settings->periodical->put('periodical_active', !empty($_POST['periodical_active']));
+        $blog_settings->periodical->put('periodical_upddate', !empty($_POST['periodical_upddate']));
+        $blog_settings->periodical->put('periodical_updurl', !empty($_POST['periodical_updurl']));
+        $blog_settings->periodical->put('periodical_pub_order', $_POST['periodical_sortby'] . ' ' . $_POST['periodical_order']);
+    }
 
     /**
      * Favorites.

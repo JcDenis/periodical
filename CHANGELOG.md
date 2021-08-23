@@ -1,6 +1,7 @@
 periodical 2021.08.xx
  * update license
  * update php code to PSR-2 style and short array
+ * move settings to blog pref
 
 periodical 2013.11.11
  * Switch to Dotclear 2.6
