@@ -1,0 +1,240 @@
+# Language: Français
+# Module: periodical - 2013.11.11
+# Date: 2013-11-12 08:11:55
+# Translated with translater 2013.05.11
+
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: periodical 2013.11.11\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2013-11-12T08:11:55+00:00\n"
+"Last-Translator: Jean-Christian Denis\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: _admin.php:25
+#: _admin.php:84
+#: _admin.php:142
+#: _admin.php:155
+#: _admin.php:311
+#: index.php:456
+#: index.php:468
+#: index.php:519
+#: index.php:738
+#: index.php:764
+msgid "Periodical"
+msgstr "Publications périodiques"
+
+#: _admin.php:143
+msgid "Add to periodical"
+msgstr "Ajouter aux publications périodiques"
+
+#: _admin.php:156
+#: index.php:519
+msgid "Remove from periodical"
+msgstr "Retirer des publications périodiques"
+
+#: _admin.php:188
+msgid "Posts have been removed from periodical."
+msgstr "Billets retirés des publications périodiques."
+
+#: _admin.php:216
+msgid "Posts have been added to periodical."
+msgstr "Billets ajoutés aux publications périodiques."
+
+#: _admin.php:226
+msgid "Add a period to this selection"
+msgstr "Ajouter une période à cette liste"
+
+#: _config.php:25
+#: inc/lib.index.pager.php:120
+msgid "Create date"
+msgstr "Date de création"
+
+#: _config.php:64
+msgid "Configuration has been successfully updated."
+msgstr "La configuration a été mise à jour avec succés."
+
+#: _config.php:84
+msgid "Enable plugin"
+msgstr "Activer le plugin"
+
+#: _config.php:89
+msgid "Dates of published entries"
+msgstr "Dates de billets publiés"
+
+#: _config.php:93
+msgid "Update post date"
+msgstr "Mettre à jour la date du billet"
+
+#: _config.php:97
+msgid "Update post url"
+msgstr "Mettre à jour l'URL du billet"
+
+#: _config.php:102
+msgid "Order of publication of entries"
+msgstr "Ordre de publication des billets"
+
+#: inc/class.periodical.php:318
+msgid "Hourly"
+msgstr "Toutes les heures"
+
+#: inc/class.periodical.php:319
+msgid "twice a day"
+msgstr "Deux fois par jour"
+
+#: inc/class.periodical.php:320
+msgid "Daily"
+msgstr "Une fois par jour"
+
+#: inc/class.periodical.php:321
+msgid "Weekly"
+msgstr "Une fois par semaine"
+
+#: inc/class.periodical.php:322
+msgid "Monthly"
+msgstr "Un fois par mois"
+
+#: inc/class.periodical.php:354
+#: inc/lib.index.pager.php:84
+msgid "Unknow frequence"
+msgstr "Fréquence inconnue"
+
+#: inc/lib.index.pager.php:31
+msgid "No period"
+msgstr "Pas de période"
+
+#: inc/lib.index.pager.php:44
+#: index.php:684
+msgid "Next update"
+msgstr "Prochaine mise à jour"
+
+#: inc/lib.index.pager.php:46
+msgid "Publications"
+msgstr "Publications"
+
+#: inc/lib.index.pager.php:48
+#: index.php:685
+msgid "End date"
+msgstr "Date de fin"
+
+#: inc/lib.index.pager.php:81
+msgid "view related entries"
+msgstr "voir les billets liés"
+
+#: inc/lib.index.pager.php:89
+msgid "edit period"
+msgstr "modifier la période"
+
+#: inc/lib.periodical.socialmewriter.php:23
+msgid "New periodical publication"
+msgstr "Nouvelle publication périodique"
+
+#: inc/lib.periodical.socialmewriter.php:24
+msgid "When an entry is published on a period"
+msgstr "Lorsque qu'un billet st marqué comme publié par une période"
+
+#: index.php:43
+msgid "One post per day"
+msgstr "Un billet par jour"
+
+#: index.php:55
+msgid "This period does not exist."
+msgstr "Cette période n'existe pas."
+
+#: index.php:99
+msgid "Period title is already taken"
+msgstr "Le titre de la période est déjà pris"
+
+#: index.php:104
+msgid "Period title is required"
+msgstr "Le titre de la période est requis"
+
+#: index.php:107
+msgid "Start date must be older than end date"
+msgstr "La date de début doit être plus ancienne que la date de fin"
+
+#: index.php:126
+msgid "Period successfully updated."
+msgstr "Période mise à jour."
+
+#: index.php:135
+msgid "Period successfully created."
+msgstr "Période crée."
+
+#: index.php:159
+msgid "Entries successfully published."
+msgstr "Billets publiés."
+
+#: index.php:182
+msgid "Entries successfully unpublished."
+msgstr "Billets mis hors ligne."
+
+#: index.php:204
+msgid "Entries successfully removed."
+msgstr "Billets retirés."
+
+#: index.php:469
+#: index.php:477
+#: index.php:770
+msgid "New period"
+msgstr "Nouvelle période"
+
+#: index.php:469
+#: index.php:477
+msgid "Edit period"
+msgstr "Modifier la période"
+
+#: index.php:486
+msgid "Next update:"
+msgstr "Prochaine mise à jour :"
+
+#: index.php:489
+msgid "End date:"
+msgstr "Date de fin :"
+
+#: index.php:494
+msgid "Publication frequency:"
+msgstr "Fréquence de publication :"
+
+#: index.php:497
+msgid "Number of entries to publish every time:"
+msgstr "Nombre de billets à publier à chaque fois :"
+
+#: index.php:539
+msgid "Entries linked to this period"
+msgstr "Billets liés à cette période"
+
+#: index.php:648
+msgid "Periods removed."
+msgstr "Périodes retirées."
+
+#: index.php:669
+msgid "Periods emptied."
+msgstr "Périodes vidées."
+
+#: index.php:686
+msgid "Frequence"
+msgstr "Fréquence"
+
+#: index.php:695
+msgid "empty periods"
+msgstr "vider les périodes"
+
+#: index.php:696
+msgid "delete periods"
+msgstr "effacer les périodes"
+
+#: index.php:794
+msgid "Results per page :"
+msgstr "Résultats par page :"
+
+#: index.php:818
+msgid "Selected periods action:"
+msgstr "Action sur les périodes selectionnées :"
+
+msgid "Published periodically entries"
+msgstr "Publier périodiquement des billets"
+
