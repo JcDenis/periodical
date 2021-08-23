@@ -11,23 +11,20 @@
 #
 # -- END LICENSE BLOCK ------------------------------------
 
-if (!defined('DC_RC_PATH')){return;}
- 
+if (!defined('DC_RC_PATH')) {
+    return null;
+}
+
 $this->registerModule(
-	/* Name */
-	"Periodical",
-	/* Description*/
-	"Published periodically entries",
-	/* Author */
-	"Jean-Christian Denis",
-	/* Version */
-	'2013.11.11',
-	/* Properies */
-	array(
-		'permissions' => 'usage,contentadmin',
-		'type' => 'plugin',
-		'dc_min' => '2.6',
-		'support' => 'http://jcd.lv/q=periodical',
-		'details' => 'http://plugins.dotaddict.org/dc2/details/periodical'
-	)
+    'Periodical',
+    'Published periodically entries',
+    'Jean-Christian Denis and contributors',
+    '2021.08.20',
+    [
+        'permissions' => 'usage,contentadmin',
+        'type' => 'plugin',
+        'dc_min' => '2.19',
+        'support' => 'https://github.com/JcDenis/periodical',
+        'details' => 'https://plugins.dotaddict.org/dc2/details/periodical'
+    ]
 );

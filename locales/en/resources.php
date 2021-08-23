@@ -12,8 +12,7 @@
 # -- END LICENSE BLOCK ------------------------------------
 
 if (!defined('DC_RC_PATH')) {
-
-	return null;
+    return null;
 }
 
-$__resources['help']['periodical'] = dirname(__FILE__).'/help/help.html';
+$__resources['help']['periodical'] = dirname(__FILE__) . '/help/help.html';
