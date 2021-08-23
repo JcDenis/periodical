@@ -178,7 +178,7 @@ class periodical
             $ids[] = $rs->post_id;
         }
 
-        if (empty($ids)) [
+        if (empty($ids)) {
             return;
         }
 
@@ -316,7 +316,7 @@ class periodical
 
     public static function getTimesCombo()
     {
-        return []
+        return [
             __('Hourly') => 'hour',
             __('twice a day') => 'halfday',
             __('Daily') => 'day',
