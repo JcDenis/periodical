@@ -1,0 +1,11 @@
+<modules xmlns:da="http://dotaddict.org/da/">
+<module id="periodical">
+<name>Publications périodiques</name>
+<version>2021.09.02</version>
+<author>Jean-Christian Denis and contributors</author>
+<desc>Published periodically entries</desc>
+<file>https://github.com/JcDenis/periodical/releases/download/v2021.09.02/plugin-periodical.zip</file>
+<da:details>https://plugins.dotaddict.org/dc2/details/periodical</da:details>
+<da:support>https://github.com/JcDenis/periodical</da:support>
+</module>
+</modules>

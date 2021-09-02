@@ -19,7 +19,7 @@ $this->registerModule(
     'Periodical',
     'Published periodically entries',
     'Jean-Christian Denis and contributors',
-    '2021.08.23',
+    '2021.09.02',
     [
         'requires' => [['core', '2.19']],
         'permissions' => 'usage,contentadmin',

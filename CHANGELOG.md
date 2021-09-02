@@ -1,5 +1,8 @@
-xxxx.xx.xx
-- [x] update php headers to phpdoc style
+2021.09.02
+- update php headers to phpdoc style
+- add dcstore.xml pre-release file
+- check translation
+- clean up code
 
 2021.08.23
 - update license
