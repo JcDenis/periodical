@@ -181,4 +181,3 @@ $GLOBALS['__l10n']['Selected periods action:'] = 'Action sur les périodes selec
 $GLOBALS['__l10n']['Configuration has been successfully updated.'] = 'La configuration a été mise à jour avec succés.';
 
 $GLOBALS['__l10n']['Published periodically entries'] = 'Publier périodiquement des billets';
-

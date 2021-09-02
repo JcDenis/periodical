@@ -1,42 +1,45 @@
-periodical 2021.08.xx
- * update license
- * update php code to PSR-2 style and short array
- * move settings to blog pref
+xxxx.xx.xx
+- [x] update php headers to phpdoc style
 
-periodical 2013.11.11
- * Switch to Dotclear 2.6
+2021.08.23
+- update license
+- update php code to PSR-2 style and short array
+- move settings to blog pref
 
-periodical 2013.06.30
- * Small fix and typo
+2013.11.11
+- Switch to Dotclear 2.6
 
-periodical 0.5 - 2011-01-30
- * Fixed install on nightly buid
- * Fixed call to blog object on prepend
- * Removed mesenger fonctions (this is to another plugin to do that)
- * Added behavior on post update
- * Added periodical to plugin soCialMe
- * New year copyright
+2013.06.30
+- Small fix and typo
 
-periodical 0.4 - 2010-09-09
- * Removed old Twitter functions
- * Added StatusNet small functions (Identica)
- * Required plugin Tac for Twitter ability
+0.5 - 2011-01-30
+- Fixed install on nightly buid
+- Fixed call to blog object on prepend
+- Removed mesenger fonctions (this is to another plugin to do that)
+- Added behavior on post update
+- Added periodical to plugin soCialMe
+- New year copyright
 
-periodical 0.3.1 - 2010-06-25
- * Fixed postgreSQL compatibility
- * Fixed php 5.3 compatibility on post action combo
- * Fixed admin crash on non DC 2.2
- * Fixed users rights
+0.4 - 2010-09-09
+- Removed old Twitter functions
+- Added StatusNet small functions (Identica)
+- Required plugin Tac for Twitter ability
 
-periodical 0.3 - 2010-06-08
- * Switched to DC 2.2
- * Fixed simultaneous updates (uses flock)
- * Added twitter option when posts are published
+0.3.1 - 2010-06-25
+- Fixed postgreSQL compatibility
+- Fixed php 5.3 compatibility on post action combo
+- Fixed admin crash on non DC 2.2
+- Fixed users rights
 
-periodical 0.2 - 2010-04-11
- * Fixed some bugs 
- * Added DC 2.2 compatibility (new setting)
- * closes #415
+0.3 - 2010-06-08
+- Switched to DC 2.2
+- Fixed simultaneous updates (uses flock)
+- Added twitter option when posts are published
 
-periodical 0.1 - 2010-04-05
- * First lab release
+0.2 - 2010-04-11
+- Fixed some bugs 
+- Added DC 2.2 compatibility (new setting)
+- closes #415
+
+0.1 - 2010-04-05
+- First lab release

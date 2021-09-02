@@ -1,15 +1,15 @@
 <?php
-# -- BEGIN LICENSE BLOCK ----------------------------------
-#
-# This file is part of periodical, a plugin for Dotclear 2.
-# 
-# Copyright (c) 2009-2021 Jean-Christian Denis and contributors
-# 
-# Licensed under the GPL version 2.0 license.
-# A copy of this license is available in LICENSE file or at
-# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-#
-# -- END LICENSE BLOCK ------------------------------------
+/**
+ * @brief periodical, a plugin for Dotclear 2
+ * 
+ * @package Dotclear
+ * @subpackage Plugin
+ * 
+ * @author Jean-Christian Denis and contributors
+ * 
+ * @copyright Jean-Christian Denis
+ * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 if (!defined('DC_RC_PATH')) {
     return null;
@@ -74,10 +74,10 @@ class publicPeriodical
 
                     $last_nb = 0;
                     $last_tz = $cur_tz;
-                    
+
                     $max_nb = $periods->periodical_pub_nb;
                     $max_tz = $end_tz < $now_tz ? $end_tz : $now_tz;
-                    
+
                     # Calculate nb of posts to get
                     $loop_tz = $cur_tz;
                     $limit = 0;
@@ -107,7 +107,7 @@ class publicPeriodical
 
                         if (!$posts->isEmpty()) {
                             $cur_post = $core->con->openCursor($core->prefix . 'post');
-                            
+
                             while($posts->fetch()) {
 
                                 # Publish post with right date

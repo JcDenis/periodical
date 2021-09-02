@@ -1,15 +1,15 @@
 <?php
-# -- BEGIN LICENSE BLOCK ----------------------------------
-#
-# This file is part of periodical, a plugin for Dotclear 2.
-# 
-# Copyright (c) 2009-2021 Jean-Christian Denis and contributors
-# 
-# Licensed under the GPL version 2.0 license.
-# A copy of this license is available in LICENSE file or at
-# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-#
-# -- END LICENSE BLOCK ------------------------------------
+/**
+ * @brief periodical, a plugin for Dotclear 2
+ * 
+ * @package Dotclear
+ * @subpackage Plugin
+ * 
+ * @author Jean-Christian Denis and contributors
+ * 
+ * @copyright Jean-Christian Denis
+ * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
@@ -24,7 +24,6 @@ $per = new periodical($core);
 # Default values
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 $part = isset($_REQUEST['part']) && $_REQUEST['part'] == 'period' ? 'period' : 'periods';
-
 
 ############################################################
 #
@@ -392,7 +391,7 @@ if ($part == 'period') {
             } else {
                 $order='desc';
             }
-            
+
             if ($sortby != 'post_dt' || $order != 'desc') {
                 $show_filters = true;
             }
@@ -538,7 +537,7 @@ if ($part == 'period') {
         '<p><label for="status" class="ib">' . __('Status:') . '</label> ' .
         form::combo('status', $status_combo, $status) . '</p> ' .
         '</div>' .
-        
+
         '<div class="cell filters-sibling-cell">' .
         '<p><label for="selected" class="ib">' . __('Selected:') . '</label> ' .
         form::combo('selected', $selected_combo, $selected) .'</p>' .
@@ -549,7 +548,7 @@ if ($part == 'period') {
         '<p><label for="lang" class="ib">' . __('Lang:') . '</label> ' .
         form::combo('lang', $lang_combo, $lang) . '</p> ' .
         '</div>'.
-        
+
         '<div class="cell filters-options">' .
         '<h4>' . __('Display options') . '</h4>' .
         '<p><label for="sortby" class="ib">' . __('Order by:') . '</label> ' .
@@ -694,7 +693,7 @@ if ($part == 'period') {
         if ($order !== '' && in_array($order, $order_combo)) {
             $params['order'] = $sortby . ' ' . $order;
         }
-        
+
         if ($sortby != 'periodical_curdt' || $order != 'desc') {
             $show_filters = true;
         }

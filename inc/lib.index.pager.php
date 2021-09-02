@@ -1,15 +1,15 @@
 <?php
-# -- BEGIN LICENSE BLOCK ----------------------------------
-#
-# This file is part of periodical, a plugin for Dotclear 2.
-# 
-# Copyright (c) 2009-2021 Jean-Christian Denis and contributors
-# 
-# Licensed under the GPL version 2.0 license.
-# A copy of this license is available in LICENSE file or at
-# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-#
-# -- END LICENSE BLOCK ------------------------------------
+/**
+ * @brief periodical, a plugin for Dotclear 2
+ * 
+ * @package Dotclear
+ * @subpackage Plugin
+ * 
+ * @author Jean-Christian Denis and contributors
+ * 
+ * @copyright Jean-Christian Denis
+ * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
@@ -67,7 +67,7 @@ class adminPeriodicalList extends adminGenericList
 
         return $echo;
     }
-    
+
     private function periodLine()
     {
         $nb_posts = $this->rs->periodical->getPosts(['periodical_id' => $this->rs->periodical_id], true);
@@ -126,11 +126,11 @@ class adminPeriodicalList extends adminGenericList
             $blocks = explode('%s', $html_block);
 
             $echo .= $blocks[0];
-            
+
             while ($this->rs->fetch()) {
                 $echo .= $this->postLine();
             }
-            
+
             $echo .= $blocks[1];
 
             $echo .= $pager->getLinks();
@@ -138,7 +138,7 @@ class adminPeriodicalList extends adminGenericList
 
         return $echo;
     }
-    
+
     private function postLine()
     {
         if ($this->core->auth->check('categories', $this->core->blog->id)) {
@@ -163,15 +163,15 @@ class adminPeriodicalList extends adminGenericList
             case 1:
                 $img_status = sprintf($img, __('published'), 'check-on.png');
             break;
-            
+
             case 0:
                 $img_status = sprintf($img, __('unpublished'), 'check-off.png');
             break;
-            
+
             case -1:
                 $img_status = sprintf($img, __('scheduled'), 'scheduled.png');
             break;
-            
+
             case -2:
                 $img_status = sprintf($img, __('pending'), 'check-wrn.png');
             break;
