@@ -1,3 +1,6 @@
+- add user pref filters for periods list
+- fix auto-link to blog pref
+
 2021.09.02
 - update php headers to phpdoc style
 - add dcstore.xml pre-release file

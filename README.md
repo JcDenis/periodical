@@ -1,5 +1,12 @@
 # README
 
+[![Release](https://img.shields.io/github/v/release/JcDenis/periodical)](https://github.com/JcDenis/periodical/releases)
+[![Date](https://img.shields.io/github/release-date/JcDenis/periodical)](https://github.com/JcDenis/periodical/releases)
+[![Issues](https://img.shields.io/github/issues/JcDenis/periodical)](https://github.com/JcDenis/periodical/issues)
+[![Dotclear](https://img.shields.io/badge/dotclear-v2.19-blue.svg)](https://fr.dotclear.org/download)
+[![Dotaddict](https://img.shields.io/badge/dotaddict-official-green.svg)](https://plugins.dotaddict.org/dc2/details/periodical)
+[![License](https://img.shields.io/github/license/JcDenis/periodical)](https://github.com/JcDenis/periodical/blob/master/LICENSE)
+
 ## WHAT IS PERIODICAL ?
 
 "Periodical" is a plugin for the open-source 
