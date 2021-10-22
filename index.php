@@ -442,13 +442,11 @@ if ($part == 'period') {
     <body>';
 
     echo
-    dcPage::breadcrumb(
-        [
+    dcPage::breadcrumb([
             html::escapeHTML($core->blog->name) => '',
             __('Periodical') => $p_url . '&amp;part=periods',
             (null === $period_id ? __('New period') : __('Edit period')) => ''
-        ]
-    ) .
+    ]) .
     dcPage::notices();
 
     # Period form
@@ -655,49 +653,16 @@ if ($part == 'period') {
         }
     }
 
-    # Combos
-    $sortby_combo = [
-        __('Next update') => 'periodical_curdt',
-        __('End date') => 'periodical_enddt',
-        __('Frequence') => 'periodical_pub_int'
+    $combo_action = [
+        __('empty periods')  => 'emptyperiods',
+        __('delete periods') => 'deleteperiods'
     ];
-
-    $order_combo = [
-        __('Descending') => 'desc',
-        __('Ascending') => 'asc'
-    ];
-
-    $combo_action = [];
-    $combo_action[__('empty periods')] = 'emptyperiods';
-    $combo_action[__('delete periods')] = 'deleteperiods';
 
     # Filters
-    $sortby = !empty($_GET['sortby']) ? $_GET['sortby'] : 'periodical_curdt';
-    $order = !empty($_GET['order']) ? $_GET['order'] : 'desc';
+    $p_filter = new adminGenericFilter($core, 'periodical');
+    $p_filter->add('part', 'period');
 
-    $show_filters = false;
-
-    $page = !empty($_GET['page']) ? (integer) $_GET['page'] : 1;
-    $nb_per_page =  30;
-
-    if (!empty($_GET['nb']) && (integer) $_GET['nb'] > 0) {
-        if ($nb_per_page != $_GET['nb']) {
-            $show_filters = true;
-        }
-        $nb_per_page = (integer) $_GET['nb'];
-    }
-
-    $params['limit'] = [(($page-1)*$nb_per_page), $nb_per_page];
-
-    if ($sortby !== '' && in_array($sortby, $sortby_combo)) {
-        if ($order !== '' && in_array($order, $order_combo)) {
-            $params['order'] = $sortby . ' ' . $order;
-        }
-
-        if ($sortby != 'periodical_curdt' || $order != 'desc') {
-            $show_filters = true;
-        }
-    }
+    $params = $p_filter->params();
 
     # Get periods
     try {
@@ -711,25 +676,8 @@ if ($part == 'period') {
     # Display
     echo 
     '<html><head><title>' . __('Periodical') . '</title>' .
-    dcPage::jsLoad(
-        'index.php?pf=periodical/js/periodsfilter.js'
-    ) .
-    '<script type="text/javascript">' . "\n" .
-    "//<![CDATA[\n" .
-    dcPage::jsVar(
-        'dotclear.msg.show_filters',
-        $show_filters ? 'true':'false'
-    ) . "\n" .
-    dcPage::jsVar(
-        'dotclear.msg.filter_posts_list',
-        __('Show filters and display options')
-    ) . "\n" .
-    dcPage::jsVar(
-        'dotclear.msg.cancel_the_filter',
-        __('Cancel filters and display options')
-    ) . "\n" .
-    "//]]>\n" .
-    "</script>\n" .
+    //dcPage::jsLoad('index.php?pf=periodical/js/periodsfilter.js') .
+    $p_filter->js($core->adminurl->get('admin.plugin.periodical', ['part' => 'periods'])) .
     '</head>' .
     '<body>' .
 
@@ -745,44 +693,11 @@ if ($part == 'period') {
     <a class="button add" href="' . $p_url . '&amp;part=period">' . __('New period') . '</a>
     </p>';
 
-    # Filter
-    echo 
-    '<form action="' . $p_url . '" method="get" id="filters-form">' .
-
-    '<h3 class="out-of-screen-if-js">' .
-    __('Show filters and display options') .
-    '</h3>' .
-
-    '<div class="table">' .
-
-    '<div class="cell">' .
-    '<p><label for="sortby">' . __('Order by:') . '</label>' .
-    form::combo('sortby', $sortby_combo, $sortby) . '</p>' .
-    '</div>' .
-
-    '<div class="cell">' .
-    '<p><label for="order">' . __('Sort:') . '</label>' .
-    form::combo('order', $order_combo, $order) . '</p>' .
-    '</div>' .
-
-    '<div class="cell">' .
-    '<p><label for="nb">' . __('Results per page :') . '</label>' .
-    form::field('nb', 3, 3, $nb_per_page) . '</p>' .
-    '</div>' .
-
-    '</div>' .
-
-    '<p>' .
-    '<input type="submit" value="' . __('Apply filters and display options') . '" />' .
-    form::hidden(['p'], 'periodical') .
-    form::hidden(['part'], 'periods') .
-    '<br class="clear" />' . //Opera sucks
-    '</p>' .
-
-    '</form>';
+    # Filters
+    $p_filter->display('admin.plugin.periodical', form::hidden('p', 'periodical') . form::hidden('part', 'periods'));
 
     # Posts list
-    echo $period_list->periodDisplay($page, $nb_per_page,
+    echo $period_list->periodDisplay($p_filter->page, $p_filter->nb,
         '<form action="' . $p_url . '" method="post" id="form-periods">' .
 
         '%s' .
@@ -793,12 +708,7 @@ if ($part == 'period') {
         '<p class="col right">' . __('Selected periods action:') . ' ' .
         form::combo('action', $combo_action) .
         '<input type="submit" value="' . __('ok') . '" /></p>' .
-        form::hidden(['sortby'], $sortby) .
-        form::hidden(['order'], $order) .
-        form::hidden(['page'], $page) .
-        form::hidden(['nb'], $nb_per_page) .
-        form::hidden(['p'], 'periodical') .
-        form::hidden(['part'], 'periods') .
+        $core->adminurl->getHiddenFormFields('admin.plugin.periodical', array_merge(['p' =>  'periodical'], $p_filter->values(true))) . 
         $core->formNonce() .
         '</div>' .
         '</form>'
@@ -808,10 +718,4 @@ if ($part == 'period') {
 
 dcPage::helpBlock('periodical');
 
-# Page footer
-echo 
-'<hr class="clear"/><p class="right modules">
-periodical - '. $core->plugins->moduleInfo('periodical', 'version') . '&nbsp;
-<img alt="' . __('periodical') . '" src="index.php?pf=periodical/icon.png" />
-</p>
-</body></html>';
+echo '</body></html>';
