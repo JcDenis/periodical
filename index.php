@@ -208,197 +208,12 @@ if ($part == 'period') {
 
     # Prepare combos for posts list
     if ($period_id) {
-        try {
-            # Getting categories
-            $categories = $core->blog->getCategories(['post_type' => 'post']);
+        # Filters
+        $post_filter = new adminPostFilter($core);
+        $post_filter->add('part', 'period');
 
-            # Getting authors
-            $users = $core->blog->getPostsUsers();
-
-            # Getting dates
-            $dates = $core->blog->getDates(['type' => 'month']);
-
-            # Getting langs
-            $langs = $core->blog->getLangs();
-        } catch (Exception $e) {
-            $core->error->add($e->getMessage());
-        }
-    }
-
-    # Creating filter combo boxes
-    if ($period_id && !$core->error->flag()) {
-
-        # Users combo
-        $users_combo = array_merge(
-            ['-' => ''],
-            dcAdminCombos::getUsersCombo($users)
-        );
-
-        # Categories combo
-        $categories_combo = array_merge(
-            [
-                new formSelectOption('-', ''),
-                new formSelectOption(__('(No cat)'), 'NULL')
-            ],      
-            dcAdminCombos::getCategoriesCombo($categories, false)
-        );
-        $categories_values = [];
-        foreach ($categories_combo as $cat) {
-            if (isset($cat->value)) {
-                $categories_values[$cat->value] = true;
-            }
-        }
-
-        # Status combo
-        $status_combo = array_merge(
-            ['-' => ''],
-            dcAdminCombos::getPostStatusesCombo()   
-        );
-
-        # Selection combo
-        $selected_combo = [
-            '-' => '',
-            __('Selected') => '1',
-            __('Not selected') => '0'
-        ];
-
-        # Attachments combo
-        $attachment_combo = [
-            '-' => '',
-            __('With attachments') => '1',
-            __('Without attachments') => '0'
-        ];
-
-        # Months combo
-        $dt_m_combo = array_merge(
-            ['-' => ''],
-            dcAdminCombos::getDatesCombo($dates)
-        );
-
-        # Langs combo
-        $lang_combo = array_merge(
-            ['-' => ''],
-            dcAdminCombos::getLangsCombo($langs, false) 
-        );
-
-        # Sort_by combo
-        $sortby_combo = [
-            __('Date') => 'post_dt',
-            __('Title') => 'post_title',
-            __('Category') => 'cat_title',
-            __('Author') => 'user_id',
-            __('Status') => 'post_status',
-            __('Selected') => 'post_selected',
-            __('Number of comments') => 'nb_comment',
-            __('Number of trackbacks') => 'nb_trackback'
-        ];
-
-        # order combo
-        $order_combo = [
-            __('Descending') => 'desc',
-            __('Ascending') => 'asc'
-        ];
-
-        # parse filters
-        $user_id = !empty($_GET['user_id']) ? $_GET['user_id'] : '';
-        $cat_id = !empty($_GET['cat_id']) ? $_GET['cat_id'] : '';
-        $status = isset($_GET['status']) ? $_GET['status'] : '';
-        $selected = isset($_GET['selected']) ? $_GET['selected'] : '';
-        $attachment = isset($_GET['attachment']) ? $_GET['attachment'] : '';
-        $month = !empty($_GET['month']) ? $_GET['month'] : '';
-        $lang = !empty($_GET['lang']) ? $_GET['lang'] : '';
-        $sortby = !empty($_GET['sortby']) ? $_GET['sortby'] : 'post_dt';
-        $order = !empty($_GET['order']) ? $_GET['order'] : 'desc';
-
-        $show_filters = false;
-
-        $page = !empty($_GET['page']) ? max(1, (integer) $_GET['page']) : 1;
-        $nb_per_page =  30;
-
-        if (!empty($_GET['nb']) && (integer) $_GET['nb'] > 0) {
-            if ($nb_per_page != $_GET['nb']) {
-                $show_filters = true;
-            }
-            $nb_per_page = (integer) $_GET['nb'];
-        }
-
-        $params['limit'] = [(($page-1)*$nb_per_page), $nb_per_page];
+        $params = $post_filter->params();
         $params['no_content'] = true;
-        $params['periodical_id'] = $period_id;
-
-        # - User filter
-        if ($user_id !== '' && in_array($user_id, $users_combo)) {
-            $params['user_id'] = $user_id;
-            $show_filters = true;
-        } else {
-            $user_id='';
-        }
-
-        # - Categories filter
-        if ($cat_id !== '' && isset($categories_values[$cat_id])) {
-            $params['cat_id'] = $cat_id;
-            $show_filters = true;
-        } else {
-            $cat_id='';
-        }
-
-        # - Status filter
-        if ($status !== '' && in_array($status, $status_combo)) {
-            $params['post_status'] = $status;
-            $show_filters = true;
-        } else {
-            $status='';
-        }
-
-        # - Selected filter
-        if ($selected !== '' && in_array($selected, $selected_combo)) {
-            $params['post_selected'] = $selected;
-            $show_filters = true;
-        } else {
-            $selected='';
-        }
-
-        # - Selected filter
-        if ($attachment !== '' && in_array($attachment, $attachment_combo)) {
-            $params['media'] = $attachment;
-            $params['link_type'] = 'attachment';
-            $show_filters = true;
-        } else {
-            $attachment='';
-        }
-
-        # - Month filter
-        if ($month !== '' && in_array($month, $dt_m_combo)) {
-            $params['post_month'] = substr($month, 4, 2);
-            $params['post_year'] = substr($month, 0, 4);
-            $show_filters = true;
-        } else {
-            $month='';
-        }
-
-        # - Lang filter
-        if ($lang !== '' && in_array($lang, $lang_combo)) {
-            $params['post_lang'] = $lang;
-            $show_filters = true;
-        } else {
-            $lang='';
-        }
-
-        # - Sortby and order filter
-        if ($sortby !== '' && in_array($sortby, $sortby_combo)) {
-            if ($order !== '' && in_array($order, $order_combo)) {
-                $params['order'] = $sortby.' '.$order;
-            } else {
-                $order='desc';
-            }
-
-            if ($sortby != 'post_dt' || $order != 'desc') {
-                $show_filters = true;
-            }
-        } else {
-            $sortby='post_dt';
-            $order='desc';
-        }
 
         # Get posts
         try {
@@ -410,25 +225,8 @@ if ($part == 'period') {
         }
 
         $starting_script =
-            dcPage::jsLoad(
-                'index.php?pf=periodical/js/postsfilter.js'
-            ) .
-            '<script type="text/javascript">' . "\n" .
-            "//<![CDATA[" . "\n" .
-            dcPage::jsVar(
-                'dotclear.msg.show_filters',
-                $show_filters ? 'true':'false'
-            ) . "\n" .
-            dcPage::jsVar(
-                'dotclear.msg.filter_posts_list',
-                __('Show filters and display options')
-            ) . "\n" .
-            dcPage::jsVar(
-                'dotclear.msg.cancel_the_filter',
-                __('Cancel filters and display options')
-            ) . "\n" .
-            "//]]>\n" .
-            "</script>\n";
+            dcPage::jsLoad('index.php?pf=periodical/js/checkbox.js') .
+            $post_filter->js($core->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $period_id], '&').'#posts');
     }
 
     # Display
@@ -491,7 +289,7 @@ if ($part == 'period') {
     if ($period_id && !$core->error->flag()) {
 
         # Actions combo box
-        $combo_action = array();
+        $combo_action = [];
         $combo_action[__('Entries')][__('Publish')] = 'publish';
         $combo_action[__('Entries')][__('Unpublish')] = 'unpublish';
         $combo_action[__('Periodical')][__('Remove from periodical')] = 'remove_post_periodical';
@@ -499,16 +297,16 @@ if ($part == 'period') {
         $base_url = $p_url .
             '&amp;period_id=' .$period_id .
             '&amp;part=period' .
-            '&amp;user_id=' . $user_id .
-            '&amp;cat_id=' . $cat_id .
-            '&amp;status=' . $status .
-            '&amp;selected=' . $selected .
-            '&amp;attachment=' . $attachment .
-            '&amp;month=' . $month .
-            '&amp;lang=' . $lang .
-            '&amp;sortby=' . $sortby .
-            '&amp;order=' . $order .
-            '&amp;nb=' . $nb_per_page .
+            '&amp;user_id=' . $post_filter->user_id .
+            '&amp;cat_id=' . $post_filter->cat_id .
+            '&amp;status=' . $post_filter->status .
+            '&amp;selected=' . $post_filter->selected .
+            '&amp;attachment=' . $post_filter->attachment .
+            '&amp;month=' . $post_filter->month .
+            '&amp;lang=' . $post_filter->lang .
+            '&amp;sortby=' . $post_filter->sortby .
+            '&amp;order=' . $post_filter->order .
+            '&amp;nb=' . $post_filter->nb .
             '&amp;page=%s' .
             '#posts';
 
@@ -518,57 +316,17 @@ if ($part == 'period') {
         '" id="posts">';
 
         # Filters
-        echo 
-        '<form action="' . $p_url . '#posts" method="get" id="filters-form">' .
-
-        '<h3 class="out-of-screen-if-js">' .
-        __('Cancel filters and display options') .
-        '</h3>' .
-
-        '<div class="table">' .
-        '<div class="cell">' .
-        '<h4>' . __('Filters') . '</h4>' .
-        '<p><label for="user_id" class="ib">' . __('Author:') . '</label> ' .
-        form::combo('user_id', $users_combo, $user_id) . '</p>' .
-        '<p><label for="cat_id" class="ib">' . __('Category:') . '</label> ' .
-        form::combo('cat_id', $categories_combo, $cat_id) . '</p>' .
-        '<p><label for="status" class="ib">' . __('Status:') . '</label> ' .
-        form::combo('status', $status_combo, $status) . '</p> ' .
-        '</div>' .
-
-        '<div class="cell filters-sibling-cell">' .
-        '<p><label for="selected" class="ib">' . __('Selected:') . '</label> ' .
-        form::combo('selected', $selected_combo, $selected) .'</p>' .
-        '<p><label for="attachment" class="ib">' . __('Attachments:') . '</label> ' .
-        form::combo('attachment', $attachment_combo, $attachment) . '</p>' .
-        '<p><label for="month" class="ib">' . __('Month:') . '</label> ' .
-        form::combo('month', $dt_m_combo,$month) . '</p>' .
-        '<p><label for="lang" class="ib">' . __('Lang:') . '</label> ' .
-        form::combo('lang', $lang_combo, $lang) . '</p> ' .
-        '</div>'.
-
-        '<div class="cell filters-options">' .
-        '<h4>' . __('Display options') . '</h4>' .
-        '<p><label for="sortby" class="ib">' . __('Order by:') . '</label> ' .
-        form::combo('sortby', $sortby_combo, $sortby) . '</p>' .
-        '<p><label for="order" class="ib">' . __('Sort:') . '</label> ' .
-        form::combo('order', $order_combo, $order) . '</p>' .
-        '<p><span class="label ib">' . __('Show') . '</span> <label for="nb" class="classic">' .
-        form::field('nb', 3, 3, $nb_per_page) . ' ' .
-        __('entries per page') . '</label></p>' .
-        '</div>' .
-        '</div>' .
-
-        '<p><input type="submit" value="' . __('Apply filters and display options') . '" />' .
-        form::hidden(['p'], 'periodical') .
-        form::hidden(['part'], 'period') .
-        form::hidden(['period_id'], $period_id) .
-        '<br class="clear" /></p>' . //Opera sucks
-        '</form>';
+        $post_filter->display(['admin.plugin.periodical','#posts'], 
+            $core->adminurl->getHiddenFormFields('admin.plugin.zoneclearFeedServer', [
+                'p'         => 'periodical',
+                'part'      => 'period',
+                'period_id' => $period_id
+            ])
+        );
 
         # Posts list
         echo 
-        $post_list->postDisplay($page, $nb_per_page, $base_url, 
+        $post_list->postDisplay($post_filter->page, $post_filter->nb, $base_url, 
             '<form action="' . $p_url . '" method="post" id="form-entries">' .
 
             '%s' .
@@ -579,21 +337,10 @@ if ($part == 'period') {
             '<p class="col right">' . __('Selected entries action:') . ' ' .
             form::combo('action', $combo_action) .
             '<input type="submit" value="' . __('ok') . '" /></p>' .
+            $core->adminurl->getHiddenFormFields('admin.plugin.periodical', $post_filter->values()) .
             form::hidden(['period_id'], $period_id) .
-            form::hidden(['user_id'], $user_id) .
-            form::hidden(['cat_id'], $cat_id) .
-            form::hidden(['status'], $status) .
-            form::hidden(['selected'], $selected) .
-            form::hidden(['attachment'], $attachment) .
-            form::hidden(['month'], $month) .
-            form::hidden(['lang'], $lang) .
-            form::hidden(['sortby'], $sortby) .
-            form::hidden(['order'], $order) .
-            form::hidden(['page'], $page) .
-            form::hidden(['nb'], $nb_per_page) .
             form::hidden(['p'], 'periodical') .
-            form::hidden(['part'], 'period') .
-            form::hidden(['redir'], sprintf($base_url, $page)) .
+            form::hidden(['redir'], sprintf($base_url, $post_filter->page)) .
             $core->formNonce() .
             '</div>' .
             '</form>'
@@ -660,7 +407,7 @@ if ($part == 'period') {
 
     # Filters
     $p_filter = new adminGenericFilter($core, 'periodical');
-    $p_filter->add('part', 'period');
+    $p_filter->add('part', 'periods');
 
     $params = $p_filter->params();
 
@@ -676,7 +423,7 @@ if ($part == 'period') {
     # Display
     echo 
     '<html><head><title>' . __('Periodical') . '</title>' .
-    //dcPage::jsLoad('index.php?pf=periodical/js/periodsfilter.js') .
+    dcPage::jsLoad('index.php?pf=periodical/js/checkbox.js') .
     $p_filter->js($core->adminurl->get('admin.plugin.periodical', ['part' => 'periods'])) .
     '</head>' .
     '<body>' .
