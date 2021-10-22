@@ -26,6 +26,9 @@ $this->registerModule(
         'type' => 'plugin',
         'support' => 'https://github.com/JcDenis/periodical',
         'details' => 'https://plugins.dotaddict.org/dc2/details/periodical',
-        'repository' => 'https://raw.githubusercontent.com/JcDenis/periodical/master/dcstore.xml'
+        'repository' => 'https://raw.githubusercontent.com/JcDenis/periodical/master/dcstore.xml',
+        'settings' => [
+            'blog' => '#params.periodical_params'
+        ]
     ]
 );
