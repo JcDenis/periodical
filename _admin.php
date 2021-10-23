@@ -50,12 +50,9 @@ if ($core->blog->settings->periodical->periodical_active) {
 
     $_menu['Plugins']->addItem(
         __('Periodical'),
-        'plugin.php?p=periodical',
-        'index.php?pf=periodical/icon.png',
-        preg_match(
-            '/plugin.php\?p=periodical(&.*)?$/',
-            $_SERVER['REQUEST_URI']
-        ),
+        $core->adminurl->get('admin.plugin.periodical'),
+        dcPage::getPF('periodical/icon.png'),
+        preg_match('/' . preg_quote($core->adminurl->get('admin.plugin.periodical')) . '(&.*)?$/', $_SERVER['REQUEST_URI']),
         $core->auth->check('usage,contentadmin', $core->blog->id)
     );
 

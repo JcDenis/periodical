@@ -64,14 +64,12 @@ class publicPeriodical
             $cur_period = $core->con->openCursor($core->prefix . 'periodical');
 
             while($periods->fetch()) {
-
                 # Check if period is ongoing
                 $cur_tz = strtotime($periods->periodical_curdt);
                 $end_tz = strtotime($periods->periodical_enddt);
                 $now_tz = $now + dt::getTimeOffset($periods->periodical_tz, $now);
 
-                if ($now_tz > $cur_tz && $now_tz < $end_tz) {
-
+                if ($cur_tz < $now_tz && $now_tz < $end_tz) {
                     $last_nb = 0;
                     $last_tz = $cur_tz;
 
@@ -90,12 +88,10 @@ class publicPeriodical
                             $limit += 1;
                         }
                     } catch (Exception $e) {
-
                     }
 
                     # If period need update
                     if ($limit > 0) {
-
                         # Get posts to publish related to this period
                         $posts_params = [];
                         $posts_params['periodical_id'] = $periods->periodical_id;
@@ -103,13 +99,12 @@ class publicPeriodical
                         $posts_params['order'] = $posts_order;
                         $posts_params['limit'] = $limit * $max_nb;
                         $posts_params['no_content'] = true;
-                        $posts =  $core->auth->sudo([$per, 'getPosts'], $posts_params);
+                        $posts = $core->auth->sudo([$per, 'getPosts'], $posts_params);
 
                         if (!$posts->isEmpty()) {
                             $cur_post = $core->con->openCursor($core->prefix . 'post');
 
                             while($posts->fetch()) {
-
                                 # Publish post with right date
                                 $cur_post->clean();
                                 $cur_post->post_status = 1;
