@@ -219,7 +219,7 @@ class periodical
 
         if (!empty($params['periodical_id'])) {
             if (is_array($params['periodical_id'])) {
-                array_walk($params['periodical_id'], create_function('&$v,$k', 'if($v!==null){$v=(integer)$v;}'));
+                array_walk($params['periodical_id'], function ($v) { if ($v !== null) { $v = (integer) $v; } });
             } else {
                 $params['periodical_id'] = [(integer) $params['periodical_id']];
             }
@@ -317,11 +317,11 @@ class periodical
     public static function getTimesCombo()
     {
         return [
-            __('Hourly') => 'hour',
+            __('Hourly')      => 'hour',
             __('twice a day') => 'halfday',
-            __('Daily') => 'day',
-            __('Weekly') => 'week',
-            __('Monthly') => 'month'
+            __('Daily')       => 'day',
+            __('Weekly')      => 'week',
+            __('Monthly')     => 'month'
         ];
     }
 
@@ -332,28 +332,28 @@ class periodical
         switch($period)
         {
             case 'hour':
-                $new_ts = mktime($e[0] + 1,$e[1],$e[2],$e[3],$e[4],$e[5]);
+                $new_ts = mktime($e[0] + 1, $e[1], $e[2], $e[3], $e[4], $e[5]);
             break;
 
             case 'halfday':
-                $new_ts = mktime($e[0],$e[1] + 12,$e[2],$e[3],$e[4],$e[5]);
+                $new_ts = mktime($e[0] + 12, $e[1], $e[2], $e[3], $e[4], $e[5]);
             break;
 
             case 'day':
-                $new_ts = mktime($e[0],$e[1],$e[2],$e[3],$e[4] + 1,$e[5]);
+                $new_ts = mktime($e[0], $e[1] ,$e[2], $e[3], $e[4] + 1, $e[5]);
             break;
 
             case 'week':
-                $new_ts = mktime($e[0],$e[1],$e[2],$e[3],$e[4] + 7,$e[5]);
+                $new_ts = mktime($e[0], $e[1], $e[2], $e[3], $e[4] + 7, $e[5]);
             break;
 
             case 'month':
-                $new_ts = mktime($e[0],$e[1],$e[2],$e[3] + 1,$e[4],$e[5]);
+                $new_ts = mktime($e[0], $e[1], $e[2], $e[3] + 1, $e[4], $e[5]);
             break;
 
             default:
                 $new_ts = 0;
-            throw new Exception(__('Unknow frequence'));
+                throw new Exception(__('Unknow frequence'));
             break;
         }
         return $new_ts;
