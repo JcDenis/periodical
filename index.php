@@ -266,7 +266,7 @@ if ($_REQUEST['part'] == 'period') {
     form::combo('period_pub_int',$per->getTimesCombo(), $period_pub_int) . '</p>
 
     <p><label for="period_pub_nb">' . __('Number of entries to publish every time:') . '</label>' .
-    form::field('period_pub_nb', 10, 3, html::escapeHTML($period_pub_nb)) . '</p>
+    form::number('period_pub_nb', ['min' => 1, 'max' => 20, 'default' => $period_pub_nb]) . '</p>
 
     </div>
 
