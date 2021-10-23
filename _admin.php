@@ -33,6 +33,18 @@ $core->addBehavior(
     'adminColumnsLists',
     ['adminPeriodical', 'adminColumnsLists']
 );
+$core->addBehavior(
+    'adminColumnsLists',
+    ['adminPeriodical', 'adminColumnsLists']
+);
+$core->addBehavior(
+    'adminPostListHeader',
+    ['adminPeriodical', 'adminPostListHeader']
+);
+$core->addBehavior(
+    'adminPostListValue',
+    ['adminPeriodical', 'adminPostListValue']
+);
 
 if ($core->blog->settings->periodical->periodical_active) {
 
@@ -86,6 +98,7 @@ $core->addBehavior(
 class adminPeriodical
 {
     public static $combo_period = null;
+    protected static $per = null;
 
     public static function sortbyCombo()
     {
@@ -94,6 +107,14 @@ class adminPeriodical
             __('End date')    => 'periodical_enddt',
             __('Frequence')   => 'periodical_pub_int'
         ];
+    }
+
+    protected static function period($core)
+    {
+        if (self::$per === null) {
+            self::$per = new periodical($core);
+        }
+        return self::$per;
     }
 
     /**
@@ -143,6 +164,12 @@ class adminPeriodical
         $blog_settings->periodical->put('periodical_updurl', !empty($_POST['periodical_updurl']));
     }
 
+    /**
+     * User pref for periods columns lists.
+     *
+     * @param    dcCore      $core dcCore instance
+     * @param    arrayObject $cols Columns
+     */
     public static function adminColumnsLists(dcCore $core, $cols)
     {
         $cols['periodical'] = [
@@ -155,8 +182,16 @@ class adminPeriodical
                 'enddt'   => [true, __('End date')]
             ]
         ];
+
+        $cols['posts'][1]['period'] = [true, __('Period')];
     }
 
+    /**
+     * User pref periods filters options.
+     *
+     * @param    dcCore      $core  dcCore instance
+     * @param    arrayObject $sorts Sort options
+     */
     public static function adminFiltersLists(dcCore $core, $sorts)
     {
         $sorts['periodical'] = [
@@ -166,6 +201,44 @@ class adminPeriodical
             'desc',
             [__('periods per page'), 10]
         ];
+    }
+
+    /**
+     * Add columns period to posts list header.
+     *
+     * @param    dcCore      $core  dcCore instance
+     * @param    record      $rs    record instance
+     * @param    arrayObject $cols  Columns
+     */
+    public static function adminPostListHeader(dcCore $core, $rs, $cols)
+    {
+        if ($core->blog->settings->periodical->periodical_active) {
+            $cols['period'] = '<th scope="col">' . __('Period') . '</th>';
+        }
+    }
+
+
+    /**
+     * Add columns period to posts list values.
+     *
+     * @param    dcCore      $core  dcCore instance
+     * @param    record      $rs    record instance
+     * @param    arrayObject $cols  Columns
+     */
+    public static function adminPostListValue(dcCore $core, $rs, $cols)
+    {
+        if (!$core->blog->settings->periodical->periodical_active) {
+            return null;
+        }
+
+        $r = self::period($core)->getPosts(['post_id' => $rs->post_id]);
+        if ($r->isEmpty()) {
+            $name = '-';
+        } else {
+            $url  = $core->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $r->periodical_id]);
+            $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . html::escapeHTML($r->periodical_title) . '</a>';
+        }
+        $cols['period'] = '<td class="nowrap">' . $name . '</td>';
     }
 
     /**
@@ -345,8 +418,7 @@ class adminPeriodical
         # Get existing linked period
         $period = '';
         if ($post) {
-            $per = new periodical($core);
-            $rs = $per->getPosts(['post_id' => $post->post_id]);
+            $rs = self::period($core)->getPosts(['post_id' => $post->post_id]);
             $period = $rs->isEmpty() ? '' : $rs->periodical_id;
         }
 
@@ -407,9 +479,7 @@ class adminPeriodical
     protected static function comboPeriod(dcCore $core)
     {
         if (adminPeriodical::$combo_period === null) {
-
-            $per = new periodical($core);
-            $periods = $per->getPeriods();
+            $periods = self::period($core)->getPeriods();
 
             if ($periods->isEmpty()) {
                 adminPeriodical::$combo_period = [];
@@ -438,8 +508,7 @@ class adminPeriodical
         }
 
         $post_id = (integer) $post_id;
-        $per = new periodical($core);
-        $per->delPost($post_id);
+        self::period($core)->delPost($post_id);
     }
 
     /**
@@ -456,11 +525,8 @@ class adminPeriodical
             return null;
         }
 
-        # Period object
-        $per = new periodical($core);
-
         # Get periods
-        $period = $per->getPeriods(['periodical_id' => $period]);
+        $period = self::period($core)->getPeriods(['periodical_id' => $period]);
 
         # No period
         if ($period->isEmpty()) {
@@ -470,6 +536,6 @@ class adminPeriodical
         $post_id = (integer) $post_id;
 
         # Add relation
-        $per->addPost($period->periodical_id, $post_id);
+        self::period($core)->addPost($period->periodical_id, $post_id);
     }
 }
