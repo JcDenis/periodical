@@ -51,7 +51,7 @@ class adminPeriodicalList extends adminGenericList
                 'name'    => '<th colspan="2" class="first">' . __('Name') . '</th>',
                 'curdt'   => '<th scope="col" class="nowrap">' . __('Next update') . '</th>',
                 'pub_int' => '<th scope="col" class="nowrap">' . __('Frequency') . '</th>',
-                'pub_nb'  => '<th scope="col" class="nowrap">' . __('Pub per update') . '</th>',
+                'pub_nb'  => '<th scope="col" class="nowrap">' . __('Entries per update') . '</th>',
                 'nbposts' => '<th scope="col" class="nowrap">' . __('Entries') . '</th>',
                 'enddt'   => '<th scope="col" class="nowrap">' . __('End date') . '</th>'
             ]);
@@ -128,7 +128,10 @@ class adminPeriodicalList extends adminGenericList
             }
 
             $html_block =
-            '<table class="clear"><tr>' .
+            '<table class="clear"><caption>' . ($filter->show() ? 
+                sprintf(__('List of %s entries matching the filter.'), $this->rs_count) :
+                sprintf(__('List of %s entries.'), $this->rs_count)
+            ). '</caption><tr>' .
             '<th colspan="2">' . __('Title') . '</th>' .
             '<th class="nowrap">' . __('Date') . '</th>' .
             '<th class="nowrap">' . __('Category') . '</th>' .

@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
-"Project-Id-Version: periodical 2021.09.02.1\n"
+"Project-Id-Version: periodical 2021.10.23\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-10-23T18:59:48+00:00\n"
+"PO-Revision-Date: 2021-10-23T21:53:08+00:00\n"
 "Last-Translator: Jean-Christian Denis\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -34,8 +34,8 @@ msgstr "Mettre à jour la date du billet"
 msgid "Update post url"
 msgstr "Mettre à jour l'URL du billet"
 
-msgid "Pub per update"
-msgstr "Pub par màj"
+msgid "Entries per update"
+msgstr "Billets par mise à jour"
 
 msgid "Period"
 msgstr "Période"
@@ -89,13 +89,16 @@ msgid "No period"
 msgstr "Pas de période"
 
 msgid "List of %s periods matching the filter."
-msgstr "Liste des %s périodes correspondant au filtre."
+msgstr "Liste des %s périodes correspondant au filtre"
 
 msgid "List of %s periods."
-msgstr "Liste des %s périodes."
+msgstr "Liste des %s périodes"
 
 msgid "view related entries"
 msgstr "voir les billets liés"
+
+msgid "List of %s entries."
+msgstr "Listes des %s billets"
 
 msgid "Create date"
 msgstr "Date de création"
@@ -105,12 +108,6 @@ msgstr "protégé"
 
 msgid "selected"
 msgstr "sélectionné"
-
-msgid "New periodical publication"
-msgstr "Nouvelle publication périodique"
-
-msgid "When an entry is published on a period"
-msgstr "Lorsque qu'un billet st marqué comme publié par une période"
 
 msgid "One post per day"
 msgstr "Un billet par jour"

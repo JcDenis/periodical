@@ -174,7 +174,7 @@ class adminPeriodical
             [
                 'curdt'   => [true, __('Next update')],
                 'pub_int' => [true, __('Frequency')],
-                'pub_nb'  => [true, __('Pub per update')],
+                'pub_nb'  => [true, __('Entries per update')],
                 'nbposts' => [true, __('Entries')],
                 'enddt'   => [true, __('End date')]
             ]
