@@ -29,6 +29,10 @@ $core->addBehavior(
     'adminFiltersLists',
     ['adminPeriodical', 'adminFiltersLists']
 );
+$core->addBehavior(
+    'adminColumnsLists',
+    ['adminPeriodical', 'adminColumnsLists']
+);
 
 if ($core->blog->settings->periodical->periodical_active) {
 
@@ -137,6 +141,20 @@ class adminPeriodical
         $blog_settings->periodical->put('periodical_active', !empty($_POST['periodical_active']));
         $blog_settings->periodical->put('periodical_upddate', !empty($_POST['periodical_upddate']));
         $blog_settings->periodical->put('periodical_updurl', !empty($_POST['periodical_updurl']));
+    }
+
+    public static function adminColumnsLists(dcCore $core, $cols)
+    {
+        $cols['periodical'] = [
+            __('Periodical'),
+            [
+                'curdt'   => [true, __('Next update')],
+                'pub_int' => [true, __('Frequency')],
+                'pub_nb'  => [true, __('Pub per update')],
+                'nbposts' => [true, __('Entries')],
+                'enddt'   => [true, __('End date')]
+            ]
+        ];
     }
 
     public static function adminFiltersLists(dcCore $core, $sorts)

@@ -18,12 +18,10 @@ if (!defined('DC_CONTEXT_ADMIN')) {
 dcPage::check('usage,contentadmin');
 
 # Objects
-$s = $core->blog->settings->periodical;
 $per = new periodical($core);
 
 # Default values
 $action = isset($_POST['action']) ? $_POST['action'] : '';
-$part = isset($_REQUEST['part']) && $_REQUEST['part'] == 'period' ? 'period' : 'periods';
 
 ############################################################
 #
@@ -31,17 +29,17 @@ $part = isset($_REQUEST['part']) && $_REQUEST['part'] == 'period' ? 'period' : '
 #
 ############################################################
 
-if ($part == 'period') {
+if ($_REQUEST['part'] == 'period') {
 
     $starting_script = '';
 
     # Default value for period
-    $period_id = null;
-    $period_title = __('One post per day');
-    $period_pub_nb = 1;
+    $period_id      = null;
+    $period_title   = __('One post per day');
+    $period_pub_nb  = 1;
     $period_pub_int = 'day';
-    $period_curdt = date('Y-m-d H:i:00', time());
-    $period_enddt = date('Y-m-d H:i:00', time() + 31536000); //one year
+    $period_curdt   = date('Y-m-d H:i:00', time());
+    $period_enddt   = date('Y-m-d H:i:00', time() + 31536000); //one year
 
     # Get period
     if (!empty($_REQUEST['period_id'])) {
@@ -52,20 +50,17 @@ if ($part == 'period') {
             $core->error->add(__('This period does not exist.'));
             $period_id = null;
         } else {
-            $period_id = $rs->periodical_id;
-            $period_title = $rs->periodical_title;
-            $period_pub_nb = $rs->periodical_pub_nb;
+            $period_id      = $rs->periodical_id;
+            $period_title   = $rs->periodical_title;
+            $period_pub_nb  = $rs->periodical_pub_nb;
             $period_pub_int = $rs->periodical_pub_int;
-            $period_curdt = date('Y-m-d H:i', strtotime($rs->periodical_curdt));
-            $period_enddt = date('Y-m-d H:i', strtotime($rs->periodical_enddt));
-
-            //todo load related posts
+            $period_curdt   = date('Y-m-d H:i', strtotime($rs->periodical_curdt));
+            $period_enddt   = date('Y-m-d H:i', strtotime($rs->periodical_enddt));
         }
     }
 
     # Set period
     if ($action == 'setperiod') {
-
         # Get POST values
         if (!empty($_POST['period_title'])) {
             $period_title = $_POST['period_title'];
@@ -74,7 +69,8 @@ if ($part == 'period') {
             $period_pub_nb = abs((integer) $_POST['period_pub_nb']);
         }
         if (!empty($_POST['period_pub_int']) 
-         && in_array($_POST['period_pub_int'], $per->getTimesCombo())) {
+            && in_array($_POST['period_pub_int'], $per->getTimesCombo())
+        ) {
             $period_pub_int = $_POST['period_pub_int'];
         }
         if (!empty($_POST['period_curdt'])) {
@@ -104,17 +100,15 @@ if ($part == 'period') {
 
         # If no error, set period
         if (!$core->error->flag()) {
-
             $cur = $per->openCursor();
-            $cur->periodical_title = $period_title;
-            $cur->periodical_curdt = $period_curdt;
-            $cur->periodical_enddt = $period_enddt;
+            $cur->periodical_title   = $period_title;
+            $cur->periodical_curdt   = $period_curdt;
+            $cur->periodical_enddt   = $period_enddt;
             $cur->periodical_pub_int = $period_pub_int;
-            $cur->periodical_pub_nb = $period_pub_nb;
+            $cur->periodical_pub_nb  = $period_pub_nb;
 
             # Update period
             if ($period_id) {
-
                 $per->updPeriod($period_id, $cur);
 
                 dcPage::addSuccessNotice(
@@ -122,7 +116,6 @@ if ($part == 'period') {
                 );
             # Create period
             } else {
-
                 $period_id = $per->addPeriod($cur);
 
                 dcPage::addSuccessNotice(
@@ -130,16 +123,16 @@ if ($part == 'period') {
                 );
             }
 
-            http::redirect(empty($_POST['redir']) ? 
-                $p_url . '&part=period&period_id=' . $period_id . '#period' : 
-                $_POST['redir']
-            );
+            if (!empty($_POST['redir'])) {
+                http::redirect($_POST['redir']);
+            } else {
+                $core->adminurl->redirect('admin.plugin.periodical', ['part' => 'period', 'period_id' => $period_id], '#period');
+            }
         }
     }
 
     # Actions on related posts
     if (!$core->error->flag() && $period_id && $action && !empty($_POST['periodical_entries'])) {
-
         # Publish posts
         if ($action == 'publish') {
             try {
@@ -153,10 +146,11 @@ if ($part == 'period') {
                     __('Entries successfully published.')
                 );
 
-                http::redirect(empty($_POST['redir']) ? 
-                    $p_url . '&part=period&period_id=' . $period_id . '#posts' : 
-                    $_POST['redir']
-                );
+                if (!empty($_POST['redir'])) {
+                    http::redirect($_POST['redir']);
+                } else {
+                    $core->adminurl->redirect('admin.plugin.periodical', ['part' => 'period', 'period_id' => $period_id], '#posts');
+                }
             } catch (Exception $e) {
                 $core->error->add($e->getMessage());
             }
@@ -175,10 +169,11 @@ if ($part == 'period') {
                     __('Entries successfully unpublished.')
                 );
 
-                http::redirect(empty($_POST['redir']) ? 
-                    $p_url . '&part=period&period_id=' . $period_id . '#posts' : 
-                    $_POST['redir']
-                );
+                if (!empty($_POST['redir'])) {
+                    http::redirect($_POST['redir']);
+                } else {
+                    $core->adminurl->redirect('admin.plugin.periodical', ['part' => 'period', 'period_id' => $period_id], '#posts');
+                }
             } catch (Exception $e) {
                 $core->error->add($e->getMessage());
             }
@@ -196,10 +191,11 @@ if ($part == 'period') {
                     __('Entries successfully removed.')
                 );
 
-                http::redirect(empty($_POST['redir']) ? 
-                    $p_url . '&part=period&period_id=' . $period_id . '#posts' : 
-                    $_POST['redir']
-                );
+                if (!empty($_POST['redir'])) {
+                    http::redirect($_POST['redir']);
+                } else {
+                    $core->adminurl->redirect('admin.plugin.periodical', ['part' => 'period', 'period_id' => $period_id], '#posts');
+                }
             } catch (Exception $e) {
                 $core->error->add($e->getMessage());
             }
@@ -213,7 +209,8 @@ if ($part == 'period') {
         $post_filter->add('part', 'period');
 
         $params = $post_filter->params();
-        $params['no_content'] = true;
+        $params['periodical_id'] = $period_id;
+        $params['no_content']    = true;
 
         # Get posts
         try {
@@ -249,9 +246,7 @@ if ($part == 'period') {
 
     # Period form
     echo '
-    <div class="multi-part" title="' .
-    (null === $period_id ? __('New period') : __('Edit period')) .
-    '" id="period">
+    <div id="period"><h3>' . (null === $period_id ? __('New period') : __('Edit period')) . '</h3>
     <form method="post" action="' . $p_url . '">
 
     <p><label for="period_title">' . __('Title:') . '</label>' .
@@ -311,22 +306,18 @@ if ($part == 'period') {
             '#posts';
 
         echo '
-        <div class="multi-part" title="' .
-        __('Entries linked to this period') .
-        '" id="posts">';
+        <div id="posts"><h3>' . __('Entries linked to this period') . '</h3>';
 
         # Filters
-        $post_filter->display(['admin.plugin.periodical','#posts'], 
-            $core->adminurl->getHiddenFormFields('admin.plugin.zoneclearFeedServer', [
-                'p'         => 'periodical',
-                'part'      => 'period',
-                'period_id' => $period_id
+        $post_filter->display(['admin.plugin.periodical', '#posts'], 
+            $core->adminurl->getHiddenFormFields('admin.plugin.periodical', [
+                'period_id' => $period_id,
+                'part'      => 'period'
             ])
         );
 
         # Posts list
-        echo 
-        $post_list->postDisplay($post_filter->page, $post_filter->nb, $base_url, 
+        echo $post_list->postDisplay($post_filter, $base_url, 
             '<form action="' . $p_url . '" method="post" id="form-entries">' .
 
             '%s' .
@@ -337,10 +328,10 @@ if ($part == 'period') {
             '<p class="col right">' . __('Selected entries action:') . ' ' .
             form::combo('action', $combo_action) .
             '<input type="submit" value="' . __('ok') . '" /></p>' .
-            $core->adminurl->getHiddenFormFields('admin.plugin.periodical', $post_filter->values()) .
-            form::hidden(['period_id'], $period_id) .
-            form::hidden(['p'], 'periodical') .
-            form::hidden(['redir'], sprintf($base_url, $post_filter->page)) .
+            $core->adminurl->getHiddenFormFields('admin.plugin.periodical', array_merge($post_filter->values(), [
+                'period_id' => $period_id,
+                'redir'     => sprintf($base_url, $post_filter->page)
+            ])) .
             $core->formNonce() .
             '</div>' .
             '</form>'
@@ -371,10 +362,11 @@ if ($part == 'period') {
                 __('Periods removed.')
             );
 
-            http::redirect(empty($_POST['redir']) ? 
-                $p_url.'&part=periods' : 
-                $_POST['redir']
-            );
+            if (!empty($_POST['redir'])) {
+                http::redirect($_POST['redir']);
+            } else {
+                $core->adminurl->redirect('admin.plugin.periodical', ['part' => 'periods']);
+            }
         } catch (Exception $e) {
             $core->error->add($e->getMessage());
         }
@@ -391,10 +383,11 @@ if ($part == 'period') {
                 __('Periods emptied.')
             );
 
-            http::redirect(empty($_POST['redir']) ? 
-                $p_url.'&part=periods' : 
-                $_POST['redir']
-            );
+            if (!empty($_POST['redir'])) {
+                http::redirect($_POST['redir']);
+            } else {
+                $core->adminurl->redirect('admin.plugin.periodical', ['part' => 'periods']);
+            }
         } catch (Exception $e) {
             $core->error->add($e->getMessage());
         }
@@ -428,12 +421,10 @@ if ($part == 'period') {
     '</head>' .
     '<body>' .
 
-    dcPage::breadcrumb(
-        [
+    dcPage::breadcrumb([
             html::escapeHTML($core->blog->name) => '',
             __('Periodical') => ''
-        ]
-    ) .
+    ]) .
     dcPage::notices() .
 
     '<p class="top-add">
@@ -443,8 +434,8 @@ if ($part == 'period') {
     # Filters
     $p_filter->display('admin.plugin.periodical', form::hidden('p', 'periodical') . form::hidden('part', 'periods'));
 
-    # Posts list
-    echo $period_list->periodDisplay($p_filter->page, $p_filter->nb,
+    # Periods list
+    $period_list->periodDisplay($p_filter,
         '<form action="' . $p_url . '" method="post" id="form-periods">' .
 
         '%s' .

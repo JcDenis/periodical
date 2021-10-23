@@ -22,90 +22,110 @@ if (!defined('DC_CONTEXT_ADMIN')) {
  */
 class adminPeriodicalList extends adminGenericList
 {
-    public function periodDisplay($page, $nb_per_page, $enclose_block='')
+    public function periodDisplay($filter, $enclose_block='')
     {
         $echo = '';
         if ($this->rs->isEmpty()) {
-            $echo .= '<p><strong>' .__('No period') .'</strong></p>';
+            if ($filter->show()) {
+                echo '<p><strong>' . __('No period matches the filter') . '</strong></p>';
+            } else {
+                echo '<p><strong>' . __('No period') . '</strong></p>';
+            }
         } else {
-            $pager = new dcPager($page, $this->rs_count, $nb_per_page, 10);
-            $pager->html_prev = $this->html_prev;
-            $pager->html_next = $this->html_next;
+            $pager = new dcPager($filter->page, $this->rs_count, $filter->nb, 10);
             $pager->var_page = 'page';
 
-            $html_block =
-            '<div class="table-outer">' .
-            '<table class="clear">' .
-            '<tr>' .
-            '<th colspan="2" class="nowrap">' . __('Name') . '</th>' .
-            '<th class="nowrap">' . __('Next update') . '</th>' .
-            '<th class="nowrap">' . __('Frequency') . '</th>' .
-            '<th class="nowrap">' . __('Publications') . '</th>' .
-            '<th class="nowrap">' . __('Entries') . '</th>' .
-            '<th class="nowrap">' . __('End date') . '</th>' .
-            '</tr>%s</table>' .
-            '</div>';
+            $periods = [];
+            if (isset($_REQUEST['periods'])) {
+                foreach ($_REQUEST['periods'] as $v) {
+                    $periods[(integer) $v] = true;
+                }
+            }
 
+            $html_block = '<div class="table-outer"><table><caption>' . ($filter->show() ? 
+                sprintf(__('List of %s periods matching the filter.'), $this->rs_count) :
+                sprintf(__('List of %s periods.'), $this->rs_count)
+            ). '</caption>';
+
+            $cols = new ArrayObject([
+                'name'    => '<th colspan="2" class="first">' . __('Name') . '</th>',
+                'curdt'   => '<th scope="col" class="nowrap">' . __('Next update') . '</th>',
+                'pub_int' => '<th scope="col" class="nowrap">' . __('Frequency') . '</th>',
+                'pub_nb'  => '<th scope="col" class="nowrap">' . __('Pub per update') . '</th>',
+                'nbposts' => '<th scope="col" class="nowrap">' . __('Entries') . '</th>',
+                'enddt'   => '<th scope="col" class="nowrap">' . __('End date') . '</th>'
+            ]);
+
+            $this->userColumns('periodical', $cols);
+
+            $html_block .= '<tr>' . implode(iterator_to_array($cols)) . '</tr>%s</table>%s</div>';
             if ($enclose_block) {
                 $html_block = sprintf($enclose_block, $html_block);
             }
-
-            $echo .= $pager->getLinks();
-
             $blocks = explode('%s', $html_block);
 
-            $echo .= $blocks[0];
+            echo $pager->getLinks() . $blocks[0];
 
             while ($this->rs->fetch()) {
-                $echo .= $this->periodLine();
+                echo $this->periodLine(isset($periods[$this->rs->periodical_id]));
             }
 
-            $echo .= $blocks[1];
-
-            $echo .= $pager->getLinks();
+            echo $blocks[1] . $blocks[2] . $pager->getLinks();
         }
-
-        return $echo;
     }
 
-    private function periodLine()
+    private function periodLine($checked)
     {
-        $nb_posts = $this->rs->periodical->getPosts(['periodical_id' => $this->rs->periodical_id], true);
-        $nb_posts = $nb_posts->f(0);
-        $style = !$nb_posts ? ' offline' : '';
-        $posts_links = !$nb_posts ? 
-            '0' : 
-            '<a href="plugin.php?p=periodical&amp;part=period&amp;period_id=' . $this->rs->periodical_id . '#posts" title="' . __('view related entries') . '">' . $nb_posts . '</a>';
+        $nb_posts = $this->rs->periodical->getPosts(['periodical_id' => $this->rs->periodical_id], true)->f(0);
+        $url = $this->core->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $this->rs->periodical_id]);
 
-        $pub_int = in_array($this->rs->periodical_pub_int, $this->rs->periodical->getTimesCombo()) ? 
+        $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . html::escapeHTML($this->rs->periodical_title) . '</a>';
+
+        $posts = $nb_posts ?  
+            '<a href="' . $url . '#posts" title="' . __('view related entries') . '">' . $nb_posts . '</a>' :
+            '0';
+
+        $interval = in_array($this->rs->periodical_pub_int, $this->rs->periodical->getTimesCombo()) ? 
             __(array_search($this->rs->periodical_pub_int, $this->rs->periodical->getTimesCombo())) : __('Unknow frequence');
 
-        $res = 
-        '<tr class="line' . $style . '">' .
-        '<td class="nowrap">' . form::checkbox(['periods[]'], $this->rs->periodical_id) . '</td>' .
-        '<td class="maximal"><a href="plugin.php?p=periodical&amp;part=period&amp;period_id=' . $this->rs->periodical_id . '#period" title="' . 
-            __('edit period') . '">' . html::escapeHTML($this->rs->periodical_title) . '</a></td>' .
-        '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->periodical_curdt) . '</td>' .
-        '<td class="nowrap">' . $pub_int . '</td>' .
-        '<td class="nowrap">' . $this->rs->periodical_pub_nb .'</td>' .
-        '<td class="nowrap">' . $posts_links . '</td>' .
-        '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->periodical_enddt) . '</td>' .
-        '</tr>';
+        $cols = new ArrayObject([
+            'check'   => '<td class="nowrap">' . form::checkbox(['periods[]'], $this->rs->periodical_id, ['checked'  => $checked]) . '</td>',
+            'name'    => '<td class="maximal">' . $name . '</td>',
+            'curdt'   => '<td class="nowrap count">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->periodical_curdt) . '</td>',
+            'pub_int' => '<td class="nowrap">' . $interval . '</td>',
+            'pub_nb'  => '<td class="nowrap count">' . $this->rs->periodical_pub_nb . '</td>',
+            'nbposts' => '<td class="nowrap count">' . $posts. '</td>',
+            'enddt'   => '<td class="nowrap count">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->periodical_enddt) . '</td>'
+        ]);
 
-        return $res;
+        $this->userColumns('periodical', $cols);
+
+        return 
+            '<tr class="line ' . ($nb_posts ? '' : ' offline') . '" id="p' . $this->rs->periodical_id . '">' .
+            implode(iterator_to_array($cols)) . 
+            '</tr>';
     }
 
-    public function postDisplay($page, $nb_per_page, $base_url, $enclose_block='')
+    public function postDisplay($filter, $base_url, $enclose_block='')
     {
         $echo = '';
         if ($this->rs->isEmpty()) {
-            $echo .= '<p><strong>' . __('No entry') . '</strong></p>';
+            if ($filter->show()) {
+                echo '<p><strong>' . __('No entry matches the filter') . '</strong></p>';
+            } else {
+                echo '<p><strong>' . __('No entry') . '</strong></p>';
+            }
         } else {
-            $pager = new dcPager($page, $this->rs_count, $nb_per_page, 10);
-            $pager->html_prev = $this->html_prev;
-            $pager->html_next = $this->html_next;
+            $pager = new dcPager($filter->page, $this->rs_count, $filter->nb, 10);
             $pager->base_url = $base_url;
             $pager->var_page = 'page';
+
+            $periodical_entries = [];
+            if (isset($_REQUEST['periodical_entries'])) {
+                foreach ($_REQUEST['periodical_entries'] as $v) {
+                    $periodical_entries[(integer) $v] = true;
+                }
+            }
 
             $html_block =
             '<table class="clear"><tr>' .
@@ -128,7 +148,7 @@ class adminPeriodicalList extends adminGenericList
             $echo .= $blocks[0];
 
             while ($this->rs->fetch()) {
-                $echo .= $this->postLine();
+                $echo .= $this->postLine(isset($periodical_entries[$this->rs->post_id]));
             }
 
             $echo .= $blocks[1];
@@ -139,7 +159,7 @@ class adminPeriodicalList extends adminGenericList
         return $echo;
     }
 
-    private function postLine()
+    private function postLine($checked)
     {
         if ($this->core->auth->check('categories', $this->core->blog->id)) {
             $cat_link = '<a href="category.php?id=%s">%s</a>';
