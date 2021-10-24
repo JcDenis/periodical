@@ -222,14 +222,14 @@ if ($_REQUEST['part'] == 'period') {
         }
 
         $starting_script =
-            dcPage::jsLoad('index.php?pf=periodical/js/checkbox.js') .
+            dcPage::jsLoad(dcPage::getPF('periodical/js/checkbox.js')) .
             $post_filter->js($core->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $period_id], '&').'#posts');
     }
 
     # Display
     echo '
     <html><head><title>' . __('Periodical') . '</title>' .
-    dcPage::jsLoad('index.php?pf=periodical/js/dates.js') .
+    dcPage::jsLoad(dcPage::getPF('periodical/js/dates.js')) .
     $starting_script .
     dcPage::jsDatePicker() .
     dcPage::jsPageTabs() .
@@ -317,7 +317,7 @@ if ($_REQUEST['part'] == 'period') {
         );
 
         # Posts list
-        echo $post_list->postDisplay($post_filter, $base_url, 
+        $post_list->postDisplay($post_filter, $base_url, 
             '<form action="' . $p_url . '" method="post" id="form-entries">' .
 
             '%s' .
@@ -416,7 +416,7 @@ if ($_REQUEST['part'] == 'period') {
     # Display
     echo 
     '<html><head><title>' . __('Periodical') . '</title>' .
-    dcPage::jsLoad('index.php?pf=periodical/js/checkbox.js') .
+    dcPage::jsLoad(dcPage::getPF('periodical/js/checkbox.js')) .
     $p_filter->js($core->adminurl->get('admin.plugin.periodical', ['part' => 'periods'])) .
     '</head>' .
     '<body>' .

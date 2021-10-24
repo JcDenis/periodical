@@ -127,39 +127,45 @@ class adminPeriodicalList extends adminGenericList
                 }
             }
 
+            $cols = [
+                'title'    => '<th colspan="2" class="first">' . __('Title') . '</th>',
+                'date'     => '<th scope="col">' . __('Date') . '</th>',
+                'category' => '<th scope="col">' . __('Category') . '</th>',
+                'author'   => '<th scope="col">' . __('Author') . '</th>',
+                'status'   => '<th scope="col">' . __('Status') . '</th>',
+                'create'   => '<th scope="col" class="nowrap">' . __('Create date') . '</th>'
+            ];
+
             $html_block =
-            '<table class="clear"><caption>' . ($filter->show() ? 
+            '<div class="table-outer"><table><caption>' . ($filter->show() ? 
                 sprintf(__('List of %s entries matching the filter.'), $this->rs_count) :
                 sprintf(__('List of %s entries.'), $this->rs_count)
-            ). '</caption><tr>' .
-            '<th colspan="2">' . __('Title') . '</th>' .
-            '<th class="nowrap">' . __('Date') . '</th>' .
-            '<th class="nowrap">' . __('Category') . '</th>' .
-            '<th class="nowrap">' . __('Author') . '</th>' .
-            '<th class="nowrap">' . __('Status') . '</th>' .
-            '<th class="nowrap">' . __('Create date') . '</th>' .
-            '</tr>%s</table>';
+            ). '</caption><tr>' . implode($cols) . '</tr>%s</table>%s</div>';
 
             if ($enclose_block) {
                 $html_block = sprintf($enclose_block, $html_block);
             }
 
-            $echo .= $pager->getLinks();
-
             $blocks = explode('%s', $html_block);
 
-            $echo .= $blocks[0];
+            echo $pager->getLinks() . $blocks[0];
 
             while ($this->rs->fetch()) {
-                $echo .= $this->postLine(isset($periodical_entries[$this->rs->post_id]));
+                echo $this->postLine(isset($periodical_entries[$this->rs->post_id]));
             }
 
-            $echo .= $blocks[1];
+            $img = '<img alt="%1$s" title="%1$s" src="images/%2$s" /> %1$s';
 
-            $echo .= $pager->getLinks();
+            echo $blocks[1] . '<p class="info">' . __('Legend: ') .
+                sprintf($img, __('Published'), 'check-on.png') . ' - ' .
+                sprintf($img, __('Unpublished'), 'check-off.png') . ' - ' .
+                sprintf($img, __('Scheduled'), 'scheduled.png') . ' - ' .
+                sprintf($img, __('Pending'), 'check-wrn.png') . ' - ' .
+                sprintf($img, __('Protected'), 'locker.png') . ' - ' .
+                sprintf($img, __('Selected'), 'selected.png') . ' - ' .
+                sprintf($img, __('Attachments'), 'attach.png') .
+                '</p>' . $blocks[2] . $pager->getLinks();
         }
-
-        return $echo;
     }
 
     private function postLine($checked)
@@ -217,19 +223,17 @@ class adminPeriodicalList extends adminGenericList
             $attach = sprintf($img, sprintf($attach_str, $nb_media), 'attach.png');
         }
 
-        $res = 
-        '<tr class="line">' .
-        '<td class="minimal">' . form::checkbox(['periodical_entries[]'], $this->rs->post_id, 0) . '</td>' .
-        '<td class="maximal"><a href="' . $this->rs->core->getPostAdminURL($this->rs->post_type, $this->rs->post_id) . '" ' .
-        'title="' . html::escapeHTML($this->rs->getURL()) . '">' .
-        html::escapeHTML($this->rs->post_title) . '</a></td>' .
-        '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->post_dt) . '</td>' .
-        '<td class="nowrap">' . $cat_title . '</td>' .
-        '<td class="nowrap">' . $this->rs->user_id . '</td>' .
-        '<td class="nowrap status">' . $img_status . ' ' . $selected . ' ' . $protected . ' ' . $attach . '</td>' .
-        '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->post_creadt, $this->rs->core->auth->getInfo('user_tz')) . '</td>' .
-        '</tr>';
+        $cols = [
+            'check'    => '<td class="minimal">' . form::checkbox(['periodical_entries[]'], $this->rs->post_id, ['checked'  => $checked]) . '</td>',
+            'title'    => '<td class="maximal"><a href="' . $this->rs->core->getPostAdminURL($this->rs->post_type, $this->rs->post_id) . '" ' .
+                'title="' . html::escapeHTML($this->rs->getURL()) . '">' . html::escapeHTML($this->rs->post_title) . '</a></td>',
+            'date'     => '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->post_dt) . '</td>',
+            'category' => '<td class="nowrap">' . $cat_title . '</td>',
+            'author'   => '<td class="nowrap">' . $this->rs->user_id . '</td>',
+            'status'   => '<td class="nowrap status">' . $img_status . ' ' . $selected . ' ' . $protected . ' ' . $attach . '</td>',
+            'create'   => '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->post_creadt, $this->rs->core->auth->getInfo('user_tz')) . '</td>'
+        ];
 
-        return $res;
+        return '<tr class="line">' . implode($cols) . '</tr>';;
     }
 }
