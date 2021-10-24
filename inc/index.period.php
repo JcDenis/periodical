@@ -230,7 +230,7 @@ dcPage::jsPageTabs() .
 
 echo
 dcPage::breadcrumb([
-        html::escapeHTML($core->blog->name) => '',
+        __('Plugins') => '',
         __('Periodical') => $p_url . '&amp;part=periods',
         (null === $period_id ? __('New period') : __('Edit period')) => ''
 ]) .

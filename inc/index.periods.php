@@ -96,7 +96,7 @@ $p_filter->js($core->adminurl->get('admin.plugin.periodical', ['part' => 'period
 '<body>' .
 
 dcPage::breadcrumb([
-        html::escapeHTML($core->blog->name) => '',
+        __('Plugins') => '',
         __('Periodical') => ''
 ]) .
 dcPage::notices() .
