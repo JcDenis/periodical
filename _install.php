@@ -26,7 +26,8 @@ if (version_compare($old_version, $new_version, '>=')) {
 try {
     # Check Dotclear version
     if (!method_exists('dcUtils', 'versionsCompare') 
-     || dcUtils::versionsCompare(DC_VERSION, $dc_min, '<', false)) {
+        || dcUtils::versionsCompare(DC_VERSION, $dc_min, '<', false)
+    ) {
         throw new Exception(sprintf(
             '%s requires Dotclear %s', 'periodical', $dc_min
         ));

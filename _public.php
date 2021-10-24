@@ -95,10 +95,10 @@ class publicPeriodical
                         # Get posts to publish related to this period
                         $posts_params = [];
                         $posts_params['periodical_id'] = $periods->periodical_id;
-                        $posts_params['post_status'] = '-2';
-                        $posts_params['order'] = $posts_order;
-                        $posts_params['limit'] = $limit * $max_nb;
-                        $posts_params['no_content'] = true;
+                        $posts_params['post_status']   = '-2';
+                        $posts_params['order']         = $posts_order;
+                        $posts_params['limit']         = $limit * $max_nb;
+                        $posts_params['no_content']    = true;
                         $posts = $core->auth->sudo([$per, 'getPosts'], $posts_params);
 
                         if (!$posts->isEmpty()) {
