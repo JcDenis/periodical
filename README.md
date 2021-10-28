@@ -43,9 +43,15 @@ to link this post to a period.
 
 You can also add or remove period to multiple posts from posts actions page.
 
-## MORE
+## LINKS
 
- * License : GNU GPL v2
+ * License : [GNU GPL v2](https://www.gnu.org/licenses/old-licenses/lgpl-2.0.html)
  * Source & contribution : [GitHub Page](https://github.com/JcDenis/periodical)
  * Packages & details:  [Dotaddict Page](https://plugins.dotaddict.org/dc2/details/periodical)
  * Discuss & help: [Dotclear Forum](https://forum.dotclear.org/viewtopic.php?id=42289)
+
+## CONTRIBUTORS
+
+ * Jean-Christian Denis
+
+ You are welcome to contribute to this code.

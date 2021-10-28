@@ -24,7 +24,6 @@ class adminPeriodicalList extends adminGenericList
 {
     public function periodDisplay($filter, $enclose_block='')
     {
-        $echo = '';
         if ($this->rs->isEmpty()) {
             if ($filter->show()) {
                 echo '<p><strong>' . __('No period matches the filter') . '</strong></p>';

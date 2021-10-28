@@ -19,15 +19,15 @@ $this->registerModule(
     'Periodical',
     'Published periodically entries',
     'Jean-Christian Denis and contributors',
-    '2021.09.02.1',
+    '2021.10.23',
     [
-        'requires' => [['core', '2.19']],
+        'requires'    => [['core', '2.20']],
         'permissions' => 'usage,contentadmin',
-        'type' => 'plugin',
-        'support' => 'https://github.com/JcDenis/periodical',
-        'details' => 'https://plugins.dotaddict.org/dc2/details/periodical',
-        'repository' => 'https://raw.githubusercontent.com/JcDenis/periodical/master/dcstore.xml',
-        'settings' => [
+        'type'        => 'plugin',
+        'support'     => 'https://github.com/JcDenis/periodical',
+        'details'     => 'https://plugins.dotaddict.org/dc2/details/periodical',
+        'repository'  => 'https://raw.githubusercontent.com/JcDenis/periodical/master/dcstore.xml',
+        'settings'    => [
             'blog' => '#params.periodical_params'
         ]
     ]

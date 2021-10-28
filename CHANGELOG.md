@@ -1,5 +1,9 @@
+2021.10.23
 - add user pref filters for periods list
+- add user pref columns for periods list
+- add period columns to posts list and user pref
 - fix auto-link to blog pref
+- fix halfday period
 
 2021.09.02
 - update php headers to phpdoc style
