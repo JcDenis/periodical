@@ -1,4 +1,5 @@
-2021.10.23
+2021.10.30
+- required Dotclear 2.20
 - add user pref filters for periods list
 - add user pref columns for periods list
 - add period columns to posts list and user pref

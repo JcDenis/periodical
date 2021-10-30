@@ -212,7 +212,6 @@ class adminPeriodical
         }
     }
 
-
     /**
      * Add columns period to posts list values.
      *
