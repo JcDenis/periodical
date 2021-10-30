@@ -3,7 +3,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Project-Id-Version: periodical 2021.10.23\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-10-23T21:53:08+00:00\n"
+"PO-Revision-Date: 2021-10-30T19:05:45+00:00\n"
 "Last-Translator: Jean-Christian Denis\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -22,17 +22,14 @@ msgstr "Date de fin"
 msgid "Frequence"
 msgstr "Fréquence"
 
-msgid "Enable plugin"
-msgstr "Activer le plugin"
+msgid "Enable periodical on this blog"
+msgstr "Activer les publications périodiques sur ce blog"
 
-msgid "Dates of published entries"
-msgstr "Dates de billets publiés"
+msgid "Update post date when publishing it"
+msgstr "Mettre à jour la date du billet lors de sa publication"
 
-msgid "Update post date"
-msgstr "Mettre à jour la date du billet"
-
-msgid "Update post url"
-msgstr "Mettre à jour l'URL du billet"
+msgid "Update post url when publishing it"
+msgstr "Mettre à jour l'URL du billet lors de sa publication"
 
 msgid "Entries per update"
 msgstr "Billets par mise à jour"
@@ -81,33 +78,6 @@ msgstr "Un fois par mois"
 
 msgid "Unknow frequence"
 msgstr "Fréquence inconnue"
-
-msgid "No period matches the filter"
-msgstr "Aucune période correspondant au filtre"
-
-msgid "No period"
-msgstr "Pas de période"
-
-msgid "List of %s periods matching the filter."
-msgstr "Liste des %s périodes correspondant au filtre"
-
-msgid "List of %s periods."
-msgstr "Liste des %s périodes"
-
-msgid "view related entries"
-msgstr "voir les billets liés"
-
-msgid "List of %s entries."
-msgstr "Listes des %s billets"
-
-msgid "Create date"
-msgstr "Date de création"
-
-msgid "protected"
-msgstr "protégé"
-
-msgid "selected"
-msgstr "sélectionné"
 
 msgid "One post per day"
 msgstr "Un billet par jour"
@@ -174,6 +144,33 @@ msgstr "effacer les périodes"
 
 msgid "Selected periods action:"
 msgstr "Action sur les périodes selectionnées :"
+
+msgid "No period matches the filter"
+msgstr "Aucune période correspondant au filtre"
+
+msgid "No period"
+msgstr "Pas de période"
+
+msgid "List of %s periods matching the filter."
+msgstr "Liste des %s périodes correspondant au filtre"
+
+msgid "List of %s periods."
+msgstr "Liste des %s périodes"
+
+msgid "view related entries"
+msgstr "voir les billets liés"
+
+msgid "Create date"
+msgstr "Date de création"
+
+msgid "List of %s entries."
+msgstr "Listes des %s billets"
+
+msgid "protected"
+msgstr "protégé"
+
+msgid "selected"
+msgstr "sélectionné"
 
 msgid "Published periodically entries"
 msgstr "Publier périodiquement des billets"

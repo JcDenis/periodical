@@ -130,19 +130,17 @@ class adminPeriodical
         '<div class="fieldset"><h4 id="periodical_params">' . __('Periodical') . '</h4>' .
         '<div class="two-cols">' .
         '<div class="col">' .
-        '<h5>' . __('Activation') . '</h5>' .
         '<p><label class="classic" for="periodical_active">' .
         form::checkbox('periodical_active', 1, $s_active) .
-        __('Enable plugin') . '</label></p>' .
+        __('Enable periodical on this blog') . '</label></p>' .
         '</div>' .
         '<div class="col">' .
-        '<h5>' . __('Dates of published entries') . '</h5>' .
         '<p><label for="periodical_upddate">' .
         form::checkbox('periodical_upddate', 1, $s_upddate) .
-        __('Update post date') . '</label></p>' .
+        __('Update post date when publishing it') . '</label></p>' .
         '<p><label for="periodical_updurl">' .
         form::checkbox('periodical_updurl', 1, $s_updurl) .
-        __('Update post url') . '</label></p>' .
+        __('Update post url when publishing it') . '</label></p>' .
         '</div>' .
         '</div>' .
         '<br class="clear" />' .
