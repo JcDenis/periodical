@@ -19,9 +19,9 @@ $this->registerModule(
     'Periodical',
     'Published periodically entries',
     'Jean-Christian Denis and contributors',
-    '2021.10.30',
+    '2022.04.27',
     [
-        'requires'    => [['core', '2.20']],
+        'requires'    => [['core', '2.21']],
         'permissions' => 'usage,contentadmin',
         'type'        => 'plugin',
         'support'     => 'https://github.com/JcDenis/periodical',

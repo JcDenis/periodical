@@ -198,6 +198,9 @@ class periodical
         if (!isset($params['from'])) {
             $params['from'] = '';
         }
+        if (!isset($params['join'])) {
+            $params['join'] = '';
+        }
         if (!isset($params['sql'])) {
             $params['sql'] = '';
         }
@@ -211,8 +214,8 @@ class periodical
         $params['columns'][] = 'T.periodical_pub_int';
         $params['columns'][] = 'T.periodical_pub_nb';
 
-        $params['from'] .= 'LEFT JOIN ' . $this->core->prefix . 'meta R ON P.post_id = R.post_id ';
-        $params['from'] .= 'LEFT JOIN ' . $this->table . ' T ON  CAST(T.periodical_id as char)=R.meta_id ';
+        $params['join'] .= 'LEFT JOIN ' . $this->core->prefix . 'meta R ON P.post_id = R.post_id ';
+        $params['join'] .= 'LEFT JOIN ' . $this->table . ' T ON CAST(T.periodical_id as char) = CAST(R.meta_id as char) ';
 
         $params['sql'] .= "AND R.meta_type = 'periodical' ";
         $params['sql'] .= "AND T.periodical_type = 'post' ";

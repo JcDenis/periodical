@@ -30,8 +30,8 @@ $period_id      = null;
 $period_title   = __('One post per day');
 $period_pub_nb  = 1;
 $period_pub_int = 'day';
-$period_curdt   = date('Y-m-d H:i:00', time());
-$period_enddt   = date('Y-m-d H:i:00', time() + 31536000); //one year
+$period_curdt   = time();
+$period_enddt   = time() + 31536000; //one year
 
 # Get period
 if (!empty($_REQUEST['period_id'])) {
@@ -46,8 +46,8 @@ if (!empty($_REQUEST['period_id'])) {
         $period_title   = $rs->periodical_title;
         $period_pub_nb  = $rs->periodical_pub_nb;
         $period_pub_int = $rs->periodical_pub_int;
-        $period_curdt   = date('Y-m-d H:i', strtotime($rs->periodical_curdt));
-        $period_enddt   = date('Y-m-d H:i', strtotime($rs->periodical_enddt));
+        $period_curdt   = strtotime($rs->periodical_curdt);
+        $period_enddt   = strtotime($rs->periodical_enddt);
     }
 }
 
@@ -66,10 +66,10 @@ if ($action == 'setperiod') {
         $period_pub_int = $_POST['period_pub_int'];
     }
     if (!empty($_POST['period_curdt'])) {
-        $period_curdt = date('Y-m-d H:i:00', strtotime($_POST['period_curdt']));
+        $period_curdt = strtotime($_POST['period_curdt']);
     }
     if (!empty($_POST['period_enddt'])) {
-        $period_enddt = date('Y-m-d H:i:00', strtotime($_POST['period_enddt']));
+        $period_enddt = strtotime($_POST['period_enddt']);
     }
 
     # Check period title and dates
@@ -247,10 +247,16 @@ form::field('period_title', 60, 255, html::escapeHTML($period_title), 'maximal')
 <div class="two-boxes">
 
 <p><label for="period_curdt">' . __('Next update:') . '</label>' .
-form::field('period_curdt', 16, 16, date('Y-m-d H:i', strtotime($period_curdt))) . '</p>
+form::datetime('period_curdt', [
+    'default' => html::escapeHTML(dt::str('%Y-%m-%dT%H:%M', strtotime($period_curdt))),
+    'class'   => (!$period_curdt ? 'invalid' : ''),
+]) . '</p>
 
 <p><label for="period_enddt">' . __('End date:') . '</label>' .
-form::field('period_enddt', 16, 16, date('Y-m-d H:i', strtotime($period_enddt))) . '</p>
+form::datetime('period_enddt', [
+    'default' => html::escapeHTML(dt::str('%Y-%m-%dT%H:%M', strtotime($period_enddt))),
+    'class'   => (!$period_enddt ? 'invalid' : ''),
+]) .'</p>
 
 </div><div class="two-boxes">
 

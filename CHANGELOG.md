@@ -1,3 +1,8 @@
+2022.04.27
+- require Dotclear 2.21.3
+- fix browser date picker
+- fix sql query on posts
+
 2021.10.30
 - required Dotclear 2.20
 - add user pref filters for periods list
