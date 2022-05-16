@@ -15,7 +15,7 @@ if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
 
-$dc_min = '2.21';
+$dc_min = '2.22';
 $new_version = $core->plugins->moduleInfo('periodical', 'version');
 $old_version = $core->getVersion('periodical');
 

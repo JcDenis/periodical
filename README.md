@@ -22,7 +22,7 @@ and they will be publish ones after the others every week.
 
   * admin permissions to configure plugin
   * usage,contentadmin permissions to link feeds
-  * Dotclear 2.21.3
+  * Dotclear 2.22
 
 ## NOTICE
 

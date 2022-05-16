@@ -1,3 +1,7 @@
+2022.05.16
+- require Dotclear 2.22
+- fix period dates
+
 2022.04.27
 - require Dotclear 2.21.3
 - fix browser date picker

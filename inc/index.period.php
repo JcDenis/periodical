@@ -30,8 +30,10 @@ $period_id      = null;
 $period_title   = __('One post per day');
 $period_pub_nb  = 1;
 $period_pub_int = 'day';
-$period_curdt   = time();
-$period_enddt   = time() + 31536000; //one year
+$period_curdt   = date('Y-m-d H:i', time());
+$period_enddt   = date('Y-m-d H:i', time() + 31536000); //one year
+$bad_period_curdt = false;
+$bad_period_enddt = false;
 
 # Get period
 if (!empty($_REQUEST['period_id'])) {
@@ -46,8 +48,8 @@ if (!empty($_REQUEST['period_id'])) {
         $period_title   = $rs->periodical_title;
         $period_pub_nb  = $rs->periodical_pub_nb;
         $period_pub_int = $rs->periodical_pub_int;
-        $period_curdt   = strtotime($rs->periodical_curdt);
-        $period_enddt   = strtotime($rs->periodical_enddt);
+        $period_curdt   = date('Y-m-d H:i', strtotime($rs->periodical_curdt));
+        $period_enddt   = date('Y-m-d H:i', strtotime($rs->periodical_enddt));
     }
 }
 
@@ -66,10 +68,30 @@ if ($action == 'setperiod') {
         $period_pub_int = $_POST['period_pub_int'];
     }
     if (!empty($_POST['period_curdt'])) {
-        $period_curdt = strtotime($_POST['period_curdt']);
+        try {
+            $period_curdt = strtotime($_POST['period_curdt']);
+            if ($period_curdt == false || $period_curdt == -1) {
+                $bad_period_curdt = true;
+
+                throw new Exception(__('Invalid date'));
+            }
+            $period_curdt = date('Y-m-d H:i', $period_curdt);
+        } catch (Exception $e) {
+            $core->error->add($e->getMessage());
+        }
     }
     if (!empty($_POST['period_enddt'])) {
-        $period_enddt = strtotime($_POST['period_enddt']);
+        try {
+            $period_enddt = strtotime($_POST['period_enddt']);
+            if ($period_enddt == false || $period_enddt == -1) {
+                $bad_period_enddt = true;
+
+                throw new Exception(__('Invalid date'));
+            }
+            $period_enddt = date('Y-m-d H:i', $period_enddt);
+        } catch (Exception $e) {
+            $core->error->add($e->getMessage());
+        }
     }
 
     # Check period title and dates
@@ -249,13 +271,13 @@ form::field('period_title', 60, 255, html::escapeHTML($period_title), 'maximal')
 <p><label for="period_curdt">' . __('Next update:') . '</label>' .
 form::datetime('period_curdt', [
     'default' => html::escapeHTML(dt::str('%Y-%m-%dT%H:%M', strtotime($period_curdt))),
-    'class'   => (!$period_curdt ? 'invalid' : ''),
+    'class'   => ($bad_period_curdt ? 'invalid' : ''),
 ]) . '</p>
 
 <p><label for="period_enddt">' . __('End date:') . '</label>' .
 form::datetime('period_enddt', [
     'default' => html::escapeHTML(dt::str('%Y-%m-%dT%H:%M', strtotime($period_enddt))),
-    'class'   => (!$period_enddt ? 'invalid' : ''),
+    'class'   => ($bad_period_enddt ? 'invalid' : ''),
 ]) .'</p>
 
 </div><div class="two-boxes">
