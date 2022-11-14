@@ -338,7 +338,7 @@ class adminPeriodical
             self::delPeriod($post_id);
         }
 
-        dcPage::addSuccessNotice(__('Posts have been removed from periodical.'));
+        dcAdminNotices::addSuccessNotice(__('Posts have been removed from periodical.'));
         $pa->redirect(true);
     }
 
@@ -365,7 +365,7 @@ class adminPeriodical
                 self::addPeriod($post_id, $post['periodical']);
             }
 
-            dcPage::addSuccessNotice(__('Posts have been added to periodical.'));
+            dcAdminNotices::addSuccessNotice(__('Posts have been added to periodical.'));
             $pa->redirect(true);
         }
 
