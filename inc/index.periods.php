@@ -15,10 +15,10 @@ if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
 
-dcPage::check('usage,contentadmin');
+dcPage::check(dcCore::app()->auth->makePermissions([dcAuth::PERMISSION_USAGE, dcAuth::PERMISSION_CONTENT_ADMIN]));
 
 # Objects
-$per = new periodical($core);
+$per = new periodical();
 
 # Default values
 $action = isset($_POST['action']) ? $_POST['action'] : '';
@@ -32,17 +32,17 @@ if ($action == 'deleteperiods' && !empty($_POST['periods'])) {
             $per->delPeriod($id);
         }
 
-        dcPage::addSuccessNotice(
+        dcAdminNotices::addSuccessNotice(
             __('Periods removed.')
         );
 
         if (!empty($_POST['redir'])) {
             http::redirect($_POST['redir']);
         } else {
-            $core->adminurl->redirect('admin.plugin.periodical', ['part' => 'periods']);
+            dcCore::app()->adminurl->redirect('admin.plugin.periodical', ['part' => 'periods']);
         }
     } catch (Exception $e) {
-        $core->error->add($e->getMessage());
+        dcCore::app()->error->add($e->getMessage());
     }
 }
 # Delete periods related posts links (without delete periods)
@@ -53,17 +53,17 @@ if ($action == 'emptyperiods' && !empty($_POST['periods'])) {
             $per->delPeriodPosts($id);
         }
 
-        dcPage::addSuccessNotice(
+        dcAdminNotices::addSuccessNotice(
             __('Periods emptied.')
         );
 
         if (!empty($_POST['redir'])) {
             http::redirect($_POST['redir']);
         } else {
-            $core->adminurl->redirect('admin.plugin.periodical', ['part' => 'periods']);
+            dcCore::app()->adminurl->redirect('admin.plugin.periodical', ['part' => 'periods']);
         }
     } catch (Exception $e) {
-        $core->error->add($e->getMessage());
+        dcCore::app()->error->add($e->getMessage());
     }
 }
 
@@ -73,7 +73,7 @@ $combo_action = [
 ];
 
 # Filters
-$p_filter = new adminGenericFilter($core, 'periodical');
+$p_filter = new adminGenericFilter(dcCore::app(), 'periodical');
 $p_filter->add('part', 'periods');
 
 $params = $p_filter->params();
@@ -82,16 +82,16 @@ $params = $p_filter->params();
 try {
     $periods = $per->getPeriods($params);
     $counter = $per->getPeriods($params, true);
-    $period_list = new adminPeriodicalList($core, $periods, $counter->f(0));
+    $period_list = new adminPeriodicalList(dcCore::app(), $periods, $counter->f(0));
 } catch (Exception $e) {
-    $core->error->add($e->getMessage());
+    dcCore::app()->error->add($e->getMessage());
 }
 
 # Display
 echo 
 '<html><head><title>' . __('Periodical') . '</title>' .
 dcPage::jsLoad(dcPage::getPF('periodical/js/checkbox.js')) .
-$p_filter->js($core->adminurl->get('admin.plugin.periodical', ['part' => 'periods'])) .
+$p_filter->js(dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'periods'])) .
 '</head>' .
 '<body>' .
 
@@ -102,7 +102,7 @@ dcPage::breadcrumb([
 dcPage::notices() .
 
 '<p class="top-add">
-<a class="button add" href="' . $p_url . '&amp;part=period">' . __('New period') . '</a>
+<a class="button add" href="' . dcCore::app()->admin->getPageURL() . '&amp;part=period">' . __('New period') . '</a>
 </p>';
 
 # Filters
@@ -110,7 +110,7 @@ $p_filter->display('admin.plugin.periodical', form::hidden('p', 'periodical') . 
 
 # Periods list
 $period_list->periodDisplay($p_filter,
-    '<form action="' . $p_url . '" method="post" id="form-periods">' .
+    '<form action="' . dcCore::app()->admin->getPageURL() . '" method="post" id="form-periods">' .
 
     '%s' .
 
@@ -120,8 +120,8 @@ $period_list->periodDisplay($p_filter,
     '<p class="col right">' . __('Selected periods action:') . ' ' .
     form::combo('action', $combo_action) .
     '<input type="submit" value="' . __('ok') . '" /></p>' .
-    $core->adminurl->getHiddenFormFields('admin.plugin.periodical', array_merge(['p' =>  'periodical'], $p_filter->values(true))) . 
-    $core->formNonce() .
+    dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.periodical', array_merge(['p' =>  'periodical'], $p_filter->values(true))) . 
+    dcCore::app()->formNonce() .
     '</div>' .
     '</form>'
 );

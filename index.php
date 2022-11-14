@@ -18,7 +18,7 @@ if (!defined('DC_CONTEXT_ADMIN')) {
 $part = !empty($_REQUEST['part']) ? $_REQUEST['part'] : 'periods';
 
 if ($part == 'period') {
-    include dirname(__FILE__) . '/inc/index.period.php';
+    include __DIR__ . '/inc/index.period.php';
 } else {
-    include dirname(__FILE__) . '/inc/index.periods.php';
+    include __DIR__ . '/inc/index.periods.php';
 }

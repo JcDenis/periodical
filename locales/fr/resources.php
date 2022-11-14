@@ -15,4 +15,4 @@ if (!defined('DC_RC_PATH')) {
     return null;
 }
 
-$__resources['help']['periodical'] = dirname(__FILE__) . '/help/help.html';
+dcCore::app()->resources['help']['periodical'] = __DIR__ . '/help/help.html';

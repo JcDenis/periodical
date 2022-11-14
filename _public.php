@@ -15,14 +15,14 @@ if (!defined('DC_RC_PATH')) {
     return null;
 }
 
-if (!in_array($core->url->type, ['default', 'feed'])) {
+if (!in_array(dcCore::app()->url->type, ['default', 'feed'])) {
     return null;
 }
 
-$core->blog->settings->addNamespace('periodical'); 
+dcCore::app()->blog->settings->addNamespace('periodical'); 
 
-$core->addBehavior(
-    'publicBeforeDocument',
+dcCore::app()->addBehavior(
+    'publicBeforeDocumentV2',
     ['publicPeriodical', 'publicBeforeDocument']
 );
 
@@ -36,18 +36,17 @@ class publicPeriodical
     /**
      * Publish periodical
      * 
-     * @param  dcCore $core dcCore instance
      */
-    public static function publicBeforeDocument(dcCore $core)
+    public static function publicBeforeDocument()
     {
         try {
-            $per = new periodical($core);
-            $s = $core->blog->settings->periodical;
+            $per = new periodical();
+            $s = dcCore::app()->blog->settings->periodical;
 
             $per->lockUpdate();
 
             # Get periods
-            $periods =  $core->auth->sudo([$per, 'getPeriods']);
+            $periods =  dcCore::app()->auth->sudo([$per, 'getPeriods']);
 
             # No period
             if ($periods->isEmpty()) {
@@ -61,7 +60,7 @@ class publicPeriodical
             if (!preg_match('/^(post_dt|post_creadt|post_id) (asc|desc)$/', $posts_order)) {
                 $posts_order = 'post_dt asc';
             }
-            $cur_period = $core->con->openCursor($core->prefix . 'periodical');
+            $cur_period = dcCore::app()->con->openCursor(dcCore::app()->prefix . 'periodical');
 
             while($periods->fetch()) {
                 # Check if period is ongoing
@@ -99,10 +98,10 @@ class publicPeriodical
                         $posts_params['order']         = $posts_order;
                         $posts_params['limit']         = $limit * $max_nb;
                         $posts_params['no_content']    = true;
-                        $posts = $core->auth->sudo([$per, 'getPosts'], $posts_params);
+                        $posts = dcCore::app()->auth->sudo([$per, 'getPosts'], $posts_params);
 
                         if (!$posts->isEmpty()) {
-                            $cur_post = $core->con->openCursor($core->prefix . 'post');
+                            $cur_post = dcCore::app()->con->openCursor(dcCore::app()->prefix . 'post');
 
                             while($posts->fetch()) {
                                 # Publish post with right date
@@ -119,12 +118,12 @@ class publicPeriodical
 
                                 # Also update post url with right date
                                 if ($s->periodical_updurl) {
-                                    $cur_post->post_url = $core->blog->getPostURL('', $cur_post->post_dt, $posts->post_title, $posts->post_id);
+                                    $cur_post->post_url = dcCore::app()->blog->getPostURL('', $cur_post->post_dt, $posts->post_title, $posts->post_id);
                                 }
 
                                 $cur_post->update(
                                     'WHERE post_id = ' . $posts->post_id . ' ' .
-                                    "AND blog_id = '" . $core->con->escape($core->blog->id) . "' "
+                                    "AND blog_id = '" . dcCore::app()->con->escape(dcCore::app()->blog->id) . "' "
                                 );
 
                                 # Delete post relation to this period
@@ -139,10 +138,10 @@ class publicPeriodical
                                 }
 
                                 # --BEHAVIOR-- periodicalAfterPublishedPeriodicalEntry
-                                $core->callBehavior('periodicalAfterPublishedPeriodicalEntry', $core, $posts, $periods);
+                                dcCore::app()->callBehavior('periodicalAfterPublishedPeriodicalEntry', $posts, $periods);
 
                             }
-                            $core->blog->triggerBlog();
+                            dcCore::app()->blog->triggerBlog();
                         }
                     }
 
@@ -151,7 +150,7 @@ class publicPeriodical
                     $cur_period->periodical_curdt = date('Y-m-d H:i:s', $loop_tz);
                     $cur_period->update(
                         'WHERE periodical_id = ' . $periods->periodical_id . ' ' .
-                        "AND blog_id = '" . $core->con->escape($core->blog->id) . "' "
+                        "AND blog_id = '" . dcCore::app()->con->escape(dcCore::app()->blog->id) . "' "
                     );
                 }
             }

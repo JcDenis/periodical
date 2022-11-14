@@ -1,3 +1,6 @@
+2022.11.12
+- require Dotclear 2.24
+
 2022.05.16
 - require Dotclear 2.22
 - fix period dates

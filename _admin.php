@@ -15,74 +15,73 @@ if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
 
-$core->blog->settings->addNamespace('periodical');
+dcCore::app()->blog->settings->addNamespace('periodical');
 
-$core->addBehavior(
-    'adminBlogPreferencesForm',
+dcCore::app()->addBehavior(
+    'adminBlogPreferencesFormV2',
     ['adminPeriodical', 'adminBlogPreferencesForm']
 );
-$core->addBehavior(
+dcCore::app()->addBehavior(
     'adminBeforeBlogSettingsUpdate',
     ['adminPeriodical', 'adminBeforeBlogSettingsUpdate']
 );
-$core->addBehavior(
-    'adminFiltersLists',
+dcCore::app()->addBehavior(
+    'adminFiltersListsV2',
     ['adminPeriodical', 'adminFiltersLists']
 );
-$core->addBehavior(
-    'adminColumnsLists',
+dcCore::app()->addBehavior(
+    'adminColumnsListsV2',
     ['adminPeriodical', 'adminColumnsLists']
 );
-$core->addBehavior(
-    'adminColumnsLists',
-    ['adminPeriodical', 'adminColumnsLists']
-);
-$core->addBehavior(
-    'adminPostListHeader',
+dcCore::app()->addBehavior(
+    'adminPostListHeaderV2',
     ['adminPeriodical', 'adminPostListHeader']
 );
-$core->addBehavior(
-    'adminPostListValue',
+dcCore::app()->addBehavior(
+    'adminPostListValueV2',
     ['adminPeriodical', 'adminPostListValue']
 );
 
-if ($core->blog->settings->periodical->periodical_active) {
+if (dcCore::app()->blog->settings->periodical->periodical_active) {
 
-    $_menu['Plugins']->addItem(
+    dcCore::app()->menu[dcAdmin::MENU_PLUGINS]->addItem(
         __('Periodical'),
-        $core->adminurl->get('admin.plugin.periodical'),
+        dcCore::app()->adminurl->get('admin.plugin.periodical'),
         dcPage::getPF('periodical/icon.png'),
-        preg_match('/' . preg_quote($core->adminurl->get('admin.plugin.periodical')) . '(&.*)?$/', $_SERVER['REQUEST_URI']),
-        $core->auth->check('usage,contentadmin', $core->blog->id)
+        preg_match('/' . preg_quote(dcCore::app()->adminurl->get('admin.plugin.periodical')) . '(&.*)?$/', $_SERVER['REQUEST_URI']),
+        dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
+            dcAuth::PERMISSION_USAGE,
+            dcAuth::PERMISSION_CONTENT_ADMIN,
+        ]), dcCore::app()->blog->id)
     );
 
-    $core->addBehavior(
-        'adminDashboardFavorites',
+    dcCore::app()->addBehavior(
+        'adminDashboardFavoritesV2',
         ['adminPeriodical', 'adminDashboardFavorites']
     );
-    $core->addBehavior(
+    dcCore::app()->addBehavior(
         'adminPostHeaders',
         ['adminPeriodical', 'adminPostHeaders']
     );
-    $core->addBehavior(
-        'adminPostsActionsPage',
-        ['adminPeriodical', 'adminPostsActionsPage']
+    dcCore::app()->addBehavior(
+        'adminPostsActions',
+        ['adminPeriodical', 'adminPostsActions']
     );
-    $core->addBehavior(
+    dcCore::app()->addBehavior(
         'adminPostFormItems',
         ['adminPeriodical', 'adminPostFormItems']
     );
-    $core->addBehavior(
+    dcCore::app()->addBehavior(
         'adminAfterPostUpdate',
         ['adminPeriodical', 'adminAfterPostSave']
     );
-    $core->addBehavior(
+    dcCore::app()->addBehavior(
         'adminAfterPostCreate',
         ['adminPeriodical', 'adminAfterPostSave']
     );
 }
 
-$core->addBehavior(
+dcCore::app()->addBehavior(
     'adminBeforePostDelete',
     ['adminPeriodical', 'adminBeforePostDelete']
 );
@@ -106,10 +105,10 @@ class adminPeriodical
         ];
     }
 
-    protected static function period($core)
+    protected static function period()
     {
         if (self::$per === null) {
-            self::$per = new periodical($core);
+            self::$per = new periodical();
         }
         return self::$per;
     }
@@ -117,10 +116,9 @@ class adminPeriodical
     /**
      * Add settings to blog preference
      * 
-     * @param  dcCore       $core           dcCore instance
      * @param  dcSettings   $blog_settings  dcSettings instance
      */
-    public static function adminBlogPreferencesForm(dcCore $core, dcSettings $blog_settings)
+    public static function adminBlogPreferencesForm(dcSettings $blog_settings)
     {
         $s_active = (boolean) $blog_settings->periodical->periodical_active;
         $s_upddate = (boolean) $blog_settings->periodical->periodical_upddate;
@@ -162,10 +160,9 @@ class adminPeriodical
     /**
      * User pref for periods columns lists.
      *
-     * @param    dcCore      $core dcCore instance
      * @param    arrayObject $cols Columns
      */
-    public static function adminColumnsLists(dcCore $core, $cols)
+    public static function adminColumnsLists($cols)
     {
         $cols['periodical'] = [
             __('Periodical'),
@@ -184,10 +181,9 @@ class adminPeriodical
     /**
      * User pref periods filters options.
      *
-     * @param    dcCore      $core  dcCore instance
      * @param    arrayObject $sorts Sort options
      */
-    public static function adminFiltersLists(dcCore $core, $sorts)
+    public static function adminFiltersLists($sorts)
     {
         $sorts['periodical'] = [
             __('Periodical'),
@@ -201,13 +197,12 @@ class adminPeriodical
     /**
      * Add columns period to posts list header.
      *
-     * @param    dcCore      $core  dcCore instance
      * @param    record      $rs    record instance
      * @param    arrayObject $cols  Columns
      */
-    public static function adminPostListHeader(dcCore $core, $rs, $cols)
+    public static function adminPostListHeader($rs, $cols)
     {
-        if ($core->blog->settings->periodical->periodical_active) {
+        if (dcCore::app()->blog->settings->periodical->periodical_active) {
             $cols['period'] = '<th scope="col">' . __('Period') . '</th>';
         }
     }
@@ -215,21 +210,20 @@ class adminPeriodical
     /**
      * Add columns period to posts list values.
      *
-     * @param    dcCore      $core  dcCore instance
      * @param    record      $rs    record instance
      * @param    arrayObject $cols  Columns
      */
-    public static function adminPostListValue(dcCore $core, $rs, $cols)
+    public static function adminPostListValue($rs, $cols)
     {
-        if (!$core->blog->settings->periodical->periodical_active) {
+        if (!dcCore::app()->blog->settings->periodical->periodical_active) {
             return null;
         }
 
-        $r = self::period($core)->getPosts(['post_id' => $rs->post_id]);
+        $r = self::period()->getPosts(['post_id' => $rs->post_id]);
         if ($r->isEmpty()) {
             $name = '-';
         } else {
-            $url  = $core->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $r->periodical_id]);
+            $url  = dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $r->periodical_id]);
             $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . html::escapeHTML($r->periodical_title) . '</a>';
         }
         $cols['period'] = '<td class="nowrap">' . $name . '</td>';
@@ -238,19 +232,20 @@ class adminPeriodical
     /**
      * Favorites.
      *
-     * @param   dcCore      $core dcCore instance
      * @param   arrayObject $favs Array of favorites
      */
-    public static function adminDashboardFavorites(dcCore $core, $favs)
+    public static function adminDashboardFavorites(dcFavorites $favs)
     {
         $favs->register('periodical', [
             'title' => __('Periodical'),
             'url' => 'plugin.php?p=periodical',
             'small-icon' => 'index.php?pf=periodical/icon.png',
             'large-icon' => 'index.php?pf=periodical/icon-big.png',
-            'permissions' => $core->auth->check(
-                'usage,contentadmin',
-                $core->blog->id
+            'permissions' => dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
+                    dcAuth::PERMISSION_USAGE,
+                    dcAuth::PERMISSION_CONTENT_ADMIN,
+                ]),
+                dcCore::app()->blog->id
             ),
             'active_cb' => [
                 'adminPeriodical', 
@@ -289,23 +284,25 @@ class adminPeriodical
      */
     public static function adminBeforePostDelete($post_id)
     {
-        self::delPeriod($GLOBALS['core'], $post_id);
+        self::delPeriod($post_id);
     }
 
     /**
      * Add actions to posts page combo
      * 
-     * @param  dcCore             $core dcCore instance
-     * @param  dcPostsActionsPage $ap   dcPostsActionsPage instance
+     * @param  dcPostsActions   $ap   dcPostsActions instance
      */
-    public static function adminPostsActionsPage(dcCore $core, dcPostsActionsPage $pa)
+    public static function adminPostsActions(dcPostsActions $pa)
     {
         $pa->addAction(
             [__('Periodical') => [__('Add to periodical') => 'periodical_add']],
             ['adminPeriodical', 'callbackAdd']
         );
 
-        if (!$core->auth->check('delete,contentadmin', $core->blog->id)) {
+        if (!dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
+            dcAuth::PERMISSION_DELETE,
+            dcAuth::PERMISSION_CONTENT_ADMIN,
+        ]), dcCore::app()->blog->id)) {
             return null;
         }
         $pa->addAction(
@@ -317,11 +314,10 @@ class adminPeriodical
     /**
      * Posts actions callback to remove period
      * 
-     * @param  dcCore             $core dcCore instance
-     * @param  dcPostsActionsPage $pa   dcPostsActionsPage instance
+     * @param  dcPostsActions   $pa   dcPostsActions instance
      * @param  ArrayObject        $post _POST actions
      */
-    public static function callbackRemove(dcCore $core, dcPostsActionsPage $pa, ArrayObject $post)
+    public static function callbackRemove(dcPostsActions $pa, ArrayObject $post)
     {
         # No entry
         $posts_ids = $pa->getIDs();
@@ -330,13 +326,16 @@ class adminPeriodical
         }
 
         # No right
-        if (!$core->auth->check('delete,contentadmin', $core->blog->id)) {
+        if (!dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
+                dcAuth::PERMISSION_DELETE,
+                dcAuth::PERMISSION_CONTENT_ADMIN,
+            ]), dcCore::app()->blog->id)) {
             throw new Exception(__('No enough right'));
         }
 
         # Remove linked period
         foreach($posts_ids as $post_id) {
-            self::delPeriod($core, $post_id);
+            self::delPeriod($post_id);
         }
 
         dcPage::addSuccessNotice(__('Posts have been removed from periodical.'));
@@ -346,11 +345,10 @@ class adminPeriodical
     /**
      * Posts actions callback to add period
      * 
-     * @param  dcCore             $core dcCore instance
-     * @param  dcPostsActionsPage $pa   dcPostsActionsPage instance
+     * @param  dcPostsActions   $pa   dcPostsActions instance
      * @param  ArrayObject        $post _POST actions
      */
-    public static function callbackAdd(dcCore $core, dcPostsActionsPage $pa, ArrayObject $post)
+    public static function callbackAdd(dcPostsActions $pa, ArrayObject $post)
     {
         # No entry
         $posts_ids = $pa->getIDs();
@@ -363,8 +361,8 @@ class adminPeriodical
         # Save action
         if (!empty($post['periodical'])) {
             foreach($posts_ids as $post_id) {
-                self::delPeriod($core, $post_id);
-                self::addPeriod($core, $post_id, $post['periodical']);
+                self::delPeriod($post_id);
+                self::addPeriod($post_id, $post['periodical']);
             }
 
             dcPage::addSuccessNotice(__('Posts have been added to periodical.'));
@@ -375,7 +373,7 @@ class adminPeriodical
         else {
             $pa->beginPage(
                 dcPage::breadcrumb(array(
-                    html::escapeHTML($core->blog->name) => '',
+                    html::escapeHTML(dcCore::app()->blog->name) => '',
                     $pa->getCallerTitle() => $pa->getRedirection(true),
                     __('Add a period to this selection') => '' 
                 ))
@@ -385,10 +383,10 @@ class adminPeriodical
             '<form action="' . $pa->getURI() . '" method="post">' .
             $pa->getCheckboxes() .
 
-            self::formPeriod($core) .
+            self::formPeriod() .
 
             '<p>'.
-            $core->formNonce() .
+            dcCore::app()->formNonce() .
             $pa->getHiddenFields() .
             form::hidden(['action'], 'periodical_add') .
             '<input type="submit" value="' . __('Save') . '" /></p>' .
@@ -407,18 +405,16 @@ class adminPeriodical
      */
     public static function adminPostFormItems(ArrayObject $main_items, ArrayObject $sidebar_items, $post)
     {
-        global $core;
-
         # Get existing linked period
         $period = '';
         if ($post) {
-            $rs = self::period($core)->getPosts(['post_id' => $post->post_id]);
+            $rs = self::period()->getPosts(['post_id' => $post->post_id]);
             $period = $rs->isEmpty() ? '' : $rs->periodical_id;
         }
 
         # Set linked period form items
         $sidebar_items['options-box']['items']['period'] =
-            self::formPeriod($core, $period);
+            self::formPeriod($period);
     }
 
     /**
@@ -429,29 +425,26 @@ class adminPeriodical
      */
     public static function adminAfterPostSave(cursor $cur, $post_id)
     {
-        global $core;
-
         if (!isset($_POST['periodical'])) {
             return null;
         }
 
         # Delete old linked period
-        self::delPeriod($core, $post_id);
+        self::delPeriod($post_id);
 
         # Add new linked period
-        self::addPeriod($core, $post_id, $_POST['periodical']);
+        self::addPeriod($post_id, $_POST['periodical']);
     }
 
     /**
      * Posts period form field
      * 
-     * @param  dcCore $core   dcCore instance
      * @param  string $period Period
      * @return string         Period form content
      */
-    protected static function formPeriod(dcCore $core, $period='')
+    protected static function formPeriod($period='')
     {
-        $combo = self::comboPeriod($core);
+        $combo = self::comboPeriod();
 
         if (empty($combo)) {
             return null;
@@ -467,13 +460,12 @@ class adminPeriodical
     /**
      * Combo of available periods
      * 
-     * @param  dcCore $core dcCore instance
      * @return array       List of period
      */
-    protected static function comboPeriod(dcCore $core)
+    protected static function comboPeriod()
     {
         if (adminPeriodical::$combo_period === null) {
-            $periods = self::period($core)->getPeriods();
+            $periods = self::period()->getPeriods();
 
             if ($periods->isEmpty()) {
                 adminPeriodical::$combo_period = [];
@@ -492,27 +484,25 @@ class adminPeriodical
     /**
      * Remove period from posts.
      * 
-     * @param  dcCore  $core    dcCore instance
      * @param  integer $post_id Post id
      */
-    protected static function delPeriod(dcCore $core, $post_id)
+    protected static function delPeriod($post_id)
     {
         if ($post_id === null) {
             return null;
         }
 
         $post_id = (integer) $post_id;
-        self::period($core)->delPost($post_id);
+        self::period()->delPost($post_id);
     }
 
     /**
      * Add period to posts
      * 
-     * @param  dcCore  $core    dcCore instance
      * @param  integer $post_id Post id
      * @param  array   $period  Period
      */
-    protected static function addPeriod($core, $post_id, $period)
+    protected static function addPeriod($post_id, $period)
     {
         # Not saved
         if ($post_id === null || empty($period)) {
@@ -520,7 +510,7 @@ class adminPeriodical
         }
 
         # Get periods
-        $period = self::period($core)->getPeriods(['periodical_id' => $period]);
+        $period = self::period()->getPeriods(['periodical_id' => $period]);
 
         # No period
         if ($period->isEmpty()) {
@@ -530,6 +520,6 @@ class adminPeriodical
         $post_id = (integer) $post_id;
 
         # Add relation
-        self::period($core)->addPost($period->periodical_id, $post_id);
+        self::period()->addPost($period->periodical_id, $post_id);
     }
 }

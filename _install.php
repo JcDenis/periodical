@@ -15,9 +15,9 @@ if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
 
-$dc_min = '2.22';
-$new_version = $core->plugins->moduleInfo('periodical', 'version');
-$old_version = $core->getVersion('periodical');
+$dc_min = '2.24';
+$new_version = dcCore::app()->plugins->moduleInfo('periodical', 'version');
+$old_version = dcCore::app()->getVersion('periodical');
 
 if (version_compare($old_version, $new_version, '>=')) {
     return null;
@@ -34,7 +34,7 @@ try {
     }
 
     # Tables
-    $t = new dbStruct($core->con,$core->prefix);
+    $t = new dbStruct(dcCore::app()->con,dcCore::app()->prefix);
 
     # Table principale des sondages
     $t->periodical
@@ -51,23 +51,23 @@ try {
         ->primary('pk_periodical', 'periodical_id')
         ->index('idx_periodical_type', 'btree', 'periodical_type');
 
-    $ti = new dbStruct($core->con, $core->prefix);
+    $ti = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
     $changes = $ti->synchronize($t);
 
     # Settings
-    $core->blog->settings->addNamespace('periodical');
-    $s = $core->blog->settings->periodical;
+    dcCore::app()->blog->settings->addNamespace('periodical');
+    $s = dcCore::app()->blog->settings->periodical;
     $s->put('periodical_active', false, 'boolean', 'Enable extension', false, true);
     $s->put('periodical_upddate', true, 'boolean', 'Update post date', false, true);
     $s->put('periodical_updurl', false, 'boolean', 'Update post url', false, true);
     $s->put('periodical_pub_order', 'post_dt asc', 'string', 'Order of publication', false, true);
 
     # Version
-    $core->setVersion('periodical', $new_version);
+    dcCore::app()->setVersion('periodical', $new_version);
 
     return true;
 } catch (Exception $e) {
-    $core->error->add($e->getMessage());
+    dcCore::app()->error->add($e->getMessage());
 }
 
 return false;

@@ -22,6 +22,8 @@ if (!defined('DC_CONTEXT_ADMIN')) {
  */
 class adminPeriodicalList extends adminGenericList
 {
+    private $periodical = null;
+
     public function periodDisplay($filter, $enclose_block='')
     {
         if ($this->rs->isEmpty()) {
@@ -31,7 +33,8 @@ class adminPeriodicalList extends adminGenericList
                 echo '<p><strong>' . __('No period') . '</strong></p>';
             }
         } else {
-            $pager = new dcPager($filter->page, $this->rs_count, $filter->nb, 10);
+            $this->periodical = new periodical();
+            $pager = new dcPager((int) $filter->page, $this->rs_count, $filter->nb, 10);
             $pager->var_page = 'page';
 
             $periods = [];
@@ -75,8 +78,8 @@ class adminPeriodicalList extends adminGenericList
 
     private function periodLine($checked)
     {
-        $nb_posts = $this->rs->periodical->getPosts(['periodical_id' => $this->rs->periodical_id], true)->f(0);
-        $url = $this->core->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $this->rs->periodical_id]);
+        $nb_posts = $this->periodical->getPosts(['periodical_id' => $this->rs->periodical_id], true)->f(0);
+        $url = dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $this->rs->periodical_id]);
 
         $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . html::escapeHTML($this->rs->periodical_title) . '</a>';
 
@@ -84,8 +87,8 @@ class adminPeriodicalList extends adminGenericList
             '<a href="' . $url . '#posts" title="' . __('view related entries') . '">' . $nb_posts . '</a>' :
             '0';
 
-        $interval = in_array($this->rs->periodical_pub_int, $this->rs->periodical->getTimesCombo()) ? 
-            __(array_search($this->rs->periodical_pub_int, $this->rs->periodical->getTimesCombo())) : __('Unknow frequence');
+        $interval = in_array($this->rs->periodical_pub_int, $this->periodical->getTimesCombo()) ? 
+            __(array_search($this->rs->periodical_pub_int, $this->periodical->getTimesCombo())) : __('Unknow frequence');
 
         $cols = new ArrayObject([
             'check'   => '<td class="nowrap">' . form::checkbox(['periods[]'], $this->rs->periodical_id, ['checked'  => $checked]) . '</td>',
@@ -169,7 +172,7 @@ class adminPeriodicalList extends adminGenericList
 
     private function postLine($checked)
     {
-        if ($this->core->auth->check('categories', $this->core->blog->id)) {
+        if (dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([dcAuth::PERMISSION_CATEGORIES]), dcCore::app()->blog->id)) {
             $cat_link = '<a href="category.php?id=%s">%s</a>';
         } else {
             $cat_link = '%2$s';
