@@ -1,21 +1,20 @@
 <?php
 /**
  * @brief periodical, a plugin for Dotclear 2
- * 
+ *
  * @package Dotclear
  * @subpackage Plugin
- * 
+ *
  * @author Jean-Christian Denis and contributors
- * 
+ *
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-
 if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
 
-$dc_min = '2.24';
+$dc_min      = '2.24';
 $new_version = dcCore::app()->plugins->moduleInfo('periodical', 'version');
 $old_version = dcCore::app()->getVersion('periodical');
 
@@ -25,33 +24,35 @@ if (version_compare($old_version, $new_version, '>=')) {
 
 try {
     # Check Dotclear version
-    if (!method_exists('dcUtils', 'versionsCompare') 
+    if (!method_exists('dcUtils', 'versionsCompare')
         || dcUtils::versionsCompare(DC_VERSION, $dc_min, '<', false)
     ) {
         throw new Exception(sprintf(
-            '%s requires Dotclear %s', 'periodical', $dc_min
+            '%s requires Dotclear %s',
+            'periodical',
+            $dc_min
         ));
     }
 
     # Tables
-    $t = new dbStruct(dcCore::app()->con,dcCore::app()->prefix);
+    $t = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
 
     # Table principale des sondages
     $t->periodical
-        ->periodical_id ('bigint', 0, false)
+        ->periodical_id('bigint', 0, false)
         ->blog_id('varchar', 32, false)
-        ->periodical_type ('varchar', 32, false, "'post'")
-        ->periodical_title ('varchar', 255, false, "''")
-        ->periodical_tz ('varchar', 128, false, "'UTC'")
-        ->periodical_curdt ('timestamp', 0, false,' now()')
-        ->periodical_enddt ('timestamp', 0, false, 'now()')
-        ->periodical_pub_int ('varchar', 32, false, "'day'")
-        ->periodical_pub_nb ('smallint', 0, false, 1)
+        ->periodical_type('varchar', 32, false, "'post'")
+        ->periodical_title('varchar', 255, false, "''")
+        ->periodical_tz('varchar', 128, false, "'UTC'")
+        ->periodical_curdt('timestamp', 0, false, ' now()')
+        ->periodical_enddt('timestamp', 0, false, 'now()')
+        ->periodical_pub_int('varchar', 32, false, "'day'")
+        ->periodical_pub_nb('smallint', 0, false, 1)
 
         ->primary('pk_periodical', 'periodical_id')
         ->index('idx_periodical_type', 'btree', 'periodical_type');
 
-    $ti = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
+    $ti      = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
     $changes = $ti->synchronize($t);
 
     # Settings

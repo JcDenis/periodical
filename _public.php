@@ -1,16 +1,15 @@
 <?php
 /**
  * @brief periodical, a plugin for Dotclear 2
- * 
+ *
  * @package Dotclear
  * @subpackage Plugin
- * 
+ *
  * @author Jean-Christian Denis and contributors
- * 
+ *
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-
 if (!defined('DC_RC_PATH')) {
     return null;
 }
@@ -19,7 +18,7 @@ if (!in_array(dcCore::app()->url->type, ['default', 'feed'])) {
     return null;
 }
 
-dcCore::app()->blog->settings->addNamespace('periodical'); 
+dcCore::app()->blog->settings->addNamespace('periodical');
 
 dcCore::app()->addBehavior(
     'publicBeforeDocumentV2',
@@ -35,18 +34,17 @@ class publicPeriodical
 {
     /**
      * Publish periodical
-     * 
      */
     public static function publicBeforeDocument()
     {
         try {
             $per = new periodical();
-            $s = dcCore::app()->blog->settings->periodical;
+            $s   = dcCore::app()->blog->settings->periodical;
 
             $per->lockUpdate();
 
             # Get periods
-            $periods =  dcCore::app()->auth->sudo([$per, 'getPeriods']);
+            $periods = dcCore::app()->auth->sudo([$per, 'getPeriods']);
 
             # No period
             if ($periods->isEmpty()) {
@@ -55,14 +53,14 @@ class publicPeriodical
                 return null;
             }
 
-            $now = dt::toUTC(time());
+            $now         = dt::toUTC(time());
             $posts_order = $s->periodical_pub_order;
             if (!preg_match('/^(post_dt|post_creadt|post_id) (asc|desc)$/', $posts_order)) {
                 $posts_order = 'post_dt asc';
             }
             $cur_period = dcCore::app()->con->openCursor(dcCore::app()->prefix . 'periodical');
 
-            while($periods->fetch()) {
+            while ($periods->fetch()) {
                 # Check if period is ongoing
                 $cur_tz = strtotime($periods->periodical_curdt);
                 $end_tz = strtotime($periods->periodical_enddt);
@@ -77,9 +75,10 @@ class publicPeriodical
 
                     # Calculate nb of posts to get
                     $loop_tz = $cur_tz;
-                    $limit = 0;
+                    $limit   = 0;
+
                     try {
-                        while(1) {
+                        while (1) {
                             if ($loop_tz > $max_tz) {
                                 break;
                             }
@@ -92,18 +91,18 @@ class publicPeriodical
                     # If period need update
                     if ($limit > 0) {
                         # Get posts to publish related to this period
-                        $posts_params = [];
+                        $posts_params                  = [];
                         $posts_params['periodical_id'] = $periods->periodical_id;
                         $posts_params['post_status']   = '-2';
                         $posts_params['order']         = $posts_order;
                         $posts_params['limit']         = $limit * $max_nb;
                         $posts_params['no_content']    = true;
-                        $posts = dcCore::app()->auth->sudo([$per, 'getPosts'], $posts_params);
+                        $posts                         = dcCore::app()->auth->sudo([$per, 'getPosts'], $posts_params);
 
                         if (!$posts->isEmpty()) {
                             $cur_post = dcCore::app()->con->openCursor(dcCore::app()->prefix . 'post');
 
-                            while($posts->fetch()) {
+                            while ($posts->fetch()) {
                                 # Publish post with right date
                                 $cur_post->clean();
                                 $cur_post->post_status = 1;
@@ -139,7 +138,6 @@ class publicPeriodical
 
                                 # --BEHAVIOR-- periodicalAfterPublishedPeriodicalEntry
                                 dcCore::app()->callBehavior('periodicalAfterPublishedPeriodicalEntry', $posts, $periods);
-
                             }
                             dcCore::app()->blog->triggerBlog();
                         }
@@ -156,7 +154,9 @@ class publicPeriodical
             }
             $per->unlockUpdate();
         } catch (Exception $e) {
-            $per->unlockUpdate();
+            if (isset($per)) {
+                $per->unlockUpdate();
+            }
 
             return null;
         }

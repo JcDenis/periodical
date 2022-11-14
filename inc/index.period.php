@@ -1,16 +1,15 @@
 <?php
 /**
  * @brief periodical, a plugin for Dotclear 2
- * 
+ *
  * @package Dotclear
  * @subpackage Plugin
- * 
+ *
  * @author Jean-Christian Denis and contributors
- * 
+ *
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-
 if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
@@ -21,24 +20,24 @@ dcPage::check(dcCore::app()->auth->makePermissions([dcAuth::PERMISSION_USAGE, dc
 $per = new periodical();
 
 # Default values
-$action = isset($_POST['action']) ? $_POST['action'] : '';
+$action = $_POST['action'] ?? '';
 
 $starting_script = '';
 
 # Default value for period
-$period_id      = null;
-$period_title   = __('One post per day');
-$period_pub_nb  = 1;
-$period_pub_int = 'day';
-$period_curdt   = date('Y-m-d H:i', time());
-$period_enddt   = date('Y-m-d H:i', time() + 31536000); //one year
+$period_id        = null;
+$period_title     = __('One post per day');
+$period_pub_nb    = 1;
+$period_pub_int   = 'day';
+$period_curdt     = date('Y-m-d H:i', time());
+$period_enddt     = date('Y-m-d H:i', time() + 31536000); //one year
 $bad_period_curdt = false;
 $bad_period_enddt = false;
 
 # Get period
 if (!empty($_REQUEST['period_id'])) {
     $rs = $per->getPeriods([
-        'periodical_id' => $_REQUEST['period_id']
+        'periodical_id' => $_REQUEST['period_id'],
     ]);
     if ($rs->isEmpty()) {
         dcCore::app()->error->add(__('This period does not exist.'));
@@ -60,9 +59,9 @@ if ($action == 'setperiod') {
         $period_title = $_POST['period_title'];
     }
     if (!empty($_POST['period_pub_nb'])) {
-        $period_pub_nb = abs((integer) $_POST['period_pub_nb']);
+        $period_pub_nb = abs((int) $_POST['period_pub_nb']);
     }
-    if (!empty($_POST['period_pub_int']) 
+    if (!empty($_POST['period_pub_int'])
         && in_array($_POST['period_pub_int'], $per->getTimesCombo())
     ) {
         $period_pub_int = $_POST['period_pub_int'];
@@ -96,10 +95,10 @@ if ($action == 'setperiod') {
 
     # Check period title and dates
     $old_titles = $per->getPeriods([
-        'periodical_title' => $period_title
+        'periodical_title' => $period_title,
     ]);
     if (!$old_titles->isEmpty()) {
-        while($old_titles->fetch()) {
+        while ($old_titles->fetch()) {
             if (!$period_id || $old_titles->periodical_id != $period_id) {
                 dcCore::app()->error->add(__('Period title is already taken'));
             }
@@ -114,7 +113,7 @@ if ($action == 'setperiod') {
 
     # If no error, set period
     if (!dcCore::app()->error->flag()) {
-        $cur = $per->openCursor();
+        $cur                     = $per->openCursor();
         $cur->periodical_title   = $period_title;
         $cur->periodical_curdt   = $period_curdt;
         $cur->periodical_enddt   = $period_enddt;
@@ -150,8 +149,8 @@ if (!dcCore::app()->error->flag() && $period_id && $action && !empty($_POST['per
     # Publish posts
     if ($action == 'publish') {
         try {
-            foreach($_POST['periodical_entries'] as $id) {
-                $id = (integer) $id;
+            foreach ($_POST['periodical_entries'] as $id) {
+                $id = (int) $id;
                 dcCore::app()->blog->updPostStatus($id, 1);
                 $per->delPost($id);
             }
@@ -173,9 +172,9 @@ if (!dcCore::app()->error->flag() && $period_id && $action && !empty($_POST['per
     # Unpublish posts
     if ($action == 'unpublish') {
         try {
-            foreach($_POST['periodical_entries'] as $id) {
-                $id = (integer) $id;
-                dcCore::app()->blog->updPostStatus($id,0);
+            foreach ($_POST['periodical_entries'] as $id) {
+                $id = (int) $id;
+                dcCore::app()->blog->updPostStatus($id, 0);
                 $per->delPost($id);
             }
 
@@ -196,8 +195,8 @@ if (!dcCore::app()->error->flag() && $period_id && $action && !empty($_POST['per
     # Remove posts from periodical
     if ($action == 'remove_post_periodical') {
         try {
-            foreach($_POST['periodical_entries'] as $id) {
-                $id = (integer) $id;
+            foreach ($_POST['periodical_entries'] as $id) {
+                $id = (int) $id;
                 $per->delPost($id);
             }
 
@@ -222,22 +221,21 @@ if ($period_id) {
     $post_filter = new adminPostFilter();
     $post_filter->add('part', 'period');
 
-    $params = $post_filter->params();
+    $params                  = $post_filter->params();
     $params['periodical_id'] = $period_id;
     $params['no_content']    = true;
 
     # Get posts
     try {
-        $posts = $per->getPosts($params);
-        $counter = $per->getPosts($params, true);
+        $posts     = $per->getPosts($params);
+        $counter   = $per->getPosts($params, true);
         $post_list = new adminPeriodicalList(dcCore::app(), $posts, $counter->f(0));
     } catch (Exception $e) {
         dcCore::app()->error->add($e->getMessage());
     }
 
-    $starting_script =
-        dcPage::jsLoad(dcPage::getPF('periodical/js/checkbox.js')) .
-        $post_filter->js(dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $period_id], '&').'#posts');
+    $starting_script = dcPage::jsLoad(dcPage::getPF('periodical/js/checkbox.js')) .
+        $post_filter->js(dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $period_id], '&') . '#posts');
 }
 
 # Display
@@ -252,9 +250,9 @@ dcPage::jsPageTabs() .
 
 echo
 dcPage::breadcrumb([
-        __('Plugins') => '',
-        __('Periodical') => dcCore::app()->admin->getPageURL() . '&amp;part=periods',
-        (null === $period_id ? __('New period') : __('Edit period')) => ''
+    __('Plugins')                                                => '',
+    __('Periodical')                                             => dcCore::app()->admin->getPageURL() . '&amp;part=periods',
+    (null === $period_id ? __('New period') : __('Edit period')) => '',
 ]) .
 dcPage::notices();
 
@@ -278,12 +276,12 @@ form::datetime('period_curdt', [
 form::datetime('period_enddt', [
     'default' => html::escapeHTML(dt::str('%Y-%m-%dT%H:%M', strtotime($period_enddt))),
     'class'   => ($bad_period_enddt ? 'invalid' : ''),
-]) .'</p>
+]) . '</p>
 
 </div><div class="two-boxes">
 
 <p><label for="period_pub_int">' . __('Publication frequency:') . '</label>' .
-form::combo('period_pub_int',$per->getTimesCombo(), $period_pub_int) . '</p>
+form::combo('period_pub_int', $per->getTimesCombo(), $period_pub_int) . '</p>
 
 <p><label for="period_pub_nb">' . __('Number of entries to publish every time:') . '</label>' .
 form::number('period_pub_nb', ['min' => 1, 'max' => 20, 'default' => $period_pub_nb]) . '</p>
@@ -295,22 +293,21 @@ form::number('period_pub_nb', ['min' => 1, 'max' => 20, 'default' => $period_pub
 dcCore::app()->formNonce() .
 form::hidden(['action'], 'setperiod') .
 form::hidden(['period_id'], $period_id) .
-form::hidden(['part'], 'period') .'
+form::hidden(['part'], 'period') . '
 </p>
 </div>
 </form>
 </div>';
 
-if ($period_id && !dcCore::app()->error->flag()) {
-
+if ($period_id && isset($post_filter) && isset($post_list) && !dcCore::app()->error->flag()) {
     # Actions combo box
-    $combo_action = [];
-    $combo_action[__('Entries')][__('Publish')] = 'publish';
-    $combo_action[__('Entries')][__('Unpublish')] = 'unpublish';
+    $combo_action                                                 = [];
+    $combo_action[__('Entries')][__('Publish')]                   = 'publish';
+    $combo_action[__('Entries')][__('Unpublish')]                 = 'unpublish';
     $combo_action[__('Periodical')][__('Remove from periodical')] = 'remove_post_periodical';
 
     $base_url = dcCore::app()->admin->getPageURL() .
-        '&amp;period_id=' .$period_id .
+        '&amp;period_id=' . $period_id .
         '&amp;part=period' .
         '&amp;user_id=' . $post_filter->user_id .
         '&amp;cat_id=' . $post_filter->cat_id .
@@ -329,15 +326,18 @@ if ($period_id && !dcCore::app()->error->flag()) {
     <div id="posts"><h3>' . __('Entries linked to this period') . '</h3>';
 
     # Filters
-    $post_filter->display(['admin.plugin.periodical', '#posts'], 
+    $post_filter->display(
+        ['admin.plugin.periodical', '#posts'],
         dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.periodical', [
             'period_id' => $period_id,
-            'part'      => 'period'
+            'part'      => 'period',
         ])
     );
 
     # Posts list
-    $post_list->postDisplay($post_filter, $base_url, 
+    $post_list->postDisplay(
+        $post_filter,
+        $base_url,
         '<form action="' . dcCore::app()->admin->getPageURL() . '" method="post" id="form-entries">' .
 
         '%s' .
@@ -350,7 +350,7 @@ if ($period_id && !dcCore::app()->error->flag()) {
         '<input type="submit" value="' . __('ok') . '" /></p>' .
         dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.periodical', array_merge($post_filter->values(), [
             'period_id' => $period_id,
-            'redir'     => sprintf($base_url, $post_filter->page)
+            'redir'     => sprintf($base_url, $post_filter->page),
         ])) .
         dcCore::app()->formNonce() .
         '</div>' .

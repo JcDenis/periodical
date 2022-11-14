@@ -1,17 +1,16 @@
 <?php
 /**
  * @brief periodical, a plugin for Dotclear 2
- * 
+ *
  * @package Dotclear
  * @subpackage Plugin
- * 
+ *
  * @author Jean-Christian Denis and contributors
- * 
+ *
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-
-if (!defined('DC_RC_PATH')){
+if (!defined('DC_RC_PATH')) {
     return;
 }
 
@@ -28,7 +27,7 @@ class periodical
         $this->con = dcCore::app()->con;
 
         $this->table = dcCore::app()->con->escape(dcCore::app()->prefix . 'periodical');
-        $this->blog = dcCore::app()->con->escape(dcCore::app()->blog->id);
+        $this->blog  = dcCore::app()->con->escape(dcCore::app()->blog->id);
     }
 
     public function openCursor()
@@ -47,8 +46,7 @@ class periodical
             if (!empty($params['columns']) && is_array($params['columns'])) {
                 $q .= implode(', ', $params['columns']) . ', ';
             }
-            $q .= 
-            'T.periodical_title, T.periodical_tz, ' .
+            $q .= 'T.periodical_title, T.periodical_tz, ' .
             'T.periodical_curdt, T.periodical_enddt, ' .
             'T.periodical_pub_int, T.periodical_pub_nb ';
         }
@@ -73,7 +71,7 @@ class periodical
             if (is_array($params['periodical_id'])) {
                 array_walk($params['periodical_id'], create_function('&$v,$k', 'if($v!==null){$v=(integer)$v;}'));
             } else {
-                $params['periodical_id'] = [(integer) $params['periodical_id']];
+                $params['periodical_id'] = [(int) $params['periodical_id']];
             }
             $q .= 'AND T.periodical_id ' . $this->con->in($params['periodical_id']);
         }
@@ -81,11 +79,11 @@ class periodical
             $q .= "AND T.periodical_title = '" . $this->con->escape($params['periodical_title']) . "' ";
         }
         if (!empty($params['sql'])) {
-            $q .= $params['sql'].' ';
+            $q .= $params['sql'] . ' ';
         }
         if (!$count_only) {
             if (!empty($params['order'])) {
-                $q .= 'ORDER BY ' . $this->con->escape($params['order']).' ';
+                $q .= 'ORDER BY ' . $this->con->escape($params['order']) . ' ';
             } else {
                 $q .= 'ORDER BY T.periodical_id ASC ';
             }
@@ -109,42 +107,44 @@ class periodical
                 'SELECT MAX(periodical_id) FROM ' . $this->table
             )->f(0) + 1;
 
-            $cur->periodical_id = $id;
-            $cur->blog_id = $this->blog;
+            $cur->periodical_id   = $id;
+            $cur->blog_id         = $this->blog;
             $cur->periodical_type = 'post';
-            $cur->periodical_tz = dcCore::app()->auth->getInfo('user_tz');
+            $cur->periodical_tz   = dcCore::app()->auth->getInfo('user_tz');
             $cur->insert();
             $this->con->unlock();
         } catch (Exception $e) {
             $this->con->unlock();
+
             throw $e;
         }
+
         return $cur->periodical_id;
     }
 
-    public function updPeriod($period_id,$cur)
+    public function updPeriod($period_id, $cur)
     {
-        $period_id = (integer) $period_id;
+        $period_id = (int) $period_id;
 
-        if ($cur->periodical_tz == '' 
+        if ($cur->periodical_tz == ''
         && ($cur->periodical_curdt != '' || $cur->periodical_enddt != '')) {
             $cur->periodical_tz = dcCore::app()->auth->getInfo('user_tz');
         }
         $cur->update(
             "WHERE blog_id = '" . $this->blog . "' " .
-            "AND periodical_id = " . $period_id . " "
+            'AND periodical_id = ' . $period_id . ' '
         );
     }
 
     # Delete a period
     public function delPeriod($period_id)
     {
-        $period_id = (integer) $period_id;
+        $period_id = (int) $period_id;
 
-        $params = [];
+        $params                  = [];
         $params['periodical_id'] = $period_id;
-        $params['post_status'] = '';
-        $rs = $this->getPosts($params);
+        $params['post_status']   = '';
+        $rs                      = $this->getPosts($params);
 
         if (!$rs->isEmpty()) {
             throw new Exception('Periodical is not empty');
@@ -153,16 +153,16 @@ class periodical
         $this->con->execute(
             'DELETE FROM ' . $this->table . ' ' .
             "WHERE blog_id = '" . $this->blog . "' " .
-            "AND periodical_id = " . $period_id . " "
+            'AND periodical_id = ' . $period_id . ' '
         );
     }
 
     # Remove all posts related to a period
     public function delPeriodPosts($period_id)
     {
-        $params = [];
-        $params['post_status'] = '';
-        $params['periodical_id'] = (integer) $period_id;
+        $params                  = [];
+        $params['post_status']   = '';
+        $params['periodical_id'] = (int) $period_id;
 
         $rs = $this->getPosts($params);
 
@@ -170,9 +170,8 @@ class periodical
             return;
         }
 
-        $ids = array();
-        while($rs->fetch())
-        {
+        $ids = [];
+        while ($rs->fetch()) {
             $ids[] = $rs->post_id;
         }
 
@@ -183,7 +182,7 @@ class periodical
         $this->con->execute(
             'DELETE FROM ' . dcCore::app()->prefix . 'meta ' .
             "WHERE meta_type = 'periodical' " .
-            "AND post_id " . $this->con->in($ids)
+            'AND post_id ' . $this->con->in($ids)
         );
     }
 
@@ -220,9 +219,9 @@ class periodical
 
         if (!empty($params['periodical_id'])) {
             if (is_array($params['periodical_id'])) {
-                array_walk($params['periodical_id'], function ($v) { if ($v !== null) { $v = (integer) $v; } });
+                array_walk($params['periodical_id'], function ($v) { if ($v !== null) { $v = (int) $v; } });
             } else {
-                $params['periodical_id'] = [(integer) $params['periodical_id']];
+                $params['periodical_id'] = [(int) $params['periodical_id']];
             }
             $params['sql'] .= 'AND T.periodical_id ' . $this->con->in($params['periodical_id']);
             unset($params['periodical_id']);
@@ -230,7 +229,7 @@ class periodical
         if (dcCore::app()->auth->check('admin', dcCore::app()->blog->id)) {
             if (isset($params['post_status'])) {
                 if ($params['post_status'] != '') {
-                    $params['sql'] .= 'AND P.post_status = ' . (integer) $params['post_status'] . ' ';
+                    $params['sql'] .= 'AND P.post_status = ' . (int) $params['post_status'] . ' ';
                 }
                 unset($params['post_status']);
             }
@@ -238,7 +237,7 @@ class periodical
             $params['sql'] .= 'AND P.post_status = -2 ';
         }
 
-        $rs = dcCore::app()->blog->getPosts($params, $count_only);
+        $rs             = dcCore::app()->blog->getPosts($params, $count_only);
         $rs->periodical = $this;
 
         return $rs;
@@ -247,26 +246,27 @@ class periodical
     # Add post to periodical
     public function addPost($period_id, $post_id)
     {
-        $period_id = (integer) $period_id;
-        $post_id = (integer) $post_id;
+        $period_id = (int) $period_id;
+        $post_id   = (int) $post_id;
 
         # Check if exists
-        $rs = $this->getPosts(array('post_id' => $post_id, 'periodical_id' => $period_id));
+        $rs = $this->getPosts(['post_id' => $post_id, 'periodical_id' => $period_id]);
         if (!$rs->isEmpty()) {
             return;
         }
 
-        $cur = $this->con->openCursor(dcCore::app()->prefix  .'meta');
+        $cur = $this->con->openCursor(dcCore::app()->prefix . 'meta');
         $this->con->writeLock(dcCore::app()->prefix . 'meta');
 
         try {
-            $cur->post_id = $post_id;
-            $cur->meta_id = $period_id;
+            $cur->post_id   = $post_id;
+            $cur->meta_id   = $period_id;
             $cur->meta_type = 'periodical';
             $cur->insert();
             $this->con->unlock();
         } catch (Exception $e) {
             $this->con->unlock();
+
             throw $e;
         }
     }
@@ -274,24 +274,25 @@ class periodical
     # Delete post from periodical
     public function delPost($post_id)
     {
-        $post_id = (integer) $post_id;
+        $post_id = (int) $post_id;
 
         $this->con->execute(
             'DELETE FROM ' . dcCore::app()->prefix . 'meta ' .
             "WHERE meta_type = 'periodical' " .
             "AND post_id = '" . $post_id . "' "
         );
+
         return true;
     }
 
     # Remove all posts without pending status from periodical
     public function cleanPosts($period_id = null)
     {
-        $params = [];
+        $params                = [];
         $params['post_status'] = '';
-        $params['sql'] = 'AND post_status != -2 ';
+        $params['sql']         = 'AND post_status != -2 ';
         if ($period_id !== null) {
-            $params['periodical_id'] = (integer) $period_id;
+            $params['periodical_id'] = (int) $period_id;
         }
         $rs = $this->getPosts($params);
 
@@ -299,8 +300,8 @@ class periodical
             return;
         }
 
-        $ids = array();
-        while($rs->fetch()) {
+        $ids = [];
+        while ($rs->fetch()) {
             $ids[] = $rs->post_id;
         }
 
@@ -311,7 +312,7 @@ class periodical
         $this->con->execute(
             'DELETE FROM ' . dcCore::app()->prefix . 'meta ' .
             "WHERE meta_type = 'periodical' " .
-            "AND post_id " . $this->con->in($ids)
+            'AND post_id ' . $this->con->in($ids)
         );
     }
 
@@ -322,41 +323,48 @@ class periodical
             __('twice a day') => 'halfday',
             __('Daily')       => 'day',
             __('Weekly')      => 'week',
-            __('Monthly')     => 'month'
+            __('Monthly')     => 'month',
         ];
     }
 
     public static function getNextTime($ts, $period)
     {
-        $ts = (integer) $ts;
-        $e = explode(',', date('H,i,s,n,j,Y', $ts));
-        switch($period)
-        {
+        $ts = (int) $ts;
+        $e  = explode(',', date('H,i,s,n,j,Y', $ts));
+        switch($period) {
             case 'hour':
                 $new_ts = mktime($e[0] + 1, $e[1], $e[2], $e[3], $e[4], $e[5]);
-            break;
+
+                break;
 
             case 'halfday':
                 $new_ts = mktime($e[0] + 12, $e[1], $e[2], $e[3], $e[4], $e[5]);
-            break;
+
+                break;
 
             case 'day':
-                $new_ts = mktime($e[0], $e[1] ,$e[2], $e[3], $e[4] + 1, $e[5]);
-            break;
+                $new_ts = mktime($e[0], $e[1], $e[2], $e[3], $e[4] + 1, $e[5]);
+
+                break;
 
             case 'week':
                 $new_ts = mktime($e[0], $e[1], $e[2], $e[3], $e[4] + 7, $e[5]);
-            break;
+
+                break;
 
             case 'month':
                 $new_ts = mktime($e[0], $e[1], $e[2], $e[3] + 1, $e[4], $e[5]);
-            break;
+
+                break;
 
             default:
                 $new_ts = 0;
+
                 throw new Exception(__('Unknow frequence'));
-            break;
+
+                break;
         }
+
         return $new_ts;
     }
 
@@ -366,14 +374,14 @@ class periodical
         try {
             # Need flock function
             if (!function_exists('flock')) {
-                throw New Exception("Can't call php function named flock");
+                throw new Exception("Can't call php function named flock");
             }
             # Cache writable ?
             if (!is_writable(DC_TPL_CACHE)) {
                 throw new Exception("Can't write in cache fodler");
             }
             # Set file path
-            $f_md5 = md5($this->blog);
+            $f_md5       = md5($this->blog);
             $cached_file = sprintf(
                 '%s/%s/%s/%s/%s.txt',
                 DC_TPL_CACHE,
@@ -386,30 +394,32 @@ class periodical
             $cached_file = path::real($cached_file, false);
             # Make dir
             if (!is_dir(dirname($cached_file))) {
-                    files::makeDir(dirname($cached_file), true);
+                files::makeDir(dirname($cached_file), true);
             }
             # Make file
             if (!file_exists($cached_file)) {
                 !$fp = @fopen($cached_file, 'w');
                 if ($fp === false) {
-                    throw New Exception("Can't create file");
+                    throw new Exception("Can't create file");
                 }
                 fwrite($fp, '1', strlen('1'));
                 fclose($fp);
             }
             # Open file
             if (!($fp = @fopen($cached_file, 'r+'))) {
-                throw New Exception("Can't open file");
+                throw new Exception("Can't open file");
             }
             # Lock file
             if (!flock($fp, LOCK_EX)) {
-                throw New Exception("Can't lock file");
+                throw new Exception("Can't lock file");
             }
             $this->lock = $fp;
+
             return true;
         } catch (Exception $e) {
             throw $e;
         }
+
         return false;
     }
 
