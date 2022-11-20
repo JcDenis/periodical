@@ -172,7 +172,7 @@ class adminPeriodicalList extends adminGenericList
 
     private function postLine($checked)
     {
-        if (dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([dcAuth::PERMISSION_CATEGORIES]), dcCore::app()->blog->id)) {
+        if (dcCore::app()->auth->check(dcAuth::PERMISSION_CATEGORIES, dcCore::app()->blog->id)) {
             $cat_link = '<a href="category.php?id=%s">%s</a>';
         } else {
             $cat_link = '%2$s';

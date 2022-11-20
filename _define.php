@@ -18,14 +18,13 @@ $this->registerModule(
     'Periodical',
     'Published periodically entries',
     'Jean-Christian Denis and contributors',
-    '2022.11.12',
+    '2022.11.20',
     [
         'requires'    => [['core', '2.24']],
         'permissions' => dcCore::app()->auth->makePermissions([
             dcAuth::PERMISSION_USAGE,
             dcAuth::PERMISSION_CONTENT_ADMIN,
         ]),
-        'usage,contentadmin',
         'type'       => 'plugin',
         'support'    => 'https://github.com/JcDenis/periodical',
         'details'    => 'https://plugins.dotaddict.org/dc2/details/periodical',

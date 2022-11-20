@@ -1,12 +1,13 @@
+<?xml version="1.0"?>
 <modules xmlns:da="http://dotaddict.org/da/">
-<module id="periodical">
-<name>Periodical</name>
-<version>2022.05.16</version>
-<author>Jean-Christian Denis and contributors</author>
-<desc>Published periodically entries</desc>
-<file>https://github.com/JcDenis/periodical/releases/download/v2022.05.16/plugin-periodical.zip</file>
-<da:dcmin>2.22</da:dcmin>
-<da:details>https://plugins.dotaddict.org/dc2/details/periodical</da:details>
-<da:support>https://github.com/JcDenis/periodical</da:support>
-</module>
+  <module id="periodical">
+    <name>Periodical</name>
+    <version>2022.11.20</version>
+    <author>Jean-Christian Denis and contributors</author>
+    <desc>Published periodically entries</desc>
+    <file>https://github.com/JcDenis/periodical/releases/download/v2022.11.20/plugin-periodical.zip</file>
+    <da:dcmin>2.24</da:dcmin>
+    <da:details>https://plugins.dotaddict.org/dc2/details/periodical</da:details>
+    <da:support>https://github.com/JcDenis/periodical</da:support>
+  </module>
 </modules>

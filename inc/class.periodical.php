@@ -226,7 +226,7 @@ class periodical
             $params['sql'] .= 'AND T.periodical_id ' . $this->con->in($params['periodical_id']);
             unset($params['periodical_id']);
         }
-        if (dcCore::app()->auth->check('admin', dcCore::app()->blog->id)) {
+        if (dcCore::app()->auth->check(dcAuth::PERMISSION_ADMIN, dcCore::app()->blog->id)) {
             if (isset($params['post_status'])) {
                 if ($params['post_status'] != '') {
                     $params['sql'] .= 'AND P.post_status = ' . (int) $params['post_status'] . ' ';
