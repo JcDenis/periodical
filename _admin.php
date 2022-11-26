@@ -45,7 +45,7 @@ if (dcCore::app()->blog->settings->periodical->periodical_active) {
     dcCore::app()->menu[dcAdmin::MENU_PLUGINS]->addItem(
         __('Periodical'),
         dcCore::app()->adminurl->get('admin.plugin.periodical'),
-        dcPage::getPF('periodical/icon.png'),
+        dcPage::getPF('periodical/icon.svg'),
         preg_match('/' . preg_quote(dcCore::app()->adminurl->get('admin.plugin.periodical')) . '(&.*)?$/', $_SERVER['REQUEST_URI']),
         dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
             dcAuth::PERMISSION_USAGE,
@@ -55,7 +55,7 @@ if (dcCore::app()->blog->settings->periodical->periodical_active) {
 
     dcCore::app()->addBehavior(
         'adminDashboardFavoritesV2',
-        ['adminPeriodical', 'adminDashboardFavorites']
+        ['adminPeriodical', 'adminDashboardFavoritesV2']
     );
     dcCore::app()->addBehavior(
         'adminPostHeaders',
@@ -233,13 +233,13 @@ class adminPeriodical
      *
      * @param   dcFavorites $favs Array of favorites
      */
-    public static function adminDashboardFavorites(dcFavorites $favs)
+    public static function adminDashboardFavoritesV2(dcFavorites $favs)
     {
         $favs->register('periodical', [
             'title'       => __('Periodical'),
-            'url'         => 'plugin.php?p=periodical',
-            'small-icon'  => 'index.php?pf=periodical/icon.png',
-            'large-icon'  => 'index.php?pf=periodical/icon-big.png',
+            'url'         => dcCore::app()->adminurl->get('admin.plugin.periodical'),
+            'small-icon'  => dcPage::getPF('periodical/icon.svg'),
+            'large-icon'  => dcPage::getPF('periodical/icon.svg'),
             'permissions' => dcCore::app()->auth->check(
                 dcCore::app()->auth->makePermissions([
                     dcAuth::PERMISSION_USAGE,
@@ -247,24 +247,7 @@ class adminPeriodical
                 ]),
                 dcCore::app()->blog->id
             ),
-            'active_cb' => [
-                'adminPeriodical',
-                'adminDashboardFavoritesActive',
-            ],
         ]);
-    }
-
-    /**
-     * Favorites selection.
-     *
-     * @param   string $request Requested page
-     * @param   array  $params  Requested parameters
-     */
-    public static function adminDashboardFavoritesActive($request, $params)
-    {
-        return $request == 'plugin.php'
-            && isset($params['p'])
-            && $params['p'] == 'periodical';
     }
 
     /**
@@ -274,7 +257,7 @@ class adminPeriodical
      */
     public static function adminPostHeaders()
     {
-        return dcPage::jsLoad('index.php?pf=periodical/js/toggle.js');
+        return dcPage::jsLoad(dcPage::getPF('periodical/js/toggle.js'));
     }
 
     /**
