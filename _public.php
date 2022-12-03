@@ -58,7 +58,7 @@ class publicPeriodical
             if (!preg_match('/^(post_dt|post_creadt|post_id) (asc|desc)$/', $posts_order)) {
                 $posts_order = 'post_dt asc';
             }
-            $cur_period = dcCore::app()->con->openCursor(dcCore::app()->prefix . 'periodical');
+            $cur_period = dcCore::app()->con->openCursor(dcCore::app()->prefix . initPeriodical::PERIOD_TABLE_NAME);
 
             while ($periods->fetch()) {
                 # Check if period is ongoing
@@ -100,7 +100,7 @@ class publicPeriodical
                         $posts                         = dcCore::app()->auth->sudo([$per, 'getPosts'], $posts_params);
 
                         if (!$posts->isEmpty()) {
-                            $cur_post = dcCore::app()->con->openCursor(dcCore::app()->prefix . 'post');
+                            $cur_post = dcCore::app()->con->openCursor(dcCore::app()->prefix . dcBlog::POST_TABLE_NAME);
 
                             while ($posts->fetch()) {
                                 # Publish post with right date

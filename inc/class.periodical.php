@@ -24,9 +24,8 @@ class periodical
 
     public function __construct()
     {
-        $this->con = dcCore::app()->con;
-
-        $this->table = dcCore::app()->con->escape(dcCore::app()->prefix . 'periodical');
+        $this->con   = dcCore::app()->con;
+        $this->table = dcCore::app()->con->escape(dcCore::app()->prefix . initPeriodical::PERIOD_TABLE_NAME);
         $this->blog  = dcCore::app()->con->escape(dcCore::app()->blog->id);
     }
 
@@ -180,7 +179,7 @@ class periodical
         }
 
         $this->con->execute(
-            'DELETE FROM ' . dcCore::app()->prefix . 'meta ' .
+            'DELETE FROM ' . dcCore::app()->prefix . dcMeta::META_TABLE_NAME . ' ' .
             "WHERE meta_type = 'periodical' " .
             'AND post_id ' . $this->con->in($ids)
         );
@@ -211,7 +210,7 @@ class periodical
         $params['columns'][] = 'T.periodical_pub_int';
         $params['columns'][] = 'T.periodical_pub_nb';
 
-        $params['join'] .= 'LEFT JOIN ' . dcCore::app()->prefix . 'meta R ON P.post_id = R.post_id ';
+        $params['join'] .= 'LEFT JOIN ' . dcCore::app()->prefix . dcMeta::META_TABLE_NAME . ' R ON P.post_id = R.post_id ';
         $params['join'] .= 'LEFT JOIN ' . $this->table . ' T ON CAST(T.periodical_id as char) = CAST(R.meta_id as char) ';
 
         $params['sql'] .= "AND R.meta_type = 'periodical' ";
@@ -255,8 +254,8 @@ class periodical
             return;
         }
 
-        $cur = $this->con->openCursor(dcCore::app()->prefix . 'meta');
-        $this->con->writeLock(dcCore::app()->prefix . 'meta');
+        $cur = $this->con->openCursor(dcCore::app()->prefix . dcMeta::META_TABLE_NAME);
+        $this->con->writeLock(dcCore::app()->prefix . dcMeta::META_TABLE_NAME);
 
         try {
             $cur->post_id   = $post_id;
@@ -277,7 +276,7 @@ class periodical
         $post_id = (int) $post_id;
 
         $this->con->execute(
-            'DELETE FROM ' . dcCore::app()->prefix . 'meta ' .
+            'DELETE FROM ' . dcCore::app()->prefix . dcMeta::META_TABLE_NAME . ' ' .
             "WHERE meta_type = 'periodical' " .
             "AND post_id = '" . $post_id . "' "
         );
@@ -310,7 +309,7 @@ class periodical
         }
 
         $this->con->execute(
-            'DELETE FROM ' . dcCore::app()->prefix . 'meta ' .
+            'DELETE FROM ' . dcCore::app()->prefix . dcMeta::META_TABLE_NAME . ' ' .
             "WHERE meta_type = 'periodical' " .
             'AND post_id ' . $this->con->in($ids)
         );

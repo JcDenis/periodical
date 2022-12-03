@@ -14,22 +14,24 @@ if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
 
-$dc_min      = '2.24';
-$new_version = dcCore::app()->plugins->moduleInfo('periodical', 'version');
-$old_version = dcCore::app()->getVersion('periodical');
-
-if (version_compare($old_version, $new_version, '>=')) {
-    return null;
-}
-
 try {
+    # Grab info
+    $mod_id      = basename(__DIR__);
+    $dc_min      = dcCore::app()->plugins->moduleInfo($mod_id, 'requires')[0][1];
+    $new_version = dcCore::app()->plugins->moduleInfo($mod_id, 'version');
+
+    # Check installed version
+    if (version_compare(dcCore::app()->getVersion($mod_id), $new_version, '>=')) {
+        return null;
+    }
+
     # Check Dotclear version
     if (!method_exists('dcUtils', 'versionsCompare')
         || dcUtils::versionsCompare(DC_VERSION, $dc_min, '<', false)
     ) {
         throw new Exception(sprintf(
             '%s requires Dotclear %s',
-            'periodical',
+            $mod_id,
             $dc_min
         ));
     }
@@ -38,7 +40,7 @@ try {
     $t = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
 
     # Table principale des sondages
-    $t->periodical
+    $t->{initPeriodical::PERIOD_TABLE_NAME}
         ->periodical_id('bigint', 0, false)
         ->blog_id('varchar', 32, false)
         ->periodical_type('varchar', 32, false, "'post'")
@@ -64,7 +66,7 @@ try {
     $s->put('periodical_pub_order', 'post_dt asc', 'string', 'Order of publication', false, true);
 
     # Version
-    dcCore::app()->setVersion('periodical', $new_version);
+    dcCore::app()->setVersion($mod_id, $new_version);
 
     return true;
 } catch (Exception $e) {
