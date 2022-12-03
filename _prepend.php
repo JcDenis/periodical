@@ -14,7 +14,7 @@ if (!defined('DC_RC_PATH')) {
     return null;
 }
 
-# DB class
-Clearbricks::lib()->autoload(['periodical' => __DIR__ . '/inc/class.periodical.php']);
-# Admin list and pagers
-Clearbricks::lib()->autoload(['adminPeriodicalList' => __DIR__ . '/inc/lib.index.pager.php']);
+Clearbricks::lib()->autoload([
+    'periodical'          => __DIR__ . '/inc/class.periodical.php',
+    'adminPeriodicalList' => __DIR__ . '/inc/lib.index.pager.php',
+]);
