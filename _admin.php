@@ -240,13 +240,10 @@ class adminPeriodical
             'url'         => dcCore::app()->adminurl->get('admin.plugin.periodical'),
             'small-icon'  => dcPage::getPF('periodical/icon.svg'),
             'large-icon'  => dcPage::getPF('periodical/icon.svg'),
-            'permissions' => dcCore::app()->auth->check(
-                dcCore::app()->auth->makePermissions([
-                    dcAuth::PERMISSION_USAGE,
-                    dcAuth::PERMISSION_CONTENT_ADMIN,
-                ]),
-                dcCore::app()->blog->id
-            ),
+            'permissions' => dcCore::app()->auth->makePermissions([
+                dcAuth::PERMISSION_USAGE,
+                dcAuth::PERMISSION_CONTENT_ADMIN,
+            ]),
         ]);
     }
 
