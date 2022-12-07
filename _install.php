@@ -18,10 +18,13 @@ try {
     # Grab info
     $mod_id      = basename(__DIR__);
     $dc_min      = dcCore::app()->plugins->moduleInfo($mod_id, 'requires')[0][1];
-    $new_version = dcCore::app()->plugins->moduleInfo($mod_id, 'version');
 
     # Check installed version
-    if (version_compare(dcCore::app()->getVersion($mod_id), $new_version, '>=')) {
+    if (version_compare(
+        dcCore::app()->getVersion($mod_id),
+        dcCore::app()->plugins->moduleInfo($mod_id, 'version'),
+        '>='
+    )) {
         return null;
     }
 
@@ -64,9 +67,6 @@ try {
     $s->put('periodical_upddate', true, 'boolean', 'Update post date', false, true);
     $s->put('periodical_updurl', false, 'boolean', 'Update post url', false, true);
     $s->put('periodical_pub_order', 'post_dt asc', 'string', 'Order of publication', false, true);
-
-    # Version
-    dcCore::app()->setVersion($mod_id, $new_version);
 
     return true;
 } catch (Exception $e) {
