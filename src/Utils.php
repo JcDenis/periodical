@@ -10,32 +10,56 @@
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-if (!defined('DC_RC_PATH')) {
-    return;
-}
+declare(strict_types=1);
 
-class periodical
+namespace Dotclear\Plugin\periodical;
+
+use cursor;
+use dcAuth;
+use dcBlog;
+use dcCore;
+use dcMeta;
+use dcRecord;
+use Exception;
+use files;
+use path;
+
+/**
+ * Manage records
+ */
+class Utils
 {
-    public $con;
+    /** @var null|resource Lock update process */
+    private static $lock = null;
 
-    protected $table;
-    protected $blog;
-    private $lock = null;
-
-    public function __construct()
+    /**
+     * Get escaped blog id
+     */
+    private static function blog(): string
     {
-        $this->con   = dcCore::app()->con;
-        $this->table = dcCore::app()->con->escape(dcCore::app()->prefix . initPeriodical::PERIOD_TABLE_NAME);
-        $this->blog  = dcCore::app()->con->escape(dcCore::app()->blog->id);
+        return dcCore::app()->con->escapeStr(dcCore::app()->blog->id);
     }
 
-    public function openCursor()
+    /**
+     * Get escaped periodical full table name
+     */
+    private static function table(): string
     {
-        return $this->con->openCursor($this->table);
+        return dcCore::app()->con->escapeStr(dcCore::app()->prefix . My::TABLE_NAME);
     }
 
-    # Get periods
-    public function getPeriods($params = [], $count_only = false)
+    /**
+     * Get periodical table cursor
+     */
+    public static function openCursor(): cursor
+    {
+        return dcCore::app()->con->openCursor(dcCore::app()->prefix . My::TABLE_NAME);
+    }
+
+    /**
+     * Get periods
+     */
+    public static function getPeriods(array $params = [], bool $count_only = false): dcRecord
     {
         if ($count_only) {
             $q = 'SELECT count(T.periodical_id) ';
@@ -45,125 +69,123 @@ class periodical
             if (!empty($params['columns']) && is_array($params['columns'])) {
                 $q .= implode(', ', $params['columns']) . ', ';
             }
-            $q .= 'T.periodical_title, T.periodical_tz, ' .
+            $q .= 'T.periodical_title, ' .
             'T.periodical_curdt, T.periodical_enddt, ' .
             'T.periodical_pub_int, T.periodical_pub_nb ';
         }
 
-        $q .= 'FROM ' . $this->table . ' T ';
+        $q .= 'FROM ' . self::table() . ' T ';
 
         if (!empty($params['from'])) {
             $q .= $params['from'] . ' ';
         }
-        $q .= "WHERE T.blog_id = '" . $this->blog . "' ";
+        $q .= "WHERE T.blog_id = '" . self::blog() . "' ";
 
         if (isset($params['periodical_type'])) {
             if (is_array($params['periodical_type']) && !empty($params['periodical_type'])) {
-                $q .= 'AND T.periodical_type ' . $this->con->in($params['periodical_type']);
+                $q .= 'AND T.periodical_type ' . dcCore::app()->con->in($params['periodical_type']);
             } elseif ($params['periodical_type'] != '') {
-                $q .= "AND T.periodical_type = '" . $this->con->escape($params['periodical_type']) . "' ";
+                $q .= "AND T.periodical_type = '" . dcCore::app()->con->escapeStr($params['periodical_type']) . "' ";
             }
         } else {
             $q .= "AND T.periodical_type = 'post' ";
         }
         if (!empty($params['periodical_id'])) {
             if (is_array($params['periodical_id'])) {
-                array_walk($params['periodical_id'], create_function('&$v,$k', 'if($v!==null){$v=(integer)$v;}'));
+                array_walk($params['periodical_id'], function ($v) { if ($v !== null) { $v = (int) $v; } });
             } else {
                 $params['periodical_id'] = [(int) $params['periodical_id']];
             }
-            $q .= 'AND T.periodical_id ' . $this->con->in($params['periodical_id']);
+            $q .= 'AND T.periodical_id ' . dcCore::app()->con->in($params['periodical_id']);
         }
         if (!empty($params['periodical_title'])) {
-            $q .= "AND T.periodical_title = '" . $this->con->escape($params['periodical_title']) . "' ";
+            $q .= "AND T.periodical_title = '" . dcCore::app()->con->escapeStr($params['periodical_title']) . "' ";
         }
         if (!empty($params['sql'])) {
             $q .= $params['sql'] . ' ';
         }
         if (!$count_only) {
             if (!empty($params['order'])) {
-                $q .= 'ORDER BY ' . $this->con->escape($params['order']) . ' ';
+                $q .= 'ORDER BY ' . dcCore::app()->con->escapeStr($params['order']) . ' ';
             } else {
                 $q .= 'ORDER BY T.periodical_id ASC ';
             }
         }
         if (!$count_only && !empty($params['limit'])) {
-            $q .= $this->con->limit($params['limit']);
+            $q .= dcCore::app()->con->limit($params['limit']);
         }
-        $rs = $this->con->select($q);
-        //$rs->core = dcCore::app();
-        //$rs->periodical = $this;
 
-        return $rs;
+        return new dcRecord(dcCore::app()->con->select($q));
     }
 
-    public function addPeriod($cur)
+    /**
+     * Add a period
+     */
+    public static function addPeriod(cursor $cur): int
     {
-        $this->con->writeLock($this->table);
+        dcCore::app()->con->writeLock(self::table());
 
         try {
-            $id = $this->con->select(
-                'SELECT MAX(periodical_id) FROM ' . $this->table
+            $id = dcCore::app()->con->select(
+                'SELECT MAX(periodical_id) FROM ' . self::table()
             )->f(0) + 1;
 
-            $cur->periodical_id   = $id;
-            $cur->blog_id         = $this->blog;
-            $cur->periodical_type = 'post';
-            $cur->periodical_tz   = dcCore::app()->auth->getInfo('user_tz');
+            $cur->setField('periodical_id', $id);
+            $cur->setField('blog_id', self::blog());
+            $cur->setField('periodical_type', 'post');
             $cur->insert();
-            $this->con->unlock();
+            dcCore::app()->con->unlock();
         } catch (Exception $e) {
-            $this->con->unlock();
+            dcCore::app()->con->unlock();
 
             throw $e;
         }
 
-        return $cur->periodical_id;
+        return (int) $cur->getField('periodical_id');
     }
 
-    public function updPeriod($period_id, $cur)
+    /**
+     * Update a period
+     */
+    public static function updPeriod(int $period_id, cursor $cur): void
     {
-        $period_id = (int) $period_id;
-
-        if ($cur->periodical_tz == ''
-        && ($cur->periodical_curdt != '' || $cur->periodical_enddt != '')) {
-            $cur->periodical_tz = dcCore::app()->auth->getInfo('user_tz');
-        }
         $cur->update(
-            "WHERE blog_id = '" . $this->blog . "' " .
+            "WHERE blog_id = '" . self::blog() . "' " .
             'AND periodical_id = ' . $period_id . ' '
         );
     }
 
-    # Delete a period
-    public function delPeriod($period_id)
+    /**
+     * Delete a period
+     */
+    public static function delPeriod(int $period_id): void
     {
-        $period_id = (int) $period_id;
-
         $params                  = [];
         $params['periodical_id'] = $period_id;
         $params['post_status']   = '';
-        $rs                      = $this->getPosts($params);
+        $rs                      = self::getPosts($params);
 
         if (!$rs->isEmpty()) {
             throw new Exception('Periodical is not empty');
         }
 
-        $this->con->execute(
-            'DELETE FROM ' . $this->table . ' ' .
-            "WHERE blog_id = '" . $this->blog . "' " .
+        dcCore::app()->con->execute(
+            'DELETE FROM ' . self::table() . ' ' .
+            "WHERE blog_id = '" . self::blog() . "' " .
             'AND periodical_id = ' . $period_id . ' '
         );
     }
 
-    # Remove all posts related to a period
-    public function delPeriodPosts($period_id)
+    /**
+     * Remove all posts related to a period
+     */
+    public static function delPeriodPosts(int $period_id): void
     {
         $params                  = [];
         $params['post_status']   = '';
-        $params['periodical_id'] = (int) $period_id;
+        $params['periodical_id'] = $period_id;
 
-        $rs = $this->getPosts($params);
+        $rs = self::getPosts($params);
 
         if ($rs->isEmpty()) {
             return;
@@ -171,22 +193,24 @@ class periodical
 
         $ids = [];
         while ($rs->fetch()) {
-            $ids[] = $rs->post_id;
+            $ids[] = $rs->f('post_id');
         }
 
         if (empty($ids)) {
             return;
         }
 
-        $this->con->execute(
+        dcCore::app()->con->execute(
             'DELETE FROM ' . dcCore::app()->prefix . dcMeta::META_TABLE_NAME . ' ' .
-            "WHERE meta_type = 'periodical' " .
-            'AND post_id ' . $this->con->in($ids)
+            "WHERE meta_type = '" . My::META_TYPE . "' " .
+            'AND post_id ' . dcCore::app()->con->in($ids)
         );
     }
 
-    # Get posts related to periods
-    public function getPosts($params = [], $count_only = false)
+    /**
+     * Get posts related to periods
+     */
+    public static function getPosts(array $params = [], bool $count_only = false): dcRecord
     {
         if (!isset($params['columns'])) {
             $params['columns'] = [];
@@ -204,25 +228,28 @@ class periodical
         $params['columns'][] = 'T.periodical_id';
         $params['columns'][] = 'T.periodical_title';
         $params['columns'][] = 'T.periodical_type';
-        $params['columns'][] = 'T.periodical_tz';
         $params['columns'][] = 'T.periodical_curdt';
         $params['columns'][] = 'T.periodical_enddt';
         $params['columns'][] = 'T.periodical_pub_int';
         $params['columns'][] = 'T.periodical_pub_nb';
 
         $params['join'] .= 'LEFT JOIN ' . dcCore::app()->prefix . dcMeta::META_TABLE_NAME . ' R ON P.post_id = R.post_id ';
-        $params['join'] .= 'LEFT JOIN ' . $this->table . ' T ON CAST(T.periodical_id as char) = CAST(R.meta_id as char) ';
+        $params['join'] .= 'LEFT JOIN ' . self::table() . ' T ON CAST(T.periodical_id as char) = CAST(R.meta_id as char) ';
 
-        $params['sql'] .= "AND R.meta_type = 'periodical' ";
+        $params['sql'] .= "AND R.meta_type = '" . My::META_TYPE . "' ";
         $params['sql'] .= "AND T.periodical_type = 'post' ";
 
         if (!empty($params['periodical_id'])) {
             if (is_array($params['periodical_id'])) {
-                array_walk($params['periodical_id'], function ($v) { if ($v !== null) { $v = (int) $v; } });
+                array_walk($params['periodical_id'], function ($v) {
+                    if ($v !== null) {
+                        $v = (int) $v;
+                    }
+                });
             } else {
                 $params['periodical_id'] = [(int) $params['periodical_id']];
             }
-            $params['sql'] .= 'AND T.periodical_id ' . $this->con->in($params['periodical_id']);
+            $params['sql'] .= 'AND T.periodical_id ' . dcCore::app()->con->in($params['periodical_id']);
             unset($params['periodical_id']);
         }
         if (dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([dcAuth::PERMISSION_ADMIN]), dcCore::app()->blog->id)) {
@@ -233,67 +260,63 @@ class periodical
                 unset($params['post_status']);
             }
         } else {
-            $params['sql'] .= 'AND P.post_status = -2 ';
+            $params['sql'] .= 'AND P.post_status = ' . dcBlog::POST_PENDING . ' ';
         }
 
-        $rs             = dcCore::app()->blog->getPosts($params, $count_only);
-        $rs->periodical = $this;
-
-        return $rs;
+        return dcCore::app()->blog->getPosts($params, $count_only);
     }
 
-    # Add post to periodical
-    public function addPost($period_id, $post_id)
+    /**
+     * Add post to a period
+     */
+    public static function addPost(int $period_id, int $post_id): void
     {
-        $period_id = (int) $period_id;
-        $post_id   = (int) $post_id;
-
         # Check if exists
-        $rs = $this->getPosts(['post_id' => $post_id, 'periodical_id' => $period_id]);
+        $rs = self::getPosts(['post_id' => $post_id, 'periodical_id' => $period_id]);
         if (!$rs->isEmpty()) {
             return;
         }
 
-        $cur = $this->con->openCursor(dcCore::app()->prefix . dcMeta::META_TABLE_NAME);
-        $this->con->writeLock(dcCore::app()->prefix . dcMeta::META_TABLE_NAME);
+        $cur = dcCore::app()->con->openCursor(dcCore::app()->prefix . dcMeta::META_TABLE_NAME);
+        dcCore::app()->con->writeLock(dcCore::app()->prefix . dcMeta::META_TABLE_NAME);
 
         try {
-            $cur->post_id   = $post_id;
-            $cur->meta_id   = $period_id;
-            $cur->meta_type = 'periodical';
+            $cur->setField('post_id', $post_id);
+            $cur->setField('meta_id', $period_id);
+            $cur->setField('meta_type', My::META_TYPE);
             $cur->insert();
-            $this->con->unlock();
+            dcCore::app()->con->unlock();
         } catch (Exception $e) {
-            $this->con->unlock();
+            dcCore::app()->con->unlock();
 
             throw $e;
         }
     }
 
-    # Delete post from periodical
-    public function delPost($post_id)
+    /**
+     * Remove a post from periods
+     */
+    public static function delPost(int $post_id): void
     {
-        $post_id = (int) $post_id;
-
-        $this->con->execute(
+        dcCore::app()->con->execute(
             'DELETE FROM ' . dcCore::app()->prefix . dcMeta::META_TABLE_NAME . ' ' .
-            "WHERE meta_type = 'periodical' " .
+            "WHERE meta_type = '" . My::META_TYPE . "' " .
             "AND post_id = '" . $post_id . "' "
         );
-
-        return true;
     }
 
-    # Remove all posts without pending status from periodical
-    public function cleanPosts($period_id = null)
+    /**
+     * Remove all posts without pending status from periodical
+     */
+    public static function cleanPosts(?int $period_id = null): void
     {
         $params                = [];
         $params['post_status'] = '';
-        $params['sql']         = 'AND post_status != -2 ';
+        $params['sql']         = 'AND post_status != ' . dcBlog::POST_PENDING . ' ';
         if ($period_id !== null) {
-            $params['periodical_id'] = (int) $period_id;
+            $params['periodical_id'] = $period_id;
         }
-        $rs = $this->getPosts($params);
+        $rs = self::getPosts($params);
 
         if ($rs->isEmpty()) {
             return;
@@ -301,74 +324,24 @@ class periodical
 
         $ids = [];
         while ($rs->fetch()) {
-            $ids[] = $rs->post_id;
+            $ids[] = (int) $rs->f('post_id');
         }
 
         if (empty($ids)) {
             return;
         }
 
-        $this->con->execute(
+        dcCore::app()->con->execute(
             'DELETE FROM ' . dcCore::app()->prefix . dcMeta::META_TABLE_NAME . ' ' .
-            "WHERE meta_type = 'periodical' " .
-            'AND post_id ' . $this->con->in($ids)
+            "WHERE meta_type = '" . My::META_TYPE . "' " .
+            'AND post_id ' . dcCore::app()->con->in($ids)
         );
     }
 
-    public static function getTimesCombo()
-    {
-        return [
-            __('Hourly')      => 'hour',
-            __('twice a day') => 'halfday',
-            __('Daily')       => 'day',
-            __('Weekly')      => 'week',
-            __('Monthly')     => 'month',
-        ];
-    }
-
-    public static function getNextTime($ts, $period)
-    {
-        $ts = (int) $ts;
-        $e  = explode(',', date('H,i,s,n,j,Y', $ts));
-        switch($period) {
-            case 'hour':
-                $new_ts = mktime($e[0] + 1, $e[1], $e[2], $e[3], $e[4], $e[5]);
-
-                break;
-
-            case 'halfday':
-                $new_ts = mktime($e[0] + 12, $e[1], $e[2], $e[3], $e[4], $e[5]);
-
-                break;
-
-            case 'day':
-                $new_ts = mktime($e[0], $e[1], $e[2], $e[3], $e[4] + 1, $e[5]);
-
-                break;
-
-            case 'week':
-                $new_ts = mktime($e[0], $e[1], $e[2], $e[3], $e[4] + 7, $e[5]);
-
-                break;
-
-            case 'month':
-                $new_ts = mktime($e[0], $e[1], $e[2], $e[3] + 1, $e[4], $e[5]);
-
-                break;
-
-            default:
-                $new_ts = 0;
-
-                throw new Exception(__('Unknow frequence'));
-
-                break;
-        }
-
-        return $new_ts;
-    }
-
-    # Lock a file to see if an update is ongoing
-    public function lockUpdate()
+    /**
+     * Lock a file to see if an update is ongoing
+     */
+    public static function lockUpdate(): bool
     {
         try {
             # Need flock function
@@ -380,7 +353,7 @@ class periodical
                 throw new Exception("Can't write in cache fodler");
             }
             # Set file path
-            $f_md5       = md5($this->blog);
+            $f_md5       = md5(self::blog());
             $cached_file = sprintf(
                 '%s/%s/%s/%s/%s.txt',
                 DC_TPL_CACHE,
@@ -391,6 +364,9 @@ class periodical
             );
             # Real path
             $cached_file = path::real($cached_file, false);
+            if (is_bool($cached_file)) {
+                throw new Exception("Can't write in cache fodler");
+            }
             # Make dir
             if (!is_dir(dirname($cached_file))) {
                 files::makeDir(dirname($cached_file), true);
@@ -412,19 +388,20 @@ class periodical
             if (!flock($fp, LOCK_EX)) {
                 throw new Exception("Can't lock file");
             }
-            $this->lock = $fp;
+            self::$lock = $fp;
 
             return true;
         } catch (Exception $e) {
             throw $e;
         }
-
-        return false;
     }
 
-    public function unlockUpdate()
+    /**
+     * Unlock update process
+     */
+    public static function unlockUpdate(): void
     {
-        @fclose($this->lock);
-        $this->lock = null;
+        @fclose(self::$lock);
+        self::$lock = null;
     }
 }

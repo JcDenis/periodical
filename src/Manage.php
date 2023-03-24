@@ -10,123 +10,172 @@
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-if (!defined('DC_CONTEXT_ADMIN')) {
-    return null;
-}
+declare(strict_types=1);
 
-dcPage::check(dcCore::app()->auth->makePermissions([dcAuth::PERMISSION_USAGE, dcAuth::PERMISSION_CONTENT_ADMIN]));
+namespace Dotclear\Plugin\periodical;
 
-# Objects
-$per = new periodical();
+use adminGenericFilter;
+use dcAuth;
+use dcCore;
+use dcNsProcess;
+use dcPage;
+use Exception;
+use form;
+use http;
 
-# Default values
-$action = $_POST['action'] ?? '';
+/**
+ * Admin page for periods
+ */
+class Manage extends dcNsProcess
+{
+    public static function init(): bool
+    {
+        static::$init == defined('DC_CONTEXT_ADMIN')
+            && My::phpCompliant()
+            && dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
+                dcAuth::PERMISSION_USAGE,
+                dcAuth::PERMISSION_CONTENT_ADMIN,
+            ]), dcCore::app()->blog->id);
 
-# Delete periods and related posts links
-if ($action == 'deleteperiods' && !empty($_POST['periods'])) {
-    try {
-        foreach ($_POST['periods'] as $id) {
-            $id = (int) $id;
-            $per->delPeriodPosts($id);
-            $per->delPeriod($id);
+        // call period manage page
+        if (($_REQUEST['part'] ?? 'periods') === 'period') {
+            static::$init = ManagePeriod::init();
         }
 
-        dcAdminNotices::addSuccessNotice(
-            __('Periods removed.')
+        return static::$init;
+    }
+
+    public static function process(): bool
+    {
+        if (!static::$init) {
+            return false;
+        }
+
+        if (($_REQUEST['part'] ?? 'periods') === 'period') {
+            return ManagePeriod::process();
+        }
+
+        # Default values
+        $vars = ManageVars::init();
+
+        # Delete periods and related posts links
+        if ($vars->action == 'deleteperiods' && !empty($vars->periods)) {
+            try {
+                foreach ($vars->periods as $id) {
+                    Utils::delPeriodPosts($id);
+                    Utils::delPeriod($id);
+                }
+
+                dcPage::addSuccessNotice(
+                    __('Periods removed.')
+                );
+
+                if (!empty($vars->redir)) {
+                    http::redirect($vars->redir);
+                } else {
+                    dcCore::app()->adminurl->redirect('admin.plugin.' . My::id(), ['part' => 'periods']);
+                }
+            } catch (Exception $e) {
+                dcCore::app()->error->add($e->getMessage());
+            }
+        }
+
+        # Delete periods related posts links (without delete periods)
+        if ($vars->action == 'emptyperiods' && !empty($vars->periods)) {
+            try {
+                foreach ($vars->periods as $id) {
+                    Utils::delPeriodPosts($id);
+                }
+
+                dcPage::addSuccessNotice(
+                    __('Periods emptied.')
+                );
+
+                if (!empty($vars->redir)) {
+                    http::redirect($vars->redir);
+                } else {
+                    dcCore::app()->adminurl->redirect('admin.plugin.' . My::id(), ['part' => 'periods']);
+                }
+            } catch (Exception $e) {
+                dcCore::app()->error->add($e->getMessage());
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Renders the page.
+     */
+    public static function render(): void
+    {
+        if (!static::$init) {
+            return;
+        }
+
+        if (($_REQUEST['part'] ?? 'periods') === 'period') {
+            ManagePeriod::render();
+
+            return;
+        }
+
+        # Filters
+        $p_filter = new adminGenericFilter(dcCore::app(), My::id());
+        $p_filter->add('part', 'periods');
+
+        $params = $p_filter->params();
+
+        # Get periods
+        try {
+            $periods     = Utils::getPeriods($params);
+            $counter     = Utils::getPeriods($params, true);
+            $period_list = new ManageList(dcCore::app(), $periods, $counter->f(0));
+        } catch (Exception $e) {
+            dcCore::app()->error->add($e->getMessage());
+        }
+
+        # Display
+        dcPage::openModule(
+            My::name(),
+            dcPage::jsModuleLoad(My::id() . '/js/checkbox.js') .
+            $p_filter->js(dcCore::app()->adminurl->get('admin.plugin.' . My::id(), ['part' => 'periods']))
         );
 
-        if (!empty($_POST['redir'])) {
-            http::redirect($_POST['redir']);
-        } else {
-            dcCore::app()->adminurl->redirect('admin.plugin.periodical', ['part' => 'periods']);
+        echo dcPage::breadcrumb([
+            __('Plugins') => '',
+            My::name()    => '',
+        ]) .
+        dcPage::notices() .
+
+        '<p class="top-add">
+        <a class="button add" href="' . dcCore::app()->admin->getPageURL() . '&amp;part=period">' . __('New period') . '</a>
+        </p>';
+
+        if (isset($period_list)) {
+            # Filters
+            $p_filter->display('admin.plugin.' . My::id(), form::hidden('p', My::id()) . form::hidden('part', 'periods'));
+
+            # Periods list
+            $period_list->periodDisplay(
+                $p_filter,
+                '<form action="' . dcCore::app()->admin->getPageURL() . '" method="post" id="form-periods">' .
+
+                '%s' .
+
+                '<div class="two-cols">' .
+                '<p class="col checkboxes-helpers"></p>' .
+
+                '<p class="col right">' . __('Selected periods action:') . ' ' .
+                form::combo('action', My::periodsActionCombo()) .
+                '<input type="submit" value="' . __('ok') . '" /></p>' .
+                dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.' . My::id(), array_merge(['p' => My::id()], $p_filter->values(true))) .
+                dcCore::app()->formNonce() .
+                '</div>' .
+                '</form>'
+            );
         }
-    } catch (Exception $e) {
-        dcCore::app()->error->add($e->getMessage());
+        dcPage::helpBlock('periodical');
+
+        dcPage::closeModule();
     }
 }
-# Delete periods related posts links (without delete periods)
-if ($action == 'emptyperiods' && !empty($_POST['periods'])) {
-    try {
-        foreach ($_POST['periods'] as $id) {
-            $id = (int) $id;
-            $per->delPeriodPosts($id);
-        }
-
-        dcAdminNotices::addSuccessNotice(
-            __('Periods emptied.')
-        );
-
-        if (!empty($_POST['redir'])) {
-            http::redirect($_POST['redir']);
-        } else {
-            dcCore::app()->adminurl->redirect('admin.plugin.periodical', ['part' => 'periods']);
-        }
-    } catch (Exception $e) {
-        dcCore::app()->error->add($e->getMessage());
-    }
-}
-
-$combo_action = [
-    __('empty periods')  => 'emptyperiods',
-    __('delete periods') => 'deleteperiods',
-];
-
-# Filters
-$p_filter = new adminGenericFilter(dcCore::app(), 'periodical');
-$p_filter->add('part', 'periods');
-
-$params = $p_filter->params();
-
-# Get periods
-try {
-    $periods     = $per->getPeriods($params);
-    $counter     = $per->getPeriods($params, true);
-    $period_list = new adminPeriodicalList(dcCore::app(), $periods, $counter->f(0));
-} catch (Exception $e) {
-    dcCore::app()->error->add($e->getMessage());
-}
-
-# Display
-echo
-'<html><head><title>' . __('Periodical') . '</title>' .
-dcPage::jsLoad(dcPage::getPF('periodical/js/checkbox.js')) .
-$p_filter->js(dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'periods'])) .
-'</head>' .
-'<body>' .
-
-dcPage::breadcrumb([
-    __('Plugins')    => '',
-    __('Periodical') => '',
-]) .
-dcPage::notices() .
-
-'<p class="top-add">
-<a class="button add" href="' . dcCore::app()->admin->getPageURL() . '&amp;part=period">' . __('New period') . '</a>
-</p>';
-
-if (isset($period_list)) {
-    # Filters
-    $p_filter->display('admin.plugin.periodical', form::hidden('p', 'periodical') . form::hidden('part', 'periods'));
-
-    # Periods list
-    $period_list->periodDisplay(
-        $p_filter,
-        '<form action="' . dcCore::app()->admin->getPageURL() . '" method="post" id="form-periods">' .
-
-        '%s' .
-
-        '<div class="two-cols">' .
-        '<p class="col checkboxes-helpers"></p>' .
-
-        '<p class="col right">' . __('Selected periods action:') . ' ' .
-        form::combo('action', $combo_action) .
-        '<input type="submit" value="' . __('ok') . '" /></p>' .
-        dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.periodical', array_merge(['p' => 'periodical'], $p_filter->values(true))) .
-        dcCore::app()->formNonce() .
-        '</div>' .
-        '</form>'
-    );
-}
-dcPage::helpBlock('periodical');
-
-echo '</body></html>';

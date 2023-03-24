@@ -10,51 +10,64 @@
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-if (!defined('DC_CONTEXT_ADMIN')) {
-    return null;
-}
+declare(strict_types=1);
 
-try {
-    # Check installed version
-    if (!dcCore::app()->newVersion(
-        basename(__DIR__), 
-        dcCore::app()->plugins->moduleInfo(basename(__DIR__), 'version')
-    )) {
-        return null;
+namespace Dotclear\Plugin\periodical;
+
+use dbStruct;
+use dcCore;
+use dcNsProcess;
+use Exception;
+
+class Install extends dcNsProcess
+{
+    public static function init(): bool
+    {
+        static::$init = defined('DC_CONTEXT_ADMIN')
+            && My::phpCompliant()
+            && dcCore::app()->newVersion(My::id(), dcCore::app()->plugins->moduleInfo(My::id(), 'version'));
+
+        return static::$init;
     }
 
-    # Tables
-    $t = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
+    public static function process(): bool
+    {
+        if (!static::$init) {
+            return false;
+        }
 
-    # Table principale des sondages
-    $t->{initPeriodical::PERIOD_TABLE_NAME}
-        ->periodical_id('bigint', 0, false)
-        ->blog_id('varchar', 32, false)
-        ->periodical_type('varchar', 32, false, "'post'")
-        ->periodical_title('varchar', 255, false, "''")
-        ->periodical_tz('varchar', 128, false, "'UTC'")
-        ->periodical_curdt('timestamp', 0, false, ' now()')
-        ->periodical_enddt('timestamp', 0, false, 'now()')
-        ->periodical_pub_int('varchar', 32, false, "'day'")
-        ->periodical_pub_nb('smallint', 0, false, 1)
+        try {
+            # Tables
+            $t = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
 
-        ->primary('pk_periodical', 'periodical_id')
-        ->index('idx_periodical_type', 'btree', 'periodical_type');
+            # Table principale des sondages
+            $t->{My::TABLE_NAME} // @phpstan-ignore-line
+                ->periodical_id('bigint', 0, false)
+                ->blog_id('varchar', 32, false)
+                ->periodical_type('varchar', 32, false, "'post'")
+                ->periodical_title('varchar', 255, false, "''")
+                ->periodical_curdt('timestamp', 0, false, ' now()')
+                ->periodical_enddt('timestamp', 0, false, 'now()')
+                ->periodical_pub_int('varchar', 32, false, "'day'")
+                ->periodical_pub_nb('smallint', 0, false, 1)
 
-    $ti      = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
-    $changes = $ti->synchronize($t);
+                ->primary('pk_periodical', 'periodical_id')
+                ->index('idx_periodical_type', 'btree', 'periodical_type');
 
-    # Settings
-    dcCore::app()->blog->settings->addNamespace(basename(__DIR__));
-    $s = dcCore::app()->blog->settings->__get(basename(__DIR__));
-    $s->put('periodical_active', false, 'boolean', 'Enable extension', false, true);
-    $s->put('periodical_upddate', true, 'boolean', 'Update post date', false, true);
-    $s->put('periodical_updurl', false, 'boolean', 'Update post url', false, true);
-    $s->put('periodical_pub_order', 'post_dt asc', 'string', 'Order of publication', false, true);
+            (new dbStruct(dcCore::app()->con, dcCore::app()->prefix))->synchronize($t);
 
-    return true;
-} catch (Exception $e) {
-    dcCore::app()->error->add($e->getMessage());
+            # Settings
+            $s = dcCore::app()->blog->settings->get(My::id());
+            $s->put('periodical_active', false, 'boolean', 'Enable extension', false, true);
+            $s->put('periodical_upddate', true, 'boolean', 'Update post date', false, true);
+            $s->put('periodical_updurl', false, 'boolean', 'Update post url', false, true);
+            $s->put('periodical_pub_order', 'post_dt asc', 'string', 'Order of publication', false, true);
+
+            return true;
+        } catch (Exception $e) {
+            dcCore::app()->error->add($e->getMessage());
+
+            return false;
+        }
+    }
 }
-
-return false;
