@@ -1,3 +1,12 @@
+2023.03.24
+- require Dotclear 2.26
+- require PHP 8.1
+- use namespace
+- use readonly vars on admin pages
+- use DateTime for user timezone
+- remove periodical timezone
+- fix post timezone
+
 2022.11.20
 - fix compatibility with Dotclear 2.24 (required)
 
