@@ -23,9 +23,19 @@ use dcPage;
 use dcPostsActions;
 use dcRecord;
 use dcSettings;
+use Dotclear\Helper\Html\Form\{
+    Checkbox,
+    Div,
+    Form,
+    Hidden,
+    Label,
+    Para,
+    Select,
+    Submit,
+    Text
+};
+use Dotclear\Helper\Html\Html;
 use Exception;
-use form;
-use html;
 
 /**
  * @ingroup DC_PLUGIN_PERIODICAL
@@ -46,24 +56,28 @@ class BackendBehaviors
         $s = $blog_settings->get('periodical');
 
         echo
-        '<div class="fieldset"><h4 id="periodical_params">' . __('Periodical') . '</h4>' .
-        '<div class="two-cols">' .
-        '<div class="col">' .
-        '<p><label class="classic" for="periodical_active">' .
-        form::checkbox('periodical_active', 1, (bool) $s->get('periodical_active')) .
-        __('Enable periodical on this blog') . '</label></p>' .
-        '</div>' .
-        '<div class="col">' .
-        '<p><label for="periodical_upddate">' .
-        form::checkbox('periodical_upddate', 1, (bool) $s->get('periodical_upddate')) .
-        __('Update post date when publishing it') . '</label></p>' .
-        '<p><label for="periodical_updurl">' .
-        form::checkbox('periodical_updurl', 1, (bool) $s->get('periodical_updurl')) .
-        __('Update post url when publishing it') . '</label></p>' .
-        '</div>' .
-        '</div>' .
-        '<br class="clear" />' .
-        '</div>';
+        (new Div())->class('fieldset')->items([
+            (new Text('h4', __('Periodical')))->id('periodical_params'),
+            (new Div())->class('two-cols')->items([
+                (new Div())->class('col')->items([
+                    (new Para())->items([
+                        (new Checkbox('periodical_active', (bool) $s->get('periodical_active')))->value(1),
+                        (new Label(__('Enable periodical on this blog'), Label::OUTSIDE_LABEL_AFTER))->for('periodical_active')->class('classic'),
+                    ]),
+                ]),
+                (new Div())->class('col')->items([
+                    (new Para())->items([
+                        (new Checkbox('periodical_upddate', (bool) $s->get('periodical_upddate')))->value(1),
+                        (new Label(__('Update post date when publishing it'), Label::OUTSIDE_LABEL_AFTER))->for('periodical_upddate')->class('classic'),
+                    ]),
+                    (new Para())->items([
+                        (new Checkbox('periodical_updurl', (bool) $s->get('periodical_updurl')))->value(1),
+                        (new Label(__('Update post url when publishing it'), Label::OUTSIDE_LABEL_AFTER))->for('periodical_updurl')->class('classic'),
+                    ]),
+                ]),
+            ]),
+            (new Text('br'))->class('clear'),
+        ])->render();
     }
 
     /**
@@ -145,7 +159,7 @@ class BackendBehaviors
             $name = '-';
         } else {
             $url  = dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $r->f('periodical_id')]);
-            $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . html::escapeHTML($r->f('periodical_title')) . '</a>';
+            $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($r->f('periodical_title')) . '</a>';
         }
         $cols['period'] = '<td class="nowrap">' . $name . '</td>';
     }
@@ -274,24 +288,25 @@ class BackendBehaviors
         else {
             $pa->beginPage(
                 dcPage::breadcrumb([
-                    html::escapeHTML(dcCore::app()->blog->name) => '',
+                    Html::escapeHTML(dcCore::app()->blog->name) => '',
                     $pa->getCallerTitle()                       => $pa->getRedirection(true),
                     __('Add a period to this selection')        => '',
                 ])
             );
 
             echo
-            '<form action="' . $pa->getURI() . '" method="post">' .
-            $pa->getCheckboxes() .
-
-            self::formPeriod() .
-
-            '<p>' .
-            dcCore::app()->formNonce() .
-            $pa->getHiddenFields() .
-            form::hidden(['action'], 'periodical_add') .
-            '<input type="submit" value="' . __('Save') . '" /></p>' .
-            '</form>';
+            (new Form('periodicaladd'))->method('post')->action($pa->getURI())->fields([
+                (new Text('', $pa->getCheckboxes())),
+                self::formPeriod(0),
+                (new Para())->items(array_merge(
+                    [
+                        dcCore::app()->formNonce(false),
+                        (new Hidden(['action'], 'periodical_add')),
+                        (new Submit(['do']))->value(__('Save')),
+                    ],
+                    $pa->hiddenFields()
+                )),
+            ])->render();
 
             $pa->endPage();
         }
@@ -314,7 +329,7 @@ class BackendBehaviors
         }
 
         # Set linked period form items
-        $sidebar_items['options-box']['items']['period'] = self::formPeriod((int) $period);
+        $sidebar_items['options-box']['items']['period'] = (string) self::formPeriod((int) $period)?->render();
     }
 
     /**
@@ -340,21 +355,16 @@ class BackendBehaviors
      * Posts period form field
      *
      * @param  int      $period Period
-     * @return string           Period form content
+     * @return null|Para     Period form object
      */
-    private static function formPeriod(int $period = 0): string
+    private static function formPeriod(int $period = 0): ?Para
     {
         $combo = self::comboPeriod();
 
-        if (empty($combo)) {
-            return '';
-        }
-
-        return
-        '<p><label for="periodical">' .
-        __('Periodical') . '</label>' .
-        form::combo('periodical', $combo, $period) .
-        '</p>';
+        return empty($combo) ? null : (new Para())->items([
+            (new Label(__('Period:')))->for('periodical'),
+            (new Select('periodical'))->default((string) $period)->items($combo),
+        ]);
     }
 
     /**
@@ -370,7 +380,7 @@ class BackendBehaviors
             if (!$periods->isEmpty()) {
                 $combo = ['-' => ''];
                 while ($periods->fetch()) {
-                    $combo[html::escapeHTML($periods->f('periodical_title'))] = $periods->f('periodical_id');
+                    $combo[Html::escapeHTML($periods->f('periodical_title'))] = $periods->f('periodical_id');
                 }
                 self::$combo_period = $combo;
             }

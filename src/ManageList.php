@@ -22,9 +22,9 @@ use dcAuth;
 use dcBlog;
 use dcCore;
 use dcPager;
+use Dotclear\Helper\Html\Form\Checkbox;
+use Dotclear\Helper\Html\Html;
 use dt;
-use html;
-use form;
 
 /**
  * @ingroup DC_PLUGIN_PERIODICAL
@@ -90,7 +90,7 @@ class ManageList extends adminGenericList
         $nb_posts = Utils::getPosts(['periodical_id' => $this->rs->f('periodical_id')], true)->f(0);
         $url      = dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $this->rs->f('periodical_id')]);
 
-        $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . html::escapeHTML($this->rs->periodical_title) . '</a>';
+        $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($this->rs->periodical_title) . '</a>';
 
         $posts = $nb_posts ?
             '<a href="' . $url . '#posts" title="' . __('view related entries') . '">' . $nb_posts . '</a>' :
@@ -100,7 +100,7 @@ class ManageList extends adminGenericList
             __((string) array_search($this->rs->f('periodical_pub_int'), My::periodCombo())) : __('Unknow frequence');
 
         $cols = new ArrayObject([
-            'check'   => '<td class="nowrap">' . form::checkbox(['periods[]'], $this->rs->f('periodical_id'), ['checked' => $checked]) . '</td>',
+            'check'   => '<td class="nowrap">' . (new Checkbox(['periods[]'], $checked))->value($this->rs->f('periodical_id'))->render() . '</td>',
             'name'    => '<td class="maximal">' . $name . '</td>',
             'curdt'   => '<td class="nowrap count">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_curdt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
             'pub_int' => '<td class="nowrap">' . $interval . '</td>',
@@ -191,7 +191,7 @@ class ManageList extends adminGenericList
             $cat_title = sprintf(
                 $cat_link,
                 $this->rs->f('cat_id'),
-                html::escapeHTML($this->rs->f('cat_title'))
+                Html::escapeHTML($this->rs->f('cat_title'))
             );
         } else {
             $cat_title = __('None');
@@ -239,9 +239,9 @@ class ManageList extends adminGenericList
         }
 
         $cols = [
-            'check' => '<td class="minimal">' . form::checkbox(['periodical_entries[]'], $this->rs->f('post_id'), ['checked' => $checked]) . '</td>',
+            'check' => '<td class="minimal">' . (new Checkbox(['periodical_entries[]'], $checked))->value($this->rs->f('post_id'))->render() . '</td>',
             'title' => '<td class="maximal"><a href="' . dcCore::app()->getPostAdminURL($this->rs->f('post_type'), $this->rs->f('post_id')) . '" ' .
-                'title="' . html::escapeHTML($this->rs->getURL()) . '">' . html::escapeHTML($this->rs->post_title) . '</a></td>',
+                'title="' . Html::escapeHTML($this->rs->getURL()) . '">' . Html::escapeHTML($this->rs->post_title) . '</a></td>',
             'date'     => '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('post_dt')) . '</td>',
             'category' => '<td class="nowrap">' . $cat_title . '</td>',
             'author'   => '<td class="nowrap">' . $this->rs->f('user_id') . '</td>',

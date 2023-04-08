@@ -20,9 +20,9 @@ use dcBlog;
 use dcCore;
 use dcMeta;
 use dcRecord;
+use Dotclear\Helper\File\Files;
+use Dotclear\Helper\File\Path;
 use Exception;
-use files;
-use path;
 
 /**
  * Manage records
@@ -363,13 +363,13 @@ class Utils
                 $f_md5
             );
             # Real path
-            $cached_file = path::real($cached_file, false);
+            $cached_file = Path::real($cached_file, false);
             if (is_bool($cached_file)) {
                 throw new Exception("Can't write in cache fodler");
             }
             # Make dir
             if (!is_dir(dirname($cached_file))) {
-                files::makeDir(dirname($cached_file), true);
+                Files::makeDir(dirname($cached_file), true);
             }
             # Make file
             if (!file_exists($cached_file)) {

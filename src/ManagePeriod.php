@@ -19,10 +19,22 @@ use dcAuth;
 use dcCore;
 use dcNsProcess;
 use dcPage;
+use Dotclear\Helper\Html\Form\{
+    Datetime,
+    Div,
+    Form,
+    Hidden,
+    Input,
+    Label,
+    Number,
+    Para,
+    Select,
+    Submit,
+    Text
+};
+use Dotclear\Helper\Html\Html;
+use Dotclear\Helper\Network\Http;
 use Exception;
-use form;
-use html;
-use http;
 
 /**
  * Admin page for a period
@@ -205,47 +217,46 @@ class ManagePeriod extends dcNsProcess
         dcPage::notices();
 
         # Period form
-        echo '
-        <div id="period"><h3>' . (null === $vars->period_id ? __('New period') : __('Edit period')) . '</h3>
-        <form method="post" action="' . dcCore::app()->admin->getPageURL() . '">
+        echo
+        (new Div('period'))->items([
+            (new Text('h3', null === $vars->period_id ? __('New period') : __('Edit period'))),
+            (new Form('periodicalbhv'))->method('post')->action(dcCore::app()->admin->getPageURL())->fields([
+                (new Para())->items([
+                    (new Label(__('Title:')))->for('period_title'),
+                    (new Input('period_title'))->size(65)->maxlenght(255)->class('maximal')->value(Html::escapeHTML($vars->period_title)),
+                ]),
+                (new Div())->class('two-boxes')->items([
+                    (new Para())->items([
+                        (new Label(__('Next update:')))->for('period_curdt'),
+                        (new Datetime('period_curdt', Html::escapeHTML(Dater::toUser($vars->period_curdt))))->class($vars->bad_period_curdt ? 'invalid' : ''),
+                    ]),
+                    (new Para())->items([
+                        (new Label(__('End date:')))->for('period_enddt'),
+                        (new Datetime('period_enddt', Html::escapeHTML(Dater::toUser($vars->period_enddt))))->class($vars->bad_period_enddt ? 'invalid' : ''),
+                    ]),
+                ]),
+                (new Div())->class('two-boxes')->items([
+                    (new Para())->items([
+                        (new Label(__('Publication frequency:'), Label::OUTSIDE_LABEL_BEFORE))->for('period_pub_int'),
+                        (new Select('period_pub_int'))->default($vars->period_pub_int)->items(My::periodCombo()),
+                    ]),
+                    (new Para())->items([
+                        (new Label(__('Number of entries to publish every time:'), Label::OUTSIDE_LABEL_BEFORE))->for('period_pub_nb'),
+                        (new Number('period_pub_nb'))->min(1)->max(20)->value($vars->period_pub_nb),
+                    ]),
+                ]),
 
-        <p><label for="period_title">' . __('Title:') . '</label>' .
-                form::field('period_title', 60, 255, html::escapeHTML($vars->period_title), 'maximal') . '</p>
-
-        <div class="two-boxes">
-
-        <p><label for="period_curdt">' . __('Next update:') . '</label>' .
-                form::datetime('period_curdt', [
-                    'default' => html::escapeHTML(Dater::toUser($vars->period_curdt)),
-                    'class'   => ($vars->bad_period_curdt ? 'invalid' : ''),
-                ]) . '</p>
-
-        <p><label for="period_enddt">' . __('End date:') . '</label>' .
-                form::datetime('period_enddt', [
-                    'default' => html::escapeHTML(Dater::toUser($vars->period_enddt)),
-                    'class'   => ($vars->bad_period_enddt ? 'invalid' : ''),
-                ]) . '</p>
-
-        </div><div class="two-boxes">
-
-        <p><label for="period_pub_int">' . __('Publication frequency:') . '</label>' .
-                form::combo('period_pub_int', My::periodCombo(), $vars->period_pub_int) . '</p>
-
-        <p><label for="period_pub_nb">' . __('Number of entries to publish every time:') . '</label>' .
-                form::number('period_pub_nb', ['min' => 1, 'max' => 20, 'default' => $vars->period_pub_nb]) . '</p>
-
-        </div>
-
-        <div class="clear">
-        <p><input type="submit" name="save" value="' . __('Save') . '" />' .
-                dcCore::app()->formNonce() .
-                form::hidden(['action'], 'setperiod') .
-                form::hidden(['period_id'], $vars->period_id) .
-                form::hidden(['part'], 'period') . '
-        </p>
-        </div>
-        </form>
-        </div>';
+                (new Div())->class('clear')->items([
+                    (new Para())->items([
+                        (new Submit(['save']))->value(__('Save')),
+                        dcCore::app()->formNonce(false),
+                        (new Hidden(['action'], 'setperiod')),
+                        (new Hidden(['period_id'], (string) $vars->period_id)),
+                        (new Hidden(['part'], 'period')),
+                    ]),
+                ]),
+            ]),
+        ])->render();
 
         if ($vars->period_id && isset($post_filter) && isset($post_list) && !dcCore::app()->error->flag()) {
             $base_url = dcCore::app()->admin->getPageURL() .
@@ -288,7 +299,7 @@ class ManagePeriod extends dcNsProcess
                 '<p class="col checkboxes-helpers"></p>' .
 
                 '<p class="col right">' . __('Selected entries action:') . ' ' .
-                form::combo('action', My::entriesActionsCombo()) .
+                (new Select('action'))->items(My::entriesActionsCombo())->redner() .
                 '<input type="submit" value="' . __('ok') . '" /></p>' .
                 dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.periodical', array_merge($post_filter->values(), [
                     'period_id' => $vars->period_id,
@@ -313,7 +324,7 @@ class ManagePeriod extends dcNsProcess
         dcPage::addSuccessNotice($msg);
 
         if (!empty($redir)) {
-            http::redirect($redir);
+            Http::redirect($redir);
         } else {
             dcCore::app()->adminurl->redirect('admin.plugin.' . My::id(), ['part' => 'period', 'period_id' => $id], $tab);
         }

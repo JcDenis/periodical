@@ -19,9 +19,12 @@ use dcAuth;
 use dcCore;
 use dcNsProcess;
 use dcPage;
+use Dotclear\Helper\Html\Form\{
+    Hidden,
+    Select
+};
+use Dotclear\Helper\Network\Http;
 use Exception;
-use form;
-use http;
 
 /**
  * Admin page for periods
@@ -71,7 +74,7 @@ class Manage extends dcNsProcess
                 );
 
                 if (!empty($vars->redir)) {
-                    http::redirect($vars->redir);
+                    Http::redirect($vars->redir);
                 } else {
                     dcCore::app()->adminurl->redirect('admin.plugin.' . My::id(), ['part' => 'periods']);
                 }
@@ -92,7 +95,7 @@ class Manage extends dcNsProcess
                 );
 
                 if (!empty($vars->redir)) {
-                    http::redirect($vars->redir);
+                    Http::redirect($vars->redir);
                 } else {
                     dcCore::app()->adminurl->redirect('admin.plugin.' . My::id(), ['part' => 'periods']);
                 }
@@ -153,7 +156,7 @@ class Manage extends dcNsProcess
 
         if (isset($period_list)) {
             # Filters
-            $p_filter->display('admin.plugin.' . My::id(), form::hidden('p', My::id()) . form::hidden('part', 'periods'));
+            $p_filter->display('admin.plugin.' . My::id(), (new Hidden('p', My::id()))->render() . (new Hidden('part', 'periods'))->render());
 
             # Periods list
             $period_list->periodDisplay(
@@ -166,7 +169,7 @@ class Manage extends dcNsProcess
                 '<p class="col checkboxes-helpers"></p>' .
 
                 '<p class="col right">' . __('Selected periods action:') . ' ' .
-                form::combo('action', My::periodsActionCombo()) .
+                (new Select('action'))->items(My::periodsActionCombo())->render() .
                 '<input type="submit" value="' . __('ok') . '" /></p>' .
                 dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.' . My::id(), array_merge(['p' => My::id()], $p_filter->values(true))) .
                 dcCore::app()->formNonce() .
