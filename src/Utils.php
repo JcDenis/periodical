@@ -72,6 +72,7 @@ class Utils
                 $sql->columns($params['columns']);
             }
             $sql->columns([
+                'T.periodical_id',
                 'T.periodical_title',
                 'T.periodical_curdt',
                 'T.periodical_enddt',
@@ -93,9 +94,9 @@ class Utils
 
         if (!empty($params['where'])) {
             $sql->where($params['where']);
-            $sql->and('P.blog_id = ' . $sql->quote((string) dcCore::app()->blog?->id));
+            $sql->and('T.blog_id = ' . $sql->quote((string) dcCore::app()->blog?->id));
         } else {
-            $sql->where('P.blog_id = ' . $sql->quote((string) dcCore::app()->blog?->id));
+            $sql->where('T.blog_id = ' . $sql->quote((string) dcCore::app()->blog?->id));
         }
 
         if (isset($params['periodical_type'])) {
