@@ -23,7 +23,7 @@ and they will be publish ones after the others every week.
   * admin permissions to configure plugin
   * usage,contentadmin permissions to link feeds
   * Dotclear 2.26
-  * PHP >= 8.1
+  * PHP 8.1+
 
 ## NOTICE
 

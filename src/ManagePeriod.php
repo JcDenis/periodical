@@ -312,12 +312,14 @@ class ManagePeriod extends dcNsProcess
                     dcCore::app()->adminurl->hiddenFormFields('admin.plugin.periodical', array_merge($post_filter->values(), [
                         'period_id' => $vars->period_id,
                         'redir'     => sprintf($base_url, $post_filter->value('page', '')),
-                    ])), [
-                    (new Label(__('Selected entries action:'), Label::OUTSIDE_LABEL_BEFORE))->for('post_action')->class('classic'),
-                    (new Select(['action','post_action']))->items(My::entriesActionsCombo()),
-                    (new Submit('do_post_action'))->value(__('ok')),
-                    dcCore::app()->formNonce(false),
-                ]))->render() .
+                    ])),
+                    [
+                        (new Label(__('Selected entries action:'), Label::OUTSIDE_LABEL_BEFORE))->for('post_action')->class('classic'),
+                        (new Select(['action','post_action']))->items(My::entriesActionsCombo()),
+                        (new Submit('do_post_action'))->value(__('ok')),
+                        dcCore::app()->formNonce(false),
+                    ]
+                ))->render() .
                 '</div>' .
                 '</form>'
             );

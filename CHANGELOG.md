@@ -1,3 +1,12 @@
+2023.04.23
+- require Dotclear 2.26
+- require PHP 8.1
+- use latest dotclear namespace
+- use sql statement
+- add plugin Uninstaller features
+- fix nullsafe warnings
+- add code inline doc
+
 2023.03.24
 - require Dotclear 2.26
 - require PHP 8.1

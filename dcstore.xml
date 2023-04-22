@@ -2,10 +2,10 @@
 <modules xmlns:da="http://dotaddict.org/da/">
   <module id="periodical">
     <name>Periodical</name>
-    <version>2023.03.24</version>
+    <version>2023.04.23</version>
     <author>Jean-Christian Denis and contributors</author>
     <desc>Published periodically entries</desc>
-    <file>https://github.com/JcDenis/periodical/releases/download/v2023.03.24/plugin-periodical.zip</file>
+    <file>https://github.com/JcDenis/periodical/releases/download/v2023.04.23/plugin-periodical.zip</file>
     <da:dcmin>2.26</da:dcmin>
     <da:details>https://plugins.dotaddict.org/dc2/details/periodical</da:details>
     <da:support>https://github.com/JcDenis/periodical</da:support>
