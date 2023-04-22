@@ -20,7 +20,7 @@ namespace Dotclear\Plugin\periodical;
 class ManageVars
 {
     /** @var    ManageVars  $container  Self instance  */
-    private static ManageVars $container;
+    private static $container;
 
     /** @var    string  $action     The post form action */
     public readonly string $action;
