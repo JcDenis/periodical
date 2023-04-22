@@ -308,14 +308,16 @@ class ManagePeriod extends dcNsProcess
                 '<div class="two-cols">' .
                 '<p class="col checkboxes-helpers"></p>' .
 
-                '<p class="col right">' . __('Selected entries action:') . ' ' .
-                (new Select('action'))->items(My::entriesActionsCombo())->redner() .
-                '<input type="submit" value="' . __('ok') . '" /></p>' .
-                dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.periodical', array_merge($post_filter->values(), [
-                    'period_id' => $vars->period_id,
-                    'redir'     => sprintf($base_url, $post_filter->value('page', '')),
-                ])) .
-                dcCore::app()->formNonce() .
+                (new Para())->class('col right')->items(array_merge(
+                    dcCore::app()->adminurl->hiddenFormFields('admin.plugin.periodical', array_merge($post_filter->values(), [
+                        'period_id' => $vars->period_id,
+                        'redir'     => sprintf($base_url, $post_filter->value('page', '')),
+                    ])), [
+                    (new Label(__('Selected entries action:'), Label::OUTSIDE_LABEL_BEFORE))->for('post_action')->class('classic'),
+                    (new Select(['action','post_action']))->items(My::entriesActionsCombo()),
+                    (new Submit('do_post_action'))->value(__('ok')),
+                    dcCore::app()->formNonce(false),
+                ]))->render() .
                 '</div>' .
                 '</form>'
             );
