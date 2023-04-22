@@ -22,9 +22,9 @@ use dcAuth;
 use dcBlog;
 use dcCore;
 use dcPager;
+use Dotclear\Helper\Date;
 use Dotclear\Helper\Html\Form\Checkbox;
 use Dotclear\Helper\Html\Html;
-use dt;
 
 /**
  * @ingroup DC_PLUGIN_PERIODICAL
@@ -102,11 +102,11 @@ class ManageList extends adminGenericList
         $cols = new ArrayObject([
             'check'   => '<td class="nowrap">' . (new Checkbox(['periods[]'], $checked))->value($this->rs->f('periodical_id'))->render() . '</td>',
             'name'    => '<td class="maximal">' . $name . '</td>',
-            'curdt'   => '<td class="nowrap count">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_curdt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
+            'curdt'   => '<td class="nowrap count">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_curdt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
             'pub_int' => '<td class="nowrap">' . $interval . '</td>',
             'pub_nb'  => '<td class="nowrap count">' . $this->rs->f('periodical_pub_nb') . '</td>',
             'nbposts' => '<td class="nowrap count">' . $posts . '</td>',
-            'enddt'   => '<td class="nowrap count">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_enddt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
+            'enddt'   => '<td class="nowrap count">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_enddt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
         ]);
 
         $this->userColumns(My::id(), $cols);
@@ -242,11 +242,11 @@ class ManageList extends adminGenericList
             'check' => '<td class="minimal">' . (new Checkbox(['periodical_entries[]'], $checked))->value($this->rs->f('post_id'))->render() . '</td>',
             'title' => '<td class="maximal"><a href="' . dcCore::app()->getPostAdminURL($this->rs->f('post_type'), $this->rs->f('post_id')) . '" ' .
                 'title="' . Html::escapeHTML($this->rs->getURL()) . '">' . Html::escapeHTML($this->rs->post_title) . '</a></td>',
-            'date'     => '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('post_dt')) . '</td>',
+            'date'     => '<td class="nowrap">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('post_dt')) . '</td>',
             'category' => '<td class="nowrap">' . $cat_title . '</td>',
             'author'   => '<td class="nowrap">' . $this->rs->f('user_id') . '</td>',
             'status'   => '<td class="nowrap status">' . $img_status . ' ' . $selected . ' ' . $protected . ' ' . $attach . '</td>',
-            'create'   => '<td class="nowrap">' . dt::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('post_creadt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
+            'create'   => '<td class="nowrap">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('post_creadt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
         ];
 
         return '<tr class="line">' . implode($cols) . '</tr>';
