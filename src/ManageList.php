@@ -18,7 +18,6 @@ use ArrayObject;
 use adminGenericFilter;
 use adminGenericList;
 use adminPostFilter;
-use dcAuth;
 use dcBlog;
 use dcCore;
 use dcPager;
@@ -33,6 +32,12 @@ use Dotclear\Helper\Html\Html;
  */
 class ManageList extends adminGenericList
 {
+    /**
+     * Display periods list.
+     *
+     * @param   adminGenericFilter  $filter         The periods filter
+     * @param   string              $enclose_block  The enclose block
+     */
     public function periodDisplay(adminGenericFilter $filter, string $enclose_block = ''): void
     {
         if ($this->rs->isEmpty()) {
@@ -78,45 +83,53 @@ class ManageList extends adminGenericList
             echo $pager->getLinks() . $blocks[0];
 
             while ($this->rs->fetch()) {
-                echo $this->periodLine(isset($periods[(int) $this->rs->f('periodical_id')]));
+                $this->periodLine(isset($periods[(int) $this->rs->f('periodical_id')]));
             }
 
             echo $blocks[1] . $blocks[2] . $pager->getLinks();
         }
     }
 
-    private function periodLine(bool $checked): string
+    /**
+     * Display a period list line.
+     *
+     * @param   bool    $checked    Selected line
+     */
+    private function periodLine(bool $checked): void
     {
+        $tz       = dcCore::app()->auth?->getInfo('user_tz');
         $nb_posts = Utils::getPosts(['periodical_id' => $this->rs->f('periodical_id')], true)->f(0);
-        $url      = dcCore::app()->adminurl->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $this->rs->f('periodical_id')]);
-
-        $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($this->rs->periodical_title) . '</a>';
-
-        $posts = $nb_posts ?
-            '<a href="' . $url . '#posts" title="' . __('view related entries') . '">' . $nb_posts . '</a>' :
-            '0';
-
+        $url      = dcCore::app()->adminurl?->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $this->rs->f('periodical_id')]);
+        $name     = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($this->rs->periodical_title) . '</a>';
+        $posts    = $nb_posts ? '<a href="' . $url . '#posts" title="' . __('view related entries') . '">' . $nb_posts . '</a>' : '0';
         $interval = in_array($this->rs->f('periodical_pub_int'), My::periodCombo()) ?
             __((string) array_search($this->rs->f('periodical_pub_int'), My::periodCombo())) : __('Unknow frequence');
 
         $cols = new ArrayObject([
             'check'   => '<td class="nowrap">' . (new Checkbox(['periods[]'], $checked))->value($this->rs->f('periodical_id'))->render() . '</td>',
             'name'    => '<td class="maximal">' . $name . '</td>',
-            'curdt'   => '<td class="nowrap count">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_curdt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
+            'curdt'   => '<td class="nowrap count">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_curdt'), $tz ?? 'UTC') . '</td>',
             'pub_int' => '<td class="nowrap">' . $interval . '</td>',
             'pub_nb'  => '<td class="nowrap count">' . $this->rs->f('periodical_pub_nb') . '</td>',
             'nbposts' => '<td class="nowrap count">' . $posts . '</td>',
-            'enddt'   => '<td class="nowrap count">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_enddt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
+            'enddt'   => '<td class="nowrap count">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_enddt'), $tz ?? 'UTC') . '</td>',
         ]);
 
         $this->userColumns(My::id(), $cols);
 
-        return
-            '<tr class="line ' . ($nb_posts ? '' : ' offline') . '" id="p' . $this->rs->f('periodical_id') . '">' .
-            implode(iterator_to_array($cols)) .
-            '</tr>';
+        echo
+        '<tr class="line ' . ($nb_posts ? '' : ' offline') . '" id="p' . $this->rs->f('periodical_id') . '">' .
+        implode(iterator_to_array($cols)) .
+        '</tr>';
     }
 
+    /**
+     * Display period posts list.
+     *
+     * @param   adminPostFilter     $filter         The posts filter
+     * @param   string              $base_url       The page base URL
+     * @param   string              $enclose_block  The enclose block
+     */
     public function postDisplay(adminPostFilter $filter, string $base_url, string $enclose_block = ''): void
     {
         $echo = '';
@@ -162,7 +175,7 @@ class ManageList extends adminGenericList
             echo $pager->getLinks() . $blocks[0];
 
             while ($this->rs->fetch()) {
-                echo $this->postLine(isset($periodical_entries[(int) $this->rs->f('post_id')]));
+                $this->postLine(isset($periodical_entries[(int) $this->rs->f('post_id')]));
             }
 
             $img = '<img alt="%1$s" title="%1$s" src="images/%2$s" /> %1$s';
@@ -179,9 +192,14 @@ class ManageList extends adminGenericList
         }
     }
 
-    private function postLine(bool $checked): string
+    /**
+     * Display post list line.
+     *
+     * @param   bool    $checked    Selected line
+     */
+    private function postLine(bool $checked): void
     {
-        if (dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([dcAuth::PERMISSION_CATEGORIES]), dcCore::app()->blog->id)) {
+        if (dcCore::app()->auth?->check(dcCore::app()->auth->makePermissions([dcCore::app()->auth::PERMISSION_CATEGORIES]), dcCore::app()->blog?->id)) {
             $cat_link = '<a href="category.php?id=%s">%s</a>';
         } else {
             $cat_link = '%2$s';
@@ -238,6 +256,8 @@ class ManageList extends adminGenericList
             $attach     = sprintf($img, sprintf($attach_str, $nb_media), 'attach.png');
         }
 
+        $tz = dcCore::app()->auth?->getInfo('user_tz');
+
         $cols = [
             'check' => '<td class="minimal">' . (new Checkbox(['periodical_entries[]'], $checked))->value($this->rs->f('post_id'))->render() . '</td>',
             'title' => '<td class="maximal"><a href="' . dcCore::app()->getPostAdminURL($this->rs->f('post_type'), $this->rs->f('post_id')) . '" ' .
@@ -246,10 +266,9 @@ class ManageList extends adminGenericList
             'category' => '<td class="nowrap">' . $cat_title . '</td>',
             'author'   => '<td class="nowrap">' . $this->rs->f('user_id') . '</td>',
             'status'   => '<td class="nowrap status">' . $img_status . ' ' . $selected . ' ' . $protected . ' ' . $attach . '</td>',
-            'create'   => '<td class="nowrap">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('post_creadt'), dcCore::app()->auth->getInfo('user_tz')) . '</td>',
+            'create'   => '<td class="nowrap">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('post_creadt'), $tz ?? 'UTC') . '</td>',
         ];
 
-        return '<tr class="line">' . implode($cols) . '</tr>';
-        ;
+        echo '<tr class="line">' . implode($cols) . '</tr>';
     }
 }

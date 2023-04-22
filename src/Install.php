@@ -14,9 +14,9 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use dbStruct;
 use dcCore;
 use dcNsProcess;
+use Dotclear\Database\Structure;
 use Exception;
 
 class Install extends dcNsProcess
@@ -32,31 +32,30 @@ class Install extends dcNsProcess
 
     public static function process(): bool
     {
-        if (!static::$init) {
+        if (!static::$init || is_null(dcCore::app()->blog)) {
             return false;
         }
 
         try {
-            # Tables
-            $t = new dbStruct(dcCore::app()->con, dcCore::app()->prefix);
+            $t = new Structure(dcCore::app()->con, dcCore::app()->prefix);
 
-            # Table principale des sondages
-            $t->{My::TABLE_NAME} // @phpstan-ignore-line
-                ->periodical_id('bigint', 0, false)
-                ->blog_id('varchar', 32, false)
-                ->periodical_type('varchar', 32, false, "'post'")
-                ->periodical_title('varchar', 255, false, "''")
-                ->periodical_curdt('timestamp', 0, false, ' now()')
-                ->periodical_enddt('timestamp', 0, false, 'now()')
-                ->periodical_pub_int('varchar', 32, false, "'day'")
-                ->periodical_pub_nb('smallint', 0, false, 1)
+            // create database table
+            $t->__get(My::TABLE_NAME)
+                ->field('periodical_id', 'bigint', 0, false)
+                ->field('blog_id', 'varchar', 32, false)
+                ->field('periodical_type', 'varchar', 32, false, "'post'")
+                ->field('periodical_title', 'varchar', 255, false, "''")
+                ->field('periodical_curdt', 'timestamp', 0, false, ' now()')
+                ->field('periodical_enddt', 'timestamp', 0, false, 'now()')
+                ->field('periodical_pub_int', 'varchar', 32, false, "'day'")
+                ->field('periodical_pub_nb', 'smallint', 0, false, 1)
 
                 ->primary('pk_periodical', 'periodical_id')
                 ->index('idx_periodical_type', 'btree', 'periodical_type');
 
-            (new dbStruct(dcCore::app()->con, dcCore::app()->prefix))->synchronize($t);
+            (new Structure(dcCore::app()->con, dcCore::app()->prefix))->synchronize($t);
 
-            # Settings
+            // set default settings
             $s = dcCore::app()->blog->settings->get(My::id());
             $s->put('periodical_active', false, 'boolean', 'Enable extension', false, true);
             $s->put('periodical_upddate', true, 'boolean', 'Update post date', false, true);

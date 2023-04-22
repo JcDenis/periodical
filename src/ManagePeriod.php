@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\periodical;
 
 use adminPostFilter;
-use dcAuth;
 use dcCore;
 use dcNsProcess;
 use dcPage;
@@ -45,9 +44,10 @@ class ManagePeriod extends dcNsProcess
     {
         static::$init == defined('DC_CONTEXT_ADMIN')
             && My::phpCompliant()
+            && !is_null(dcCore::app()->auth) && !is_null(dcCore::app()->blog)
             && dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
-                dcAuth::PERMISSION_USAGE,
-                dcAuth::PERMISSION_CONTENT_ADMIN,
+                dcCore::app()->auth::PERMISSION_USAGE,
+                dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
             ]), dcCore::app()->blog->id)
             && ($_REQUEST['part'] ?? 'periods') === 'period';
 
@@ -60,21 +60,25 @@ class ManagePeriod extends dcNsProcess
             return false;
         }
 
-        # Default values
+        if (is_null(dcCore::app()->blog)) {
+            return false;
+        }
+
+        // Default values
         $vars = ManageVars::init();
 
-        # Get period
+        // Get period
         if ($vars->bad_period_id) {
             dcCore::app()->error->add(__('This period does not exist.'));
         }
 
-        # Set period
+        // Set period
         if ($vars->action == 'setperiod') {
             if ($vars->bad_period_curdt || $vars->bad_period_enddt) {
                 dcCore::app()->error->add(__('Invalid date'));
             }
 
-            # Check period title and dates
+            // Check period title and dates
             $old_titles = Utils::getPeriods([
                 'periodical_title' => $vars->period_title,
             ]);
@@ -92,7 +96,7 @@ class ManagePeriod extends dcNsProcess
                 dcCore::app()->error->add(__('Start date must be older than end date'));
             }
 
-            # If no error, set period
+            // If no error, set period
             if (!dcCore::app()->error->flag()) {
                 $cur = Utils::openCursor();
                 $cur->setField('periodical_title', $vars->period_title);
@@ -101,12 +105,12 @@ class ManagePeriod extends dcNsProcess
                 $cur->setField('periodical_pub_int', $vars->period_pub_int);
                 $cur->setField('periodical_pub_nb', $vars->period_pub_nb);
 
-                # Update period
+                // Update period
                 if ($vars->period_id) {
                     Utils::updPeriod($vars->period_id, $cur);
 
                     self::redirect($vars->redir, $vars->period_id, '#period', __('Period successfully updated.'));
-                # Create period
+                // Create period
                 } else {
                     $period_id = Utils::addPeriod($cur);
 
@@ -115,9 +119,9 @@ class ManagePeriod extends dcNsProcess
             }
         }
 
-        # Actions on related posts
+        // Actions on related posts
         if (!dcCore::app()->error->flag() && $vars->period_id && $vars->action && !empty($vars->entries)) {
-            # Publish posts
+            // Publish posts
             if ($vars->action == 'publish') {
                 try {
                     foreach ($vars->entries as $id) {
@@ -131,7 +135,7 @@ class ManagePeriod extends dcNsProcess
                 }
             }
 
-            # Unpublish posts
+            // Unpublish posts
             if ($vars->action == 'unpublish') {
                 try {
                     foreach ($vars->entries as $id) {
@@ -145,7 +149,7 @@ class ManagePeriod extends dcNsProcess
                 }
             }
 
-            # Remove posts from periodical
+            // Remove posts from periodical
             if ($vars->action == 'remove_post_periodical') {
                 try {
                     foreach ($vars->entries as $id) {
@@ -171,14 +175,19 @@ class ManagePeriod extends dcNsProcess
             return;
         }
 
-        # Default values
+        // nullsafe
+        if (is_null(dcCore::app()->adminurl)) {
+            return;
+        }
+
+        // Default values
         $vars = ManageVars::init();
 
         $starting_script = '';
 
-        # Prepare combos for posts list
+        // Prepare combos for posts list
         if ($vars->period_id > 0) {
-            # Filters
+            // Filters
             $post_filter = new adminPostFilter();
             $post_filter->add('part', 'period');
 
@@ -186,7 +195,7 @@ class ManagePeriod extends dcNsProcess
             $params['periodical_id'] = $vars->period_id;
             $params['no_content']    = true;
 
-            # Get posts
+            // Get posts
             try {
                 $posts     = Utils::getPosts($params);
                 $counter   = Utils::getPosts($params, true);
@@ -199,7 +208,7 @@ class ManagePeriod extends dcNsProcess
                 $post_filter->js(dcCore::app()->adminurl->get('admin.plugin.' . My::id(), ['part' => 'period', 'period_id' => $vars->period_id], '&') . '#posts');
         }
 
-        # Display
+        // Display
         dcPage::openModule(
             My::name(),
             dcPage::jsModuleLoad(My::id() . '/js/dates.js') .
@@ -216,7 +225,7 @@ class ManagePeriod extends dcNsProcess
         ]) .
         dcPage::notices();
 
-        # Period form
+        // Period form
         echo
         (new Div('period'))->items([
             (new Text('h3', null === $vars->period_id ? __('New period') : __('Edit period'))),
@@ -278,7 +287,7 @@ class ManagePeriod extends dcNsProcess
             echo '
             <div id="posts"><h3>' . __('Entries linked to this period') . '</h3>';
 
-            # Filters
+            // Filters
             $post_filter->display(
                 ['admin.plugin.periodical', '#posts'],
                 dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.periodical', [
@@ -287,7 +296,7 @@ class ManagePeriod extends dcNsProcess
                 ])
             );
 
-            # Posts list
+            // Posts list
             $post_list->postDisplay(
                 $post_filter,
                 $base_url,
@@ -319,6 +328,14 @@ class ManagePeriod extends dcNsProcess
         dcPage::closeModule();
     }
 
+    /**
+     * Do a Http redirection.
+     *
+     * @param   string  $redir  Previous redirection
+     * @param   int     $id     The period ID
+     * @param   string  $tab    The page tab
+     * @param   string  $msg    The notice message
+     */
     private static function redirect(string $redir, int $id, string $tab, string $msg): void
     {
         dcPage::addSuccessNotice($msg);
@@ -326,7 +343,7 @@ class ManagePeriod extends dcNsProcess
         if (!empty($redir)) {
             Http::redirect($redir);
         } else {
-            dcCore::app()->adminurl->redirect('admin.plugin.' . My::id(), ['part' => 'period', 'period_id' => $id], $tab);
+            dcCore::app()->adminurl?->redirect('admin.plugin.' . My::id(), ['part' => 'period', 'period_id' => $id], $tab);
         }
     }
 }

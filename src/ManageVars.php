@@ -19,26 +19,51 @@ namespace Dotclear\Plugin\periodical;
  */
 class ManageVars
 {
-    /**
-     * @var ManageVars self instance
-     */
-    private static $container;
+    /** @var    ManageVars  $container  Self instance  */
+    private static ManageVars $container;
 
+    /** @var    string  $action     The post form action */
     public readonly string $action;
+
+    /** @var    string  $redir      The post form redirection */
     public readonly string $redir;
+
+    /** @var    array   $periods    The post form periods */
     public readonly array $periods;
+
+    /** @var    array   $entries    The post form entries */
     public readonly array $entries;
 
+    /** @var    null|int    $period_id  The post form period id */
     public readonly ?int $period_id;
+
+    /** @var    string  $period_title   The psort form period title */
     public readonly string $period_title;
+
+    /** @var    int    $period_pub_nb   The post form period publication number */
     public readonly int $period_pub_nb;
+
+    /** @var    string  $period_pub_int     The post form period publication interval */
     public readonly string $period_pub_int;
+
+    /** @var    string    $period_curdt     The post form period current date */
     public readonly string $period_curdt;
+
+    /** @var    string    $period_curdt     The post form period end date */
     public readonly string $period_enddt;
+
+    /** @var    bool    $bad_period_id  Is period ID wrong */
     public readonly bool $bad_period_id;
+
+    /** @var    bool    $bad_period_curdt   Is period current date wrong */
     public readonly bool $bad_period_curdt;
+
+    /** @var    bool    $bad_period_enddt   Is period end date wrong */
     public readonly bool $bad_period_enddt;
 
+    /**
+     * Constructor check and sets default post form values.
+     */
     protected function __construct()
     {
         $this->action = $_POST['action'] ?? '';
@@ -71,7 +96,7 @@ class ManageVars
         $bad_period_curdt = false;
         $bad_period_enddt = false;
 
-        # period values from record
+        // period values from record
         if (!empty($_REQUEST['period_id'])) {
             $rs = Utils::getPeriods([
                 'periodical_id' => $_REQUEST['period_id'],
@@ -88,7 +113,7 @@ class ManageVars
             }
         }
 
-        # period values from POST
+        // period values from POST
         if (!empty($_POST['period_title'])) {
             $period_title = $_POST['period_title'];
         }
@@ -129,6 +154,11 @@ class ManageVars
         $this->bad_period_enddt = $bad_period_enddt;
     }
 
+    /**
+     * Get self instance.
+     *
+     * @return  ManageVars  Self instance
+     */
     public static function init(): ManageVars
     {
         if (!(self::$container instanceof self)) {

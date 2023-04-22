@@ -39,15 +39,19 @@ class Frontend extends dcNsProcess
         }
 
         dcCore::app()->addBehavior('publicBeforeDocumentV2', function (): void {
+            if (is_null(dcCore::app()->auth) || is_null(dcCore::app()->blog)) {
+                return;
+            }
+
             try {
                 $s = dcCore::app()->blog->settings->get(My::id());
 
                 Utils::lockUpdate();
 
-                # Get periods
+                // Get periods
                 $periods = dcCore::app()->auth->sudo([Utils::class, 'getPeriods']);
 
-                # No period
+                // No period
                 if ($periods->isEmpty()) {
                     Utils::unlockUpdate();
 
@@ -62,7 +66,7 @@ class Frontend extends dcNsProcess
                 $cur_period = dcCore::app()->con->openCursor(dcCore::app()->prefix . My::TABLE_NAME);
 
                 while ($periods->fetch()) {
-                    # Check if period is ongoing
+                    // Check if period is ongoing
                     $cur_ts = (int) Dater::toDate($periods->f('periodical_curdt'), 'U');
                     $end_ts = (int) Dater::toDate($periods->f('periodical_enddt'), 'U');
 
@@ -83,9 +87,9 @@ class Frontend extends dcNsProcess
                         } catch (Exception $e) {
                         }
 
-                        # If period need update
+                        // If period need update
                         if ($limit > 0) {
-                            # Get posts to publish related to this period
+                            // Get posts to publish related to this period
                             $posts_params                  = [];
                             $posts_params['periodical_id'] = $periods->f('periodical_id');
                             $posts_params['post_status']   = dcBlog::POST_PENDING;
@@ -98,18 +102,18 @@ class Frontend extends dcNsProcess
                                 $cur_post = dcCore::app()->con->openCursor(dcCore::app()->prefix . dcBlog::POST_TABLE_NAME);
 
                                 while ($posts->fetch()) {
-                                    # Publish post with right date
+                                    // Publish post with right date
                                     $cur_post->clean();
                                     $cur_post->setField('post_status', dcBlog::POST_PUBLISHED);
 
-                                    # Update post date with right date
+                                    // Update post date with right date
                                     if ($s->get('periodical_upddate')) {
                                         $cur_post->setField('post_dt', Dater::toDate($last_ts, 'Y-m-d H:i:00', $posts->post_tz));
                                     } else {
                                         $cur_post->setField('post_dt', $posts->f('post_dt'));
                                     }
 
-                                    # Also update post url with right date
+                                    // Also update post url with right date
                                     if ($s->get('periodical_updurl')) {
                                         $cur_post->setField('post_url', dcCore::app()->blog->getPostURL(
                                             '',
@@ -124,25 +128,25 @@ class Frontend extends dcNsProcess
                                         "AND blog_id = '" . dcCore::app()->con->escapeStr(dcCore::app()->blog->id) . "' "
                                     );
 
-                                    # Delete post relation to this period
+                                    // Delete post relation to this period
                                     Utils::delPost((int) $posts->f('post_id'));
 
                                     $last_nb++;
 
-                                    # Increment upddt if nb of publishing is to the max
+                                    // Increment upddt if nb of publishing is to the max
                                     if ($last_nb == $max_nb) {
                                         $last_ts = Dater::getNextTime($last_ts, $periods->f('periodical_pub_int'));
                                         $last_nb = 0;
                                     }
 
-                                    # --BEHAVIOR-- periodicalAfterPublishedPeriodicalEntry
+                                    // --BEHAVIOR-- periodicalAfterPublishedPeriodicalEntry
                                     dcCore::app()->callBehavior('periodicalAfterPublishedPeriodicalEntry', $posts, $periods);
                                 }
                                 dcCore::app()->blog->triggerBlog();
                             }
                         }
 
-                        # Update last published date of this period even if there's no post to publish
+                        // Update last published date of this period even if there's no post to publish
                         $cur_period->clean();
                         $cur_period->setField('periodical_curdt', Dater::toDate($loop_ts, 'Y-m-d H:i:00'));
                         $cur_period->update(

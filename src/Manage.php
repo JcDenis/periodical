@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\periodical;
 
 use adminGenericFilter;
-use dcAuth;
 use dcCore;
 use dcNsProcess;
 use dcPage;
@@ -35,9 +34,10 @@ class Manage extends dcNsProcess
     {
         static::$init == defined('DC_CONTEXT_ADMIN')
             && My::phpCompliant()
+            && !is_null(dcCore::app()->auth) && !is_null(dcCore::app()->blog)
             && dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
-                dcAuth::PERMISSION_USAGE,
-                dcAuth::PERMISSION_CONTENT_ADMIN,
+                dcCore::app()->auth::PERMISSION_USAGE,
+                dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
             ]), dcCore::app()->blog->id);
 
         // call period manage page
@@ -54,14 +54,20 @@ class Manage extends dcNsProcess
             return false;
         }
 
+        // nullsafe
+        if (is_null(dcCore::app()->adminurl)) {
+            return false;
+        }
+
+        // call period manage page
         if (($_REQUEST['part'] ?? 'periods') === 'period') {
             return ManagePeriod::process();
         }
 
-        # Default values
+        // load default values
         $vars = ManageVars::init();
 
-        # Delete periods and related posts links
+        // Delete periods and related posts links
         if ($vars->action == 'deleteperiods' && !empty($vars->periods)) {
             try {
                 foreach ($vars->periods as $id) {
@@ -83,7 +89,7 @@ class Manage extends dcNsProcess
             }
         }
 
-        # Delete periods related posts links (without delete periods)
+        // Delete periods related posts links (without delete periods)
         if ($vars->action == 'emptyperiods' && !empty($vars->periods)) {
             try {
                 foreach ($vars->periods as $id) {
@@ -116,19 +122,25 @@ class Manage extends dcNsProcess
             return;
         }
 
+        // nullsafe
+        if (is_null(dcCore::app()->adminurl)) {
+            return;
+        }
+
+        // call period manage page
         if (($_REQUEST['part'] ?? 'periods') === 'period') {
             ManagePeriod::render();
 
             return;
         }
 
-        # Filters
+        // Filters
         $p_filter = new adminGenericFilter(dcCore::app(), My::id());
         $p_filter->add('part', 'periods');
 
         $params = $p_filter->params();
 
-        # Get periods
+        // Get periods
         try {
             $periods     = Utils::getPeriods($params);
             $counter     = Utils::getPeriods($params, true);
@@ -137,7 +149,7 @@ class Manage extends dcNsProcess
             dcCore::app()->error->add($e->getMessage());
         }
 
-        # Display
+        // Display
         dcPage::openModule(
             My::name(),
             dcPage::jsModuleLoad(My::id() . '/js/checkbox.js') .
@@ -155,10 +167,10 @@ class Manage extends dcNsProcess
         </p>';
 
         if (isset($period_list)) {
-            # Filters
+            // Filters
             $p_filter->display('admin.plugin.' . My::id(), (new Hidden('p', My::id()))->render() . (new Hidden('part', 'periods'))->render());
 
-            # Periods list
+            // Periods list
             $period_list->periodDisplay(
                 $p_filter,
                 '<form action="' . dcCore::app()->admin->getPageURL() . '" method="post" id="form-periods">' .

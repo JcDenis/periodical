@@ -24,27 +24,45 @@ use Exception;
 class Dater
 {
     /**
-     * Format a date from UTC to user TZ
+     * Format a date from UTC to user TZ.
+     *
+     * @param   string  $date       The date
+     * @param   string  $format     The output format
+     *
+     * @return  string  The formated date on user timezone
      */
     public static function fromUser(string $date, string $format = 'Y-m-d H:i:00'): string
     {
-        $d = date_create($date, new DateTimeZone(dcCore::app()->auth->getInfo('user_tz')));
+        $tz = dcCore::app()->auth?->getInfo('user_tz');
+        $d  = date_create($date, new DateTimeZone($tz ?? 'UTC'));
 
         return $d ? date_format($d->setTimezone(new DateTimeZone('UTC')), $format) : '';
     }
 
     /**
-     * Format a date from user TZ to UTC
+     * Format a date from user TZ to UTC.
+     *
+     * @param   string  $date       The date
+     * @param   string  $format     The output format
+     *
+     * @return  string  The formated date on UTC
      */
     public static function toUser(string $date, string $format = 'Y-m-d\TH:i'): string
     {
-        $d = date_create($date, new DateTimeZone('UTC'));
+        $tz = dcCore::app()->auth?->getInfo('user_tz');
+        $d  = date_create($date, new DateTimeZone('UTC'));
 
-        return $d ? date_format($d->setTimezone(new DateTimeZone(dcCore::app()->auth->getInfo('user_tz'))), $format) : '';
+        return $d ? date_format($d->setTimezone(new DateTimeZone($tz ?? 'UTC')), $format) : '';
     }
 
     /**
-     * Format a date to specific TZ (UTC by default) from another format
+     * Format a date to specific TZ (UTC by default) from another format.
+     *
+     * @param   string  $date       The date
+     * @param   string  $format     The output format
+     * @param   string  $to_tz      The output timezone
+     *
+     * @return  string  The formated date
      */
     public static function toDate(int|string $date = 'now', string $format = 'Y-m-d H:i:00', string $to_tz = 'UTC'): string
     {
@@ -56,7 +74,12 @@ class Dater
     }
 
     /**
-     * Get next timestamp from a period
+     * Get next timestamp from a period.
+     *
+     * @param   int     $ts         The timestamp
+     * @param   string  $period     The period (periodical string format)
+     *
+     * @return  int  The timestamp of next update
      */
     public static function getNextTime(int $ts, string $period): int
     {
