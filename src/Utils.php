@@ -66,7 +66,7 @@ class Utils
         $sql    = $ext_sql ? clone $ext_sql : new SelectStatement();
 
         if ($count_only) {
-            $sql->column($sql->count($sql->unique('T.periodical_id')));
+            $sql->column($sql->count('T.periodical_id'));
         } else {
             if (!empty($params['columns']) && is_array($params['columns'])) {
                 $sql->columns($params['columns']);
@@ -259,8 +259,8 @@ class Utils
             $params['sql'] = '';
         }
 
-        $sql
-            ->columns([
+        if (!$count_only) {
+            $sql->columns([
                 'T.periodical_id',
                 'T.periodical_title',
                 'T.periodical_type',
@@ -269,7 +269,9 @@ class Utils
                 'T.periodical_pub_int',
                 'T.periodical_pub_nb',
 
-            ])
+            ]);
+        }
+        $sql
             ->join(
                 (new JoinStatement())
                     ->left()
