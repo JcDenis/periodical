@@ -235,26 +235,27 @@ class ManagePeriod extends dcNsProcess
                     (new Input('period_title'))->size(65)->maxlenght(255)->class('maximal')->value(Html::escapeHTML($vars->period_title)),
                 ]),
                 (new Div())->class('two-boxes')->items([
-                    (new Para())->items([
-                        (new Label(__('Next update:')))->for('period_curdt'),
-                        (new Datetime('period_curdt', Html::escapeHTML(Dater::toUser($vars->period_curdt))))->class($vars->bad_period_curdt ? 'invalid' : ''),
+                    (new Div())->class('box odd')->items([
+                        (new Para())->items([
+                            (new Label(__('Next update:')))->for('period_curdt'),
+                            (new Datetime('period_curdt', Html::escapeHTML(Dater::toUser($vars->period_curdt))))->class($vars->bad_period_curdt ? 'invalid' : ''),
+                        ]),
+                        (new Para())->items([
+                            (new Label(__('End date:')))->for('period_enddt'),
+                            (new Datetime('period_enddt', Html::escapeHTML(Dater::toUser($vars->period_enddt))))->class($vars->bad_period_enddt ? 'invalid' : ''),
+                        ]),
                     ]),
-                    (new Para())->items([
-                        (new Label(__('End date:')))->for('period_enddt'),
-                        (new Datetime('period_enddt', Html::escapeHTML(Dater::toUser($vars->period_enddt))))->class($vars->bad_period_enddt ? 'invalid' : ''),
+                    (new Div())->class('box even')->items([
+                        (new Para())->items([
+                            (new Label(__('Publication frequency:'), Label::OUTSIDE_LABEL_BEFORE))->for('period_pub_int'),
+                            (new Select('period_pub_int'))->default($vars->period_pub_int)->items(My::periodCombo()),
+                        ]),
+                        (new Para())->items([
+                            (new Label(__('Number of entries to publish every time:'), Label::OUTSIDE_LABEL_BEFORE))->for('period_pub_nb'),
+                            (new Number('period_pub_nb'))->min(1)->max(20)->value($vars->period_pub_nb),
+                        ]),
                     ]),
                 ]),
-                (new Div())->class('two-boxes')->items([
-                    (new Para())->items([
-                        (new Label(__('Publication frequency:'), Label::OUTSIDE_LABEL_BEFORE))->for('period_pub_int'),
-                        (new Select('period_pub_int'))->default($vars->period_pub_int)->items(My::periodCombo()),
-                    ]),
-                    (new Para())->items([
-                        (new Label(__('Number of entries to publish every time:'), Label::OUTSIDE_LABEL_BEFORE))->for('period_pub_nb'),
-                        (new Number('period_pub_nb'))->min(1)->max(20)->value($vars->period_pub_nb),
-                    ]),
-                ]),
-
                 (new Div())->class('clear')->items([
                     (new Para())->items([
                         (new Submit(['save']))->value(__('Save')),
