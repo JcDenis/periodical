@@ -17,21 +17,21 @@ namespace Dotclear\Plugin\periodical;
 use dcCore;
 
 /**
- * Plugin def
+ * This module definitions.
  */
 class My
 {
-    /** @var string Required php version */
-    public const PHP_MIN = '8.1';
-
-    /** @var string This plugin table name */
+    /** @var    string  This module table name */
     public const TABLE_NAME = 'periodical';
 
-    /** @var string This plugin meta type */
+    /** @var    string  This module meta type */
     public const META_TYPE = 'periodical';
 
+    /** @var    string  This module required php version */
+    public const PHP_MIN = '8.1';
+
     /**
-     * This module id
+     * This module id.
      */
     public static function id(): string
     {
@@ -39,15 +39,25 @@ class My
     }
 
     /**
-     * This module name
+     * This module name.
      */
     public static function name(): string
     {
-        return __((string) dcCore::app()->plugins->moduleInfo(self::id(), 'name'));
+        $name = dcCore::app()->plugins->moduleInfo(self::id(), 'name');
+
+        return __(is_string($name) ? $name : self::id());
     }
 
     /**
-     * Check php version
+     * This module path.
+     */
+    public static function path(): string
+    {
+        return dirname(__DIR__);
+    }
+
+    /**
+     * Check this module PHP version compliant.
      */
     public static function phpCompliant(): bool
     {
@@ -55,7 +65,9 @@ class My
     }
 
     /**
-     * Periods action combo
+     * Periods action combo.
+     * 
+     * @return  array<string,sting>
      */
     public static function periodsActionCombo(): array
     {
@@ -66,7 +78,9 @@ class My
     }
 
     /**
-     * Period entries action combo
+     * Period entries action combo.
+     * 
+     * @return  array<string,array{string,string}>
      */
     public static function entriesActionsCombo(): array
     {
@@ -82,7 +96,9 @@ class My
     }
 
     /**
-     * Periods sortby combo
+     * Periods sortby combo.
+     * 
+     * @return  array<string,string>
      */
     public static function sortbyCombo(): array
     {
@@ -94,7 +110,9 @@ class My
     }
 
     /**
-     * Period combo
+     * Period combo.
+     * 
+     * @return  array<string,string>
      */
     public static function periodCombo(): array
     {
