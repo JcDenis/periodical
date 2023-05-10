@@ -24,7 +24,6 @@ class Install extends dcNsProcess
     public static function init(): bool
     {
         static::$init = defined('DC_CONTEXT_ADMIN')
-            && My::phpCompliant()
             && dcCore::app()->newVersion(My::id(), dcCore::app()->plugins->moduleInfo(My::id(), 'version'));
 
         return static::$init;

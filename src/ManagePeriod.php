@@ -43,7 +43,6 @@ class ManagePeriod extends dcNsProcess
     public static function init(): bool
     {
         static::$init == defined('DC_CONTEXT_ADMIN')
-            && My::phpCompliant()
             && !is_null(dcCore::app()->auth) && !is_null(dcCore::app()->blog)
             && dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
                 dcCore::app()->auth::PERMISSION_USAGE,

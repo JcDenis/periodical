@@ -20,7 +20,10 @@ $this->registerModule(
     'Jean-Christian Denis and contributors',
     '2023.04.23',
     [
-        'requires'    => [['core', '2.26']],
+        'requires' => [
+            ['php', '8.1'],
+            ['core', '2.26'],
+        ],
         'permissions' => dcCore::app()->auth->makePermissions([
             dcAuth::PERMISSION_USAGE,
             dcAuth::PERMISSION_CONTENT_ADMIN,
