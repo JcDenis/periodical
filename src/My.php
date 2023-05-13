@@ -55,7 +55,7 @@ class My
 
     /**
      * Periods action combo.
-     * 
+     *
      * @return  array<string,sting>
      */
     public static function periodsActionCombo(): array
@@ -68,7 +68,7 @@ class My
 
     /**
      * Period entries action combo.
-     * 
+     *
      * @return  array<string,array{string,string}>
      */
     public static function entriesActionsCombo(): array
@@ -86,7 +86,7 @@ class My
 
     /**
      * Periods sortby combo.
-     * 
+     *
      * @return  array<string,string>
      */
     public static function sortbyCombo(): array
@@ -100,7 +100,7 @@ class My
 
     /**
      * Period combo.
-     * 
+     *
      * @return  array<string,string>
      */
     public static function periodCombo(): array
