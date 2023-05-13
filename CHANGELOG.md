@@ -1,3 +1,9 @@
+2023.05.13
+- require Dotclear 2.26
+- require PHP 8.1+
+- use define php_min
+- use dotclear lock method
+
 2023.04.23
 - require Dotclear 2.26
 - require PHP 8.1
