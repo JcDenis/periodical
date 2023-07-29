@@ -14,10 +14,13 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use adminPostFilter;
 use dcCore;
-use dcNsProcess;
-use dcPage;
+use Dotclear\Core\Process;
+use Dotclear\Core\Backend\{
+    Notices,
+    Page
+};
+use Dotclear\Core\Backend\Filter\FilterPosts;
 use Dotclear\Helper\Html\Form\{
     Datetime,
     Div,
@@ -38,24 +41,16 @@ use Exception;
 /**
  * Admin page for a period
  */
-class ManagePeriod extends dcNsProcess
+class ManagePeriod extends Process
 {
     public static function init(): bool
     {
-        static::$init == defined('DC_CONTEXT_ADMIN')
-            && !is_null(dcCore::app()->auth) && !is_null(dcCore::app()->blog)
-            && dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
-                dcCore::app()->auth::PERMISSION_USAGE,
-                dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
-            ]), dcCore::app()->blog->id)
-            && ($_REQUEST['part'] ?? 'periods') === 'period';
-
-        return static::$init;
+        return self::status(My::checkContext(My::MANAGE) && ($_REQUEST['part'] ?? 'periods') === 'period');
     }
 
     public static function process(): bool
     {
-        if (!static::$init) {
+        if (!self::status()) {
             return false;
         }
 
@@ -170,12 +165,7 @@ class ManagePeriod extends dcNsProcess
      */
     public static function render(): void
     {
-        if (!static::$init) {
-            return;
-        }
-
-        // nullsafe
-        if (is_null(dcCore::app()->adminurl)) {
+        if (!self::status()) {
             return;
         }
 
@@ -187,7 +177,7 @@ class ManagePeriod extends dcNsProcess
         // Prepare combos for posts list
         if ($vars->period_id > 0) {
             // Filters
-            $post_filter = new adminPostFilter();
+            $post_filter = new FilterPosts();
             $post_filter->add('part', 'period');
 
             $params                  = $post_filter->params();
@@ -198,31 +188,31 @@ class ManagePeriod extends dcNsProcess
             try {
                 $posts     = Utils::getPosts($params);
                 $counter   = Utils::getPosts($params, true);
-                $post_list = new ManageList(dcCore::app(), $posts, $counter->f(0));
+                $post_list = new ManageList($posts, $counter->f(0));
             } catch (Exception $e) {
                 dcCore::app()->error->add($e->getMessage());
             }
 
-            $starting_script = dcPage::jsModuleLoad(My::id() . '/js/checkbox.js') .
-                $post_filter->js(dcCore::app()->adminurl->get('admin.plugin.' . My::id(), ['part' => 'period', 'period_id' => $vars->period_id], '&') . '#posts');
+            $starting_script = My::jsLoad('checkbox') .
+                $post_filter->js(My::manageUrl(['part' => 'period', 'period_id' => $vars->period_id], '&') . '#posts');
         }
 
         // Display
-        dcPage::openModule(
+        Page::openModule(
             My::name(),
-            dcPage::jsModuleLoad(My::id() . '/js/dates.js') .
+            My::jsLoad('dates') .
             $starting_script .
-            dcPage::jsDatePicker() .
-            dcPage::jsPageTabs()
+            Page::jsDatePicker() .
+            Page::jsPageTabs()
         );
 
         echo
-        dcPage::breadcrumb([
+        Page::breadcrumb([
             __('Plugins')                                                      => '',
             My::name()                                                         => dcCore::app()->admin->getPageURL() . '&amp;part=periods',
             (null === $vars->period_id ? __('New period') : __('Edit period')) => '',
         ]) .
-        dcPage::notices();
+        Notices::getNotices();
 
         // Period form
         echo
@@ -258,10 +248,11 @@ class ManagePeriod extends dcNsProcess
                 (new Div())->class('clear')->items([
                     (new Para())->items([
                         (new Submit(['save']))->value(__('Save')),
-                        dcCore::app()->formNonce(false),
-                        (new Hidden(['action'], 'setperiod')),
-                        (new Hidden(['period_id'], (string) $vars->period_id)),
-                        (new Hidden(['part'], 'period')),
+                        ... My::hiddenFields([
+                            'action'    => 'setperiod',
+                            'period_id' => (string) $vars->period_id,
+                            'part'      => 'period',
+                        ]),
                     ]),
                 ]),
             ]),
@@ -290,7 +281,7 @@ class ManagePeriod extends dcNsProcess
             // Filters
             $post_filter->display(
                 ['admin.plugin.periodical', '#posts'],
-                dcCore::app()->adminurl->getHiddenFormFields('admin.plugin.periodical', [
+                My::parsedHiddenFields([
                     'period_id' => $vars->period_id,
                     'part'      => 'period',
                 ])
@@ -307,18 +298,18 @@ class ManagePeriod extends dcNsProcess
                 '<div class="two-cols">' .
                 '<p class="col checkboxes-helpers"></p>' .
 
-                (new Para())->class('col right')->items(array_merge(
-                    dcCore::app()->adminurl->hiddenFormFields('admin.plugin.periodical', array_merge($post_filter->values(), [
-                        'period_id' => $vars->period_id,
-                        'redir'     => sprintf($base_url, $post_filter->value('page', '')),
-                    ])),
-                    [
+                (new Para())->class('col right')
+                    ->items([
                         (new Label(__('Selected entries action:'), Label::OUTSIDE_LABEL_BEFORE))->for('post_action')->class('classic'),
                         (new Select(['action','post_action']))->items(My::entriesActionsCombo()),
                         (new Submit('do_post_action'))->value(__('ok')),
-                        dcCore::app()->formNonce(false),
-                    ]
-                ))->render() .
+                        ... My::hiddenFields([
+                            ... $post_filter->values(),
+                            'period_id' => $vars->period_id,
+                            'redir'     => sprintf($base_url, $post_filter->value('page', '')),
+                        ]),
+                    ])
+                    ->render() .
                 '</div>' .
                 '</form>'
             );
@@ -327,9 +318,9 @@ class ManagePeriod extends dcNsProcess
             '</div>';
         }
 
-        dcPage::helpBlock('periodical');
+        Page::helpBlock('periodical');
 
-        dcPage::closeModule();
+        Page::closeModule();
     }
 
     /**
@@ -342,12 +333,12 @@ class ManagePeriod extends dcNsProcess
      */
     private static function redirect(string $redir, int $id, string $tab, string $msg): void
     {
-        dcPage::addSuccessNotice($msg);
+        Notices::addSuccessNotice($msg);
 
         if (!empty($redir)) {
             Http::redirect($redir);
         } else {
-            dcCore::app()->adminurl?->redirect('admin.plugin.' . My::id(), ['part' => 'period', 'period_id' => $id], $tab);
+            My::redirect(['part' => 'period', 'period_id' => $id], $tab);
         }
     }
 }

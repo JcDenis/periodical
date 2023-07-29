@@ -16,35 +16,32 @@ namespace Dotclear\Plugin\periodical;
 
 use dcBlog;
 use dcCore;
-use dcNsProcess;
+use Dotclear\Core\Process;
 use Exception;
 
 /**
  * Update posts from periods on frontend
  */
-class Frontend extends dcNsProcess
+class Frontend extends Process
 {
     public static function init(): bool
     {
-        static::$init = defined('DC_RC_PATH')
-            && in_array(dcCore::app()->url->type, ['default', 'feed']);
-
-        return static::$init;
+        return self::status(My::checkContext(My::INSTALL) && in_array(dcCore::app()->url->type, ['default', 'feed']));
     }
 
     public static function process(): bool
     {
-        if (!static::$init) {
+        if (!self::status()) {
             return false;
         }
 
         dcCore::app()->addBehavior('publicBeforeDocumentV2', function (): void {
-            if (is_null(dcCore::app()->auth) || is_null(dcCore::app()->blog)) {
+            if (is_null(dcCore::app()->blog)) {
                 return;
             }
 
             try {
-                $s = dcCore::app()->blog->settings->get(My::id());
+                $s = My::settings();
 
                 Utils::lockUpdate();
 

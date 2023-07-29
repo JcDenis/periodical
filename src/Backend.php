@@ -14,54 +14,36 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use dcAdmin;
 use dcCore;
-use dcNsProcess;
-use dcPage;
+use Dotclear\Core\Process;
 
-class Backend extends dcNsProcess
+class Backend extends Process
 {
     public static function init(): bool
     {
-        static::$init == defined('DC_CONTEXT_ADMIN')
-            && !is_null(dcCore::app()->blog) && !is_null(dcCore::app()->auth)
-            && dcCore::app()->auth->check(dcCore::app()->auth->makePermissions([
-                dcCore::app()->auth::PERMISSION_USAGE,
-                dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
-            ]), dcCore::app()->blog->id);
-
-        return static::$init;
+        return self::status(My::checkContext(My::BACKEND));
     }
 
     public static function process(): bool
     {
-        if (!static::$init) {
+        if (!self::status()) {
             return false;
         }
 
         // register backend behaviors
         dcCore::app()->addBehaviors([
-            'adminBlogPreferencesFormV2'    => [BackendBehaviors::class, 'adminBlogPreferencesForm'],
+            'adminBlogPreferencesFormV2'    => [BackendBehaviors::class, 'adminBlogPreferencesFormV2'],
             'adminBeforeBlogSettingsUpdate' => [BackendBehaviors::class, 'adminBeforeBlogSettingsUpdate'],
-            'adminFiltersListsV2'           => [BackendBehaviors::class, 'adminFiltersLists'],
-            'adminColumnsListsV2'           => [BackendBehaviors::class, 'adminColumnsLists'],
-            'adminPostListHeaderV2'         => [BackendBehaviors::class, 'adminPostListHeader'],
-            'adminPostListValueV2'          => [BackendBehaviors::class, 'adminPostListValue'],
+            'adminFiltersListsV2'           => [BackendBehaviors::class, 'adminFiltersListsV2'],
+            'adminColumnsListsV2'           => [BackendBehaviors::class, 'adminColumnsListsV2'],
+            'adminPostListHeaderV2'         => [BackendBehaviors::class, 'adminPostListHeaderV2'],
+            'adminPostListValueV2'          => [BackendBehaviors::class, 'adminPostListValueV2'],
             'adminBeforePostDelete'         => [BackendBehaviors::class, 'adminBeforePostDelete'],
         ]);
 
-        if (dcCore::app()->blog?->settings->get(My::id())->get('periodical_active')) {
+        if (My::settings()->get('periodical_active')) {
             // add backend sidebar icon
-            dcCore::app()->menu[dcAdmin::MENU_PLUGINS]->addItem(
-                My::name(),
-                dcCore::app()->adminurl?->get('admin.plugin.' . My::id()),
-                dcPage::getPF(My::id() . '/icon.svg'),
-                preg_match('/' . preg_quote((string) dcCore::app()->adminurl?->get('admin.plugin.' . My::id())) . '(&.*)?$/', $_SERVER['REQUEST_URI']),
-                dcCore::app()->auth?->check(dcCore::app()->auth->makePermissions([
-                    dcCore::app()->auth::PERMISSION_USAGE,
-                    dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
-                ]), dcCore::app()->blog->id)
-            );
+            My::addBackendMenuItem();
 
             // register bakend behaviors required user permissions
             dcCore::app()->addBehaviors([

@@ -16,10 +16,13 @@ namespace Dotclear\Plugin\periodical;
 
 use ArrayObject;
 use dcCore;
-use dcFavorites;
-use dcPage;
-use dcPostsActions;
 use dcSettings;
+use Dotclear\Core\Backend\{
+    Favorites,
+    Notices,
+    Page
+};
+use Dotclear\Core\Backend\Action\ActionsPosts;
 use Dotclear\Database\{
     Cursor,
     MetaRecord
@@ -52,9 +55,9 @@ class BackendBehaviors
      *
      * @param   dcSettings  $blog_settings  dcSettings instance
      */
-    public static function adminBlogPreferencesForm(dcSettings $blog_settings): void
+    public static function adminBlogPreferencesFormV2(dcSettings $blog_settings): void
     {
-        $s = $blog_settings->get('periodical');
+        $s = $blog_settings->get(My::id());
 
         echo
         (new Div())->class('fieldset')->items([
@@ -88,9 +91,9 @@ class BackendBehaviors
      */
     public static function adminBeforeBlogSettingsUpdate(dcSettings $blog_settings): void
     {
-        $blog_settings->get('periodical')->put('periodical_active', !empty($_POST['periodical_active']));
-        $blog_settings->get('periodical')->put('periodical_upddate', !empty($_POST['periodical_upddate']));
-        $blog_settings->get('periodical')->put('periodical_updurl', !empty($_POST['periodical_updurl']));
+        $blog_settings->get(My::id())->put('periodical_active', !empty($_POST['periodical_active']));
+        $blog_settings->get(My::id())->put('periodical_upddate', !empty($_POST['periodical_upddate']));
+        $blog_settings->get(My::id())->put('periodical_updurl', !empty($_POST['periodical_updurl']));
     }
 
     /**
@@ -98,7 +101,7 @@ class BackendBehaviors
      *
      * @param   ArrayObject     $cols   Columns
      */
-    public static function adminColumnsLists(ArrayObject $cols): void
+    public static function adminColumnsListsV2(ArrayObject $cols): void
     {
         $cols[My::id()] = [
             My::name(),
@@ -119,7 +122,7 @@ class BackendBehaviors
      *
      * @param   ArrayObject     $sorts  Sort options
      */
-    public static function adminFiltersLists(ArrayObject $sorts): void
+    public static function adminFiltersListsV2(ArrayObject $sorts): void
     {
         $sorts[My::id()] = [
             My::name(),
@@ -136,9 +139,9 @@ class BackendBehaviors
      * @param   MetaRecord      $rs     record instance
      * @param   ArrayObject     $cols   Columns
      */
-    public static function adminPostListHeader(MetaRecord $rs, ArrayObject $cols): void
+    public static function adminPostListHeaderV2(MetaRecord $rs, ArrayObject $cols): void
     {
-        if (dcCore::app()->blog?->settings->get('periodical')->get('periodical_active')) {
+        if (My::settings()->get('periodical_active')) {
             $cols['period'] = '<th scope="col">' . __('Period') . '</th>';
         }
     }
@@ -149,9 +152,9 @@ class BackendBehaviors
      * @param   MetaRecord      $rs     record instance
      * @param   ArrayObject     $cols   Columns
      */
-    public static function adminPostListValue(MetaRecord $rs, ArrayObject $cols): void
+    public static function adminPostListValueV2(MetaRecord $rs, ArrayObject $cols): void
     {
-        if (!dcCore::app()->blog?->settings->get('periodical')->get('periodical_active')) {
+        if (!My::settings()->get('periodical_active')) {
             return;
         }
 
@@ -159,7 +162,7 @@ class BackendBehaviors
         if ($r->isEmpty()) {
             $name = '-';
         } else {
-            $url  = dcCore::app()->adminurl?->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $r->f('periodical_id')]);
+            $url  = My::manageUrl(['part' => 'period', 'period_id' => $r->f('periodical_id')]);
             $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($r->f('periodical_title')) . '</a>';
         }
         $cols['period'] = '<td class="nowrap">' . $name . '</td>';
@@ -168,18 +171,15 @@ class BackendBehaviors
     /**
      * Dashboard Favorites.
      *
-     * @param   dcFavorites     $favs   Array of favorites
+     * @param   Favorites   $favs   Array of favorites
      */
-    public static function adminDashboardFavoritesV2(dcFavorites $favs): void
+    public static function adminDashboardFavoritesV2(Favorites $favs): void
     {
-        if (is_null(dcCore::app()->auth) || is_null(dcCore::app()->blog) || is_null(dcCore::app()->adminurl)) {
-            return;
-        }
         $favs->register(My::id(), [
             'title'       => My::name(),
-            'url'         => dcCore::app()->adminurl->get('admin.plugin.' . My::id()),
-            'small-icon'  => dcPage::getPF(My::id() . '/icon.svg'),
-            'large-icon'  => dcPage::getPF(My::id() . '/icon.svg'),
+            'url'         => My::manageUrl(),
+            'small-icon'  => My::icons(),
+            'large-icon'  => My::icons(),
             'permissions' => dcCore::app()->auth->makePermissions([
                 dcCore::app()->auth::PERMISSION_USAGE,
                 dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
@@ -194,7 +194,7 @@ class BackendBehaviors
      */
     public static function adminPostHeaders(): string
     {
-        return dcPage::jsModuleLoad(My::id() . '/js/toggle.js');
+        return My::jsLoad('toggle');
     }
 
     /**
@@ -210,9 +210,9 @@ class BackendBehaviors
     /**
      * Add actions to posts page combo.
      *
-     * @param   dcPostsActions  $pa     dcPostsActions instance
+     * @param   ActionsPosts    $pa     ActionsPosts instance
      */
-    public static function adminPostsActions(dcPostsActions $pa): void
+    public static function adminPostsActions(ActionsPosts $pa): void
     {
         $pa->addAction(
             [My::name() => [__('Add to periodical') => 'periodical_add']],
@@ -233,10 +233,10 @@ class BackendBehaviors
     /**
      * Posts actions callback to remove period.
      *
-     * @param   dcPostsActions  $pa     dcPostsActions instance
+     * @param   ActionsPosts    $pa     ActionsPosts instance
      * @param   ArrayObject     $post   _POST actions
      */
-    public static function callbackRemove(dcPostsActions $pa, ArrayObject $post): void
+    public static function callbackRemove(ActionsPosts $pa, ArrayObject $post): void
     {
         // No entry
         $posts_ids = $pa->getIDs();
@@ -257,17 +257,17 @@ class BackendBehaviors
             self::delPeriod($post_id);
         }
 
-        dcPage::addSuccessNotice(__('Posts have been removed from periodical.'));
+        Notices::addSuccessNotice(__('Posts have been removed from periodical.'));
         $pa->redirect(true);
     }
 
     /**
      * Posts actions callback to add period.
      *
-     * @param   dcPostsActions  $pa     dcPostsActions instance
+     * @param   ActionsPosts    $pa     ActionsPosts instance
      * @param   ArrayObject     $post   _POST actions
      */
-    public static function callbackAdd(dcPostsActions $pa, ArrayObject $post): void
+    public static function callbackAdd(ActionsPosts $pa, ArrayObject $post): void
     {
         // No entry
         $posts_ids = $pa->getIDs();
@@ -284,14 +284,14 @@ class BackendBehaviors
                 self::addPeriod($post_id, (int) $post['periodical']);
             }
 
-            dcPage::addSuccessNotice(__('Posts have been added to periodical.'));
+            Notices::addSuccessNotice(__('Posts have been added to periodical.'));
             $pa->redirect(true);
         }
 
         // Display form
         else {
             $pa->beginPage(
-                dcPage::breadcrumb([
+                Page::breadcrumb([
                     Html::escapeHTML((string) dcCore::app()->blog?->name) => '',
                     $pa->getCallerTitle()                                 => $pa->getRedirection(true),
                     __('Add a period to this selection')                  => '',

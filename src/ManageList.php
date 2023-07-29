@@ -15,12 +15,16 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\periodical;
 
 use ArrayObject;
-use adminGenericFilter;
-use adminGenericList;
-use adminPostFilter;
 use dcBlog;
 use dcCore;
-use dcPager;
+use Dotclear\Core\Backend\Filter\{
+    Filters,
+    FilterPosts
+};
+use Dotclear\Core\Backend\Listing\{
+    Listing,
+    Pager
+};
 use Dotclear\Helper\Date;
 use Dotclear\Helper\Html\Form\Checkbox;
 use Dotclear\Helper\Html\Html;
@@ -30,15 +34,15 @@ use Dotclear\Helper\Html\Html;
  * @brief Periodical - admin pager methods.
  * @since 2.6
  */
-class ManageList extends adminGenericList
+class ManageList extends Listing
 {
     /**
      * Display periods list.
      *
-     * @param   adminGenericFilter  $filter         The periods filter
-     * @param   string              $enclose_block  The enclose block
+     * @param   Filters     $filter         The periods filter
+     * @param   string      $enclose_block  The enclose block
      */
-    public function periodDisplay(adminGenericFilter $filter, string $enclose_block = ''): void
+    public function periodDisplay(Filters $filter, string $enclose_block = ''): void
     {
         if ($this->rs->isEmpty()) {
             if ($filter->show()) {
@@ -47,7 +51,7 @@ class ManageList extends adminGenericList
                 echo '<p><strong>' . __('No period') . '</strong></p>';
             }
         } else {
-            $pager           = new dcPager((int) $filter->value('page'), (int) $this->rs_count, (int) $filter->value('nb'), 10);
+            $pager           = new Pager((int) $filter->value('page'), (int) $this->rs_count, (int) $filter->value('nb'), 10);
             $pager->var_page = 'page';
 
             $periods = [];
@@ -99,7 +103,7 @@ class ManageList extends adminGenericList
     {
         $tz       = dcCore::app()->auth?->getInfo('user_tz');
         $nb_posts = Utils::getPosts(['periodical_id' => $this->rs->f('periodical_id')], true)->f(0);
-        $url      = dcCore::app()->adminurl?->get('admin.plugin.periodical', ['part' => 'period', 'period_id' => $this->rs->f('periodical_id')]);
+        $url      = My::manageUrl(['part' => 'period', 'period_id' => $this->rs->f('periodical_id')]);
         $name     = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($this->rs->periodical_title) . '</a>';
         $posts    = $nb_posts ? '<a href="' . $url . '#posts" title="' . __('view related entries') . '">' . $nb_posts . '</a>' : '0';
         $interval = in_array($this->rs->f('periodical_pub_int'), My::periodCombo()) ?
@@ -126,11 +130,11 @@ class ManageList extends adminGenericList
     /**
      * Display period posts list.
      *
-     * @param   adminPostFilter     $filter         The posts filter
-     * @param   string              $base_url       The page base URL
-     * @param   string              $enclose_block  The enclose block
+     * @param   FilterPosts     $filter         The posts filter
+     * @param   string          $base_url       The page base URL
+     * @param   string          $enclose_block  The enclose block
      */
-    public function postDisplay(adminPostFilter $filter, string $base_url, string $enclose_block = ''): void
+    public function postDisplay(FilterPosts $filter, string $base_url, string $enclose_block = ''): void
     {
         $echo = '';
         if ($this->rs->isEmpty()) {
@@ -140,7 +144,7 @@ class ManageList extends adminGenericList
                 echo '<p><strong>' . __('No entry') . '</strong></p>';
             }
         } else {
-            $pager           = new dcPager((int) $filter->value('page'), (int) $this->rs_count, (int) $filter->value('nb'), 10);
+            $pager           = new Pager((int) $filter->value('page'), (int) $this->rs_count, (int) $filter->value('nb'), 10);
             $pager->base_url = $base_url;
             $pager->var_page = 'page';
 
