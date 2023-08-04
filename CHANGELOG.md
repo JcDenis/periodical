@@ -1,3 +1,9 @@
+2023.08.04
+- require Dotclear 2.27
+- require PHP 8.1+
+- fix permissions
+- move repository to gitea (experimental)
+
 2023.07.29
 - require Dotclear 2.27
 - require PHP 8.1+

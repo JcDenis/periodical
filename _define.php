@@ -18,7 +18,7 @@ $this->registerModule(
     'Periodical',
     'Published periodically entries',
     'Jean-Christian Denis and contributors',
-    '2023.07.29',
+    '2023.08.04',
     [
         'requires' => [
             ['php', '8.1'],
@@ -29,9 +29,9 @@ $this->registerModule(
             dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
         ]),
         'type'       => 'plugin',
-        'support'    => 'https://github.com/JcDenis/periodical',
-        'details'    => 'https://plugins.dotaddict.org/dc2/details/periodical',
-        'repository' => 'https://raw.githubusercontent.com/JcDenis/periodical/master/dcstore.xml',
+        'support'    => 'http://gitea.jcdenis.fr/Dotclear/periodical',
+        'details'    => 'http://gitea.jcdenis.fr/Dotclear/periodical/src/branch/master/README.md',
+        'repository' => 'http://gitea.jcdenis.fr/Dotclear/periodical/raw/branch/master/dcstore.xml',
         'settings'   => [
             'blog' => '#params.periodical_params',
         ],
