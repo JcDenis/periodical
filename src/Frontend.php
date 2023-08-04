@@ -26,7 +26,7 @@ class Frontend extends Process
 {
     public static function init(): bool
     {
-        return self::status(My::checkContext(My::INSTALL) && in_array(dcCore::app()->url->type, ['default', 'feed']));
+        return self::status(My::checkContext(My::FRONTEND) && in_array(dcCore::app()->url->type, ['default', 'feed']));
     }
 
     public static function process(): bool
