@@ -22,12 +22,6 @@ use Dotclear\Module\MyPlugin;
  */
 class My extends MyPlugin
 {
-    /** @var    string  This module table name */
-    public const TABLE_NAME = 'periodical';
-
-    /** @var    string  This module meta type */
-    public const META_TYPE = 'periodical';
-
     public static function checkCustomContext(int $context): ?bool
     {
         return in_array($context, [My::MANAGE, My::MENU]) ?

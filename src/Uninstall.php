@@ -40,7 +40,7 @@ class Uninstall extends Process
             ->addUserAction(
                 'tables',
                 'delete',
-                My::TABLE_NAME
+                My::id()
             )
             ->addUserAction(
                 'plugins',
@@ -60,7 +60,7 @@ class Uninstall extends Process
             ->addDirectAction(
                 'tables',
                 'delete',
-                My::TABLE_NAME
+                My::id()
             )
             ->addDirectAction(
                 'plugins',

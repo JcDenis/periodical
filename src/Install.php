@@ -36,7 +36,7 @@ class Install extends Process
             $t = new Structure(dcCore::app()->con, dcCore::app()->prefix);
 
             // create database table
-            $t->__get(My::TABLE_NAME)
+            $t->__get(My::id())
                 ->field('periodical_id', 'bigint', 0, false)
                 ->field('blog_id', 'varchar', 32, false)
                 ->field('periodical_type', 'varchar', 32, false, "'post'")

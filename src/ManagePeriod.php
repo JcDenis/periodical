@@ -104,8 +104,8 @@ class ManagePeriod extends Process
                     Utils::updPeriod($vars->period_id, $cur);
 
                     self::redirect($vars->redir, $vars->period_id, '#period', __('Period successfully updated.'));
-                // Create period
                 } else {
+                    // Create period
                     $period_id = Utils::addPeriod($cur);
 
                     self::redirect($vars->redir, $period_id, '#period', __('Period successfully created.'));

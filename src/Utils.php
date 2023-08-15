@@ -48,7 +48,7 @@ class Utils
      */
     public static function openCursor(): Cursor
     {
-        return dcCore::app()->con->openCursor(dcCore::app()->prefix . My::TABLE_NAME);
+        return dcCore::app()->con->openCursor(dcCore::app()->prefix . My::id());
     }
 
     /**
@@ -82,7 +82,7 @@ class Utils
             ]);
         }
 
-        $sql->from($sql->as(dcCore::app()->prefix . My::TABLE_NAME, 'T'), false, true);
+        $sql->from($sql->as(dcCore::app()->prefix . My::id(), 'T'), false, true);
 
         if (!empty($params['join'])) {
             $sql->join($params['join']);
@@ -150,12 +150,12 @@ class Utils
      */
     public static function addPeriod(Cursor $cur): int
     {
-        dcCore::app()->con->writeLock(dcCore::app()->prefix . My::TABLE_NAME);
+        dcCore::app()->con->writeLock(dcCore::app()->prefix . My::id());
 
         try {
             // get next id
             $sql = new SelectStatement();
-            $rs  = $sql->from(dcCore::app()->prefix . My::TABLE_NAME)
+            $rs  = $sql->from(dcCore::app()->prefix . My::id())
                 ->column($sql->max('periodical_id'))
                 ->select();
 
@@ -207,7 +207,7 @@ class Utils
         }
 
         $sql = new DeleteStatement();
-        $sql->from(dcCore::app()->prefix . My::TABLE_NAME)
+        $sql->from(dcCore::app()->prefix . My::id())
             ->where('blog_id = ' . $sql->quote((string) dcCore::app()->blog?->id))
             ->and('periodical_id = ' . $period_id)
             ->delete();
@@ -236,7 +236,7 @@ class Utils
 
         $sql = new DeleteStatement();
         $sql->from(dcCore::app()->prefix . dcMeta::META_TABLE_NAME)
-            ->where('meta_type = ' . $sql->quote(My::META_TYPE))
+            ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id ' . $sql->in($ids))
             ->delete();
     }
@@ -282,11 +282,11 @@ class Utils
             ->join(
                 (new JoinStatement())
                     ->left()
-                    ->from($sql->as(dcCore::app()->prefix . My::TABLE_NAME, 'T'))
+                    ->from($sql->as(dcCore::app()->prefix . My::id(), 'T'))
                     ->on('CAST(T.periodical_id as char) = CAST(R.meta_id as char)')
                     ->statement()
             )
-            ->and('R.meta_type = ' . $sql->quote(My::META_TYPE))
+            ->and('R.meta_type = ' . $sql->quote(My::id()))
             ->and("T.periodical_type = 'post' ")
         ;
 
@@ -343,7 +343,7 @@ class Utils
         try {
             $cur->setField('post_id', $post_id);
             $cur->setField('meta_id', $period_id);
-            $cur->setField('meta_type', My::META_TYPE);
+            $cur->setField('meta_type', My::id());
             $cur->insert();
             dcCore::app()->con->unlock();
         } catch (Exception $e) {
@@ -362,7 +362,7 @@ class Utils
     {
         $sql = new DeleteStatement();
         $sql->from(dcCore::app()->prefix . dcMeta::META_TABLE_NAME)
-            ->where('meta_type = ' . $sql->quote(My::META_TYPE))
+            ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id = ' . $post_id)
             ->delete();
     }
@@ -395,7 +395,7 @@ class Utils
 
         $sql = new DeleteStatement();
         $sql->from(dcCore::app()->prefix . dcMeta::META_TABLE_NAME)
-            ->where('meta_type = ' . $sql->quote(My::META_TYPE))
+            ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id ' . $sql->in($ids))
             ->delete();
     }

@@ -60,7 +60,7 @@ class Frontend extends Process
                 if (!preg_match('/^(post_dt|post_creadt|post_id) (asc|desc)$/', $posts_order)) {
                     $posts_order = 'post_dt asc';
                 }
-                $cur_period = dcCore::app()->con->openCursor(dcCore::app()->prefix . My::TABLE_NAME);
+                $cur_period = dcCore::app()->con->openCursor(dcCore::app()->prefix . My::id());
 
                 while ($periods->fetch()) {
                     // Check if period is ongoing

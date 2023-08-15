@@ -16,5 +16,6 @@ if (!defined('DC_RC_PATH')) {
 
 class initPeriodical
 {
+    // now use My::id()
     public const PERIOD_TABLE_NAME = 'periodical';
 }
