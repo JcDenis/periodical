@@ -89,7 +89,7 @@ class Frontend extends Process
                             $posts                         = App::auth()->sudo(Utils::getPosts(...), $posts_params);
 
                             if (!$posts->isEmpty()) {
-                                $cur_post = App::blgo()->openPostCursor();
+                                $cur_post = App::blog()->openPostCursor();
 
                                 while ($posts->fetch()) {
                                     // Publish post with right date
