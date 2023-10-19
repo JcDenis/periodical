@@ -1,19 +1,10 @@
 <?php
-
-# -- BEGIN LICENSE BLOCK ----------------------------------
-#
-# This file is part of periodical, a plugin for Dotclear 2.
-#
-# Copyright (c) 2009-2021 Jean-Christian Denis and contributors
-#
-# Licensed under the GPL version 2.0 license.
-# A copy of this license is available in LICENSE file or at
-# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-#
-# -- END LICENSE BLOCK ------------------------------------
-
-if (!defined('DC_RC_PATH')) {
-    return null;
-}
-
-dcCore::app()->resources['help']['periodical'] = __DIR__ . '/help/help.html';
+/**
+ * @file
+ * @brief       The plugin periodical definition
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
+\Dotclear\App::backend()->resources()->set('help', 'periodical', __DIR__ . '/help/help.html');

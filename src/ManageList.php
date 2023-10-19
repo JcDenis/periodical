@@ -1,22 +1,11 @@
 <?php
-/**
- * @brief periodical, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
 use ArrayObject;
-use dcBlog;
-use dcCore;
+use Dotclear\App;
 use Dotclear\Core\Backend\Filter\{
     Filters,
     FilterPosts
@@ -30,9 +19,11 @@ use Dotclear\Helper\Html\Form\Checkbox;
 use Dotclear\Helper\Html\Html;
 
 /**
- * @ingroup DC_PLUGIN_PERIODICAL
- * @brief Periodical - admin pager methods.
- * @since 2.6
+ * @brief       periodical periods list class.
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
 class ManageList extends Listing
 {
@@ -101,7 +92,7 @@ class ManageList extends Listing
      */
     private function periodLine(bool $checked): void
     {
-        $tz       = dcCore::app()->auth?->getInfo('user_tz');
+        $tz       = App::auth()->getInfo('user_tz');
         $nb_posts = Utils::getPosts(['periodical_id' => $this->rs->f('periodical_id')], true)->f(0);
         $url      = My::manageUrl(['part' => 'period', 'period_id' => $this->rs->f('periodical_id')]);
         $name     = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($this->rs->periodical_title) . '</a>';
@@ -203,7 +194,7 @@ class ManageList extends Listing
      */
     private function postLine(bool $checked): void
     {
-        if (dcCore::app()->auth?->check(dcCore::app()->auth->makePermissions([dcCore::app()->auth::PERMISSION_CATEGORIES]), dcCore::app()->blog?->id)) {
+        if (App::auth()->check(App::auth()->makePermissions([App::auth()::PERMISSION_CATEGORIES]), App::blog()->id())) {
             $cat_link = '<a href="category.php?id=%s">%s</a>';
         } else {
             $cat_link = '%2$s';
@@ -222,22 +213,22 @@ class ManageList extends Listing
         $img_status = '';
         $img        = '<img alt="%1$s" title="%1$s" src="images/%2$s" />';
         switch ((int) $this->rs->f('post_status')) {
-            case dcBlog::POST_PUBLISHED:
+            case App::blog()::POST_PUBLISHED:
                 $img_status = sprintf($img, __('published'), 'check-on.png');
 
                 break;
 
-            case dcBlog::POST_UNPUBLISHED:
+            case App::blog()::POST_UNPUBLISHED:
                 $img_status = sprintf($img, __('unpublished'), 'check-off.png');
 
                 break;
 
-            case dcBlog::POST_SCHEDULED:
+            case App::blog()::POST_SCHEDULED:
                 $img_status = sprintf($img, __('scheduled'), 'scheduled.png');
 
                 break;
 
-            case dcBlog::POST_PENDING:
+            case App::blog()::POST_PENDING:
                 $img_status = sprintf($img, __('pending'), 'check-wrn.png');
 
                 break;
@@ -260,11 +251,11 @@ class ManageList extends Listing
             $attach     = sprintf($img, sprintf($attach_str, $nb_media), 'attach.png');
         }
 
-        $tz = dcCore::app()->auth?->getInfo('user_tz');
+        $tz = App::auth()->getInfo('user_tz');
 
         $cols = [
             'check' => '<td class="minimal">' . (new Checkbox(['periodical_entries[]'], $checked))->value($this->rs->f('post_id'))->render() . '</td>',
-            'title' => '<td class="maximal"><a href="' . dcCore::app()->getPostAdminURL($this->rs->f('post_type'), $this->rs->f('post_id')) . '" ' .
+            'title' => '<td class="maximal"><a href="' . App::postTypes()->getPostAdminURL($this->rs->f('post_type'), $this->rs->f('post_id')) . '" ' .
                 'title="' . Html::escapeHTML($this->rs->getURL()) . '">' . Html::escapeHTML($this->rs->post_title) . '</a></td>',
             'date'     => '<td class="nowrap">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('post_dt')) . '</td>',
             'category' => '<td class="nowrap">' . $cat_title . '</td>',

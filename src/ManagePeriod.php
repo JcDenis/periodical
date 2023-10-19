@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use dcCore;
+use Dotclear\App;
 use Dotclear\Core\Process;
 use Dotclear\Core\Backend\{
     Notices,
@@ -39,7 +39,11 @@ use Dotclear\Helper\Network\Http;
 use Exception;
 
 /**
- * Admin page for a period
+ * @brief       periodical manage a period class.
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
 class ManagePeriod extends Process
 {
@@ -54,7 +58,7 @@ class ManagePeriod extends Process
             return false;
         }
 
-        if (is_null(dcCore::app()->blog)) {
+        if (!App::blog()->isDefined()) {
             return false;
         }
 
@@ -63,13 +67,13 @@ class ManagePeriod extends Process
 
         // Get period
         if ($vars->bad_period_id) {
-            dcCore::app()->error->add(__('This period does not exist.'));
+            App::error()->add(__('This period does not exist.'));
         }
 
         // Set period
         if ($vars->action == 'setperiod') {
             if ($vars->bad_period_curdt || $vars->bad_period_enddt) {
-                dcCore::app()->error->add(__('Invalid date'));
+                App::error()->add(__('Invalid date'));
             }
 
             // Check period title and dates
@@ -79,19 +83,19 @@ class ManagePeriod extends Process
             if (!$old_titles->isEmpty()) {
                 while ($old_titles->fetch()) {
                     if (!$vars->period_id || $old_titles->f('periodical_id') != $vars->period_id) {
-                        dcCore::app()->error->add(__('Period title is already taken'));
+                        App::error()->add(__('Period title is already taken'));
                     }
                 }
             }
             if (empty($vars->period_title)) {
-                dcCore::app()->error->add(__('Period title is required'));
+                App::error()->add(__('Period title is required'));
             }
             if (strtotime($vars->period_curdt) > strtotime($vars->period_enddt)) {
-                dcCore::app()->error->add(__('Start date must be older than end date'));
+                App::error()->add(__('Start date must be older than end date'));
             }
 
             // If no error, set period
-            if (!dcCore::app()->error->flag()) {
+            if (!App::error()->flag()) {
                 $cur = Utils::openCursor();
                 $cur->setField('periodical_title', $vars->period_title);
                 $cur->setField('periodical_curdt', $vars->period_curdt);
@@ -114,18 +118,18 @@ class ManagePeriod extends Process
         }
 
         // Actions on related posts
-        if (!dcCore::app()->error->flag() && $vars->period_id && $vars->action && !empty($vars->entries)) {
+        if (!App::error()->flag() && $vars->period_id && $vars->action && !empty($vars->entries)) {
             // Publish posts
             if ($vars->action == 'publish') {
                 try {
                     foreach ($vars->entries as $id) {
-                        dcCore::app()->blog->updPostStatus($id, 1);
+                        App::blog()->updPostStatus($id, 1);
                         Utils::delPost($id);
                     }
 
                     self::redirect($vars->redir, $vars->period_id, '#posts', __('Entries successfully published.'));
                 } catch (Exception $e) {
-                    dcCore::app()->error->add($e->getMessage());
+                    App::error()->add($e->getMessage());
                 }
             }
 
@@ -133,13 +137,13 @@ class ManagePeriod extends Process
             if ($vars->action == 'unpublish') {
                 try {
                     foreach ($vars->entries as $id) {
-                        dcCore::app()->blog->updPostStatus($id, 0);
+                        App::blog()->updPostStatus($id, 0);
                         Utils::delPost($id);
                     }
 
                     self::redirect($vars->redir, $vars->period_id, '#posts', __('Entries successfully unpublished.'));
                 } catch (Exception $e) {
-                    dcCore::app()->error->add($e->getMessage());
+                    App::error()->add($e->getMessage());
                 }
             }
 
@@ -152,7 +156,7 @@ class ManagePeriod extends Process
 
                     self::redirect($vars->redir, $vars->period_id, '#posts', __('Entries successfully removed.'));
                 } catch (Exception $e) {
-                    dcCore::app()->error->add($e->getMessage());
+                    App::error()->add($e->getMessage());
                 }
             }
         }
@@ -190,7 +194,7 @@ class ManagePeriod extends Process
                 $counter   = Utils::getPosts($params, true);
                 $post_list = new ManageList($posts, $counter->f(0));
             } catch (Exception $e) {
-                dcCore::app()->error->add($e->getMessage());
+                App::error()->add($e->getMessage());
             }
 
             $starting_script = My::jsLoad('checkbox') .
@@ -209,7 +213,7 @@ class ManagePeriod extends Process
         echo
         Page::breadcrumb([
             __('Plugins')                                                      => '',
-            My::name()                                                         => dcCore::app()->admin->getPageURL() . '&amp;part=periods',
+            My::name()                                                         => App::backend()->getPageURL() . '&amp;part=periods',
             (null === $vars->period_id ? __('New period') : __('Edit period')) => '',
         ]) .
         Notices::getNotices();
@@ -218,7 +222,7 @@ class ManagePeriod extends Process
         echo
         (new Div('period'))->items([
             (new Text('h3', null === $vars->period_id ? __('New period') : __('Edit period'))),
-            (new Form('periodicalbhv'))->method('post')->action(dcCore::app()->admin->getPageURL())->fields([
+            (new Form('periodicalbhv'))->method('post')->action(App::backend()->getPageURL())->fields([
                 (new Para())->items([
                     (new Label(__('Title:')))->for('period_title'),
                     (new Input('period_title'))->size(65)->maxlenght(255)->class('maximal')->value(Html::escapeHTML($vars->period_title)),
@@ -258,8 +262,8 @@ class ManagePeriod extends Process
             ]),
         ])->render();
 
-        if ($vars->period_id && isset($post_filter) && isset($post_list) && !dcCore::app()->error->flag()) {
-            $base_url = dcCore::app()->admin->getPageURL() .
+        if ($vars->period_id && isset($post_filter) && isset($post_list) && !App::error()->flag()) {
+            $base_url = App::backend()->getPageURL() .
                 '&amp;period_id=' . $vars->period_id .
                 '&amp;part=period' .
                 '&amp;user_id=' . $post_filter->value('user_id', '') .
@@ -291,7 +295,7 @@ class ManagePeriod extends Process
             $post_list->postDisplay(
                 $post_filter,
                 $base_url,
-                '<form action="' . dcCore::app()->admin->getPageURL() . '" method="post" id="form-entries">' .
+                '<form action="' . App::backend()->getPageURL() . '" method="post" id="form-entries">' .
 
                 '%s' .
 

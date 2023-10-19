@@ -1,24 +1,21 @@
 <?php
-/**
- * @brief periodical, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use dcCore;
+use Dotclear\App;
 use Dotclear\Core\Process;
 use Dotclear\Database\Structure;
 use Exception;
 
+/**
+ * @brief       periodical insatll class.
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 class Install extends Process
 {
     public static function init(): bool
@@ -33,7 +30,7 @@ class Install extends Process
         }
 
         try {
-            $t = new Structure(dcCore::app()->con, dcCore::app()->prefix);
+            $t = new Structure(App::con(), App::con()->prefix());
 
             // create database table
             $t->__get(My::id())
@@ -49,7 +46,7 @@ class Install extends Process
                 ->primary('pk_periodical', 'periodical_id')
                 ->index('idx_periodical_type', 'btree', 'periodical_type');
 
-            (new Structure(dcCore::app()->con, dcCore::app()->prefix))->synchronize($t);
+            (new Structure(App::con(), App::con()->prefix()))->synchronize($t);
 
             // set default settings
             $s = My::settings();
@@ -60,7 +57,7 @@ class Install extends Process
 
             return true;
         } catch (Exception $e) {
-            dcCore::app()->error->add($e->getMessage());
+            App::error()->add($e->getMessage());
 
             return false;
         }

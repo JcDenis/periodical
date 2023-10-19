@@ -1,22 +1,19 @@
 <?php
-/**
- * @brief periodical, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use dcCore;
+use Dotclear\App;
 use Dotclear\Core\Process;
 
+/**
+ * @brief       periodical backend class.
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 class Backend extends Process
 {
     public static function init(): bool
@@ -31,14 +28,14 @@ class Backend extends Process
         }
 
         // register backend behaviors
-        dcCore::app()->addBehaviors([
-            'adminBlogPreferencesFormV2'    => [BackendBehaviors::class, 'adminBlogPreferencesFormV2'],
-            'adminBeforeBlogSettingsUpdate' => [BackendBehaviors::class, 'adminBeforeBlogSettingsUpdate'],
-            'adminFiltersListsV2'           => [BackendBehaviors::class, 'adminFiltersListsV2'],
-            'adminColumnsListsV2'           => [BackendBehaviors::class, 'adminColumnsListsV2'],
-            'adminPostListHeaderV2'         => [BackendBehaviors::class, 'adminPostListHeaderV2'],
-            'adminPostListValueV2'          => [BackendBehaviors::class, 'adminPostListValueV2'],
-            'adminBeforePostDelete'         => [BackendBehaviors::class, 'adminBeforePostDelete'],
+        App::behavior()->addBehaviors([
+            'adminBlogPreferencesFormV2'    => BackendBehaviors::adminBlogPreferencesFormV2(...),
+            'adminBeforeBlogSettingsUpdate' => BackendBehaviors::adminBeforeBlogSettingsUpdate(...),
+            'adminFiltersListsV2'           => BackendBehaviors::adminFiltersListsV2(...),
+            'adminColumnsListsV2'           => BackendBehaviors::adminColumnsListsV2(...),
+            'adminPostListHeaderV2'         => BackendBehaviors::adminPostListHeaderV2(...),
+            'adminPostListValueV2'          => BackendBehaviors::adminPostListValueV2(...),
+            'adminBeforePostDelete'         => BackendBehaviors::adminBeforePostDelete(...),
         ]);
 
         if (My::settings()->get('periodical_active')) {
@@ -46,13 +43,13 @@ class Backend extends Process
             My::addBackendMenuItem();
 
             // register bakend behaviors required user permissions
-            dcCore::app()->addBehaviors([
-                'adminDashboardFavoritesV2' => [BackendBehaviors::class, 'adminDashboardFavoritesV2'],
-                'adminPostHeaders'          => [BackendBehaviors::class, 'adminPostHeaders'],
-                'adminPostsActions'         => [BackendBehaviors::class, 'adminPostsActions'],
-                'adminPostFormItems'        => [BackendBehaviors::class, 'adminPostFormItems'],
-                'adminAfterPostUpdate'      => [BackendBehaviors::class, 'adminAfterPostSave'],
-                'adminAfterPostCreate'      => [BackendBehaviors::class, 'adminAfterPostSave'],
+            App::behavior()->addBehaviors([
+                'adminDashboardFavoritesV2' => BackendBehaviors::adminDashboardFavoritesV2(...),
+                'adminPostHeaders'          => BackendBehaviors::adminPostHeaders(...),
+                'adminPostsActions'         => BackendBehaviors::adminPostsActions(...),
+                'adminPostFormItems'        => BackendBehaviors::adminPostFormItems(...),
+                'adminAfterPostUpdate'      => BackendBehaviors::adminAfterPostSave(...),
+                'adminAfterPostCreate'      => BackendBehaviors::adminAfterPostSave(...),
             ]);
         }
 

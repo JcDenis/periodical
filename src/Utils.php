@@ -1,23 +1,11 @@
 <?php
-/**
- * @brief periodical, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
 use ArrayObject;
-use dcBlog;
-use dcCore;
-use dcMeta;
+use Dotclear\App;
 use Dotclear\Database\{
     Cursor,
     MetaRecord
@@ -34,7 +22,11 @@ use Dotclear\Helper\File\{
 use Exception;
 
 /**
- * Manage periodical records
+ * @brief       periodical utils class.
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
 class Utils
 {
@@ -48,7 +40,7 @@ class Utils
      */
     public static function openCursor(): Cursor
     {
-        return dcCore::app()->con->openCursor(dcCore::app()->prefix . My::id());
+        return App::con()->openCursor(App::con()->prefix() . My::id());
     }
 
     /**
@@ -82,7 +74,7 @@ class Utils
             ]);
         }
 
-        $sql->from($sql->as(dcCore::app()->prefix . My::id(), 'T'), false, true);
+        $sql->from($sql->as(App::con()->prefix() . My::id(), 'T'), false, true);
 
         if (!empty($params['join'])) {
             $sql->join($params['join']);
@@ -94,9 +86,9 @@ class Utils
 
         if (!empty($params['where'])) {
             $sql->where($params['where']);
-            $sql->and('T.blog_id = ' . $sql->quote((string) dcCore::app()->blog?->id));
+            $sql->and('T.blog_id = ' . $sql->quote(App::blog()->id()));
         } else {
-            $sql->where('T.blog_id = ' . $sql->quote((string) dcCore::app()->blog?->id));
+            $sql->where('T.blog_id = ' . $sql->quote(App::blog()->id()));
         }
 
         if (isset($params['periodical_type'])) {
@@ -136,9 +128,7 @@ class Utils
             $sql->limit($params['limit']);
         }
 
-        $rs = $sql->select();
-
-        return is_null($rs) ? MetaRecord::newFromArray([]) : $rs;
+        return $sql->select() ?? MetaRecord::newFromArray([]);
     }
 
     /**
@@ -150,12 +140,12 @@ class Utils
      */
     public static function addPeriod(Cursor $cur): int
     {
-        dcCore::app()->con->writeLock(dcCore::app()->prefix . My::id());
+        App::con()->writeLock(App::con()->prefix() . My::id());
 
         try {
             // get next id
             $sql = new SelectStatement();
-            $rs  = $sql->from(dcCore::app()->prefix . My::id())
+            $rs  = $sql->from(App::con()->prefix() . My::id())
                 ->column($sql->max('periodical_id'))
                 ->select();
 
@@ -163,12 +153,12 @@ class Utils
 
             // insert
             $cur->setField('periodical_id', $id);
-            $cur->setField('blog_id', (string) dcCore::app()->blog?->id);
+            $cur->setField('blog_id', App::blog()->id());
             $cur->setField('periodical_type', 'post');
             $cur->insert();
-            dcCore::app()->con->unlock();
+            App::con()->unlock();
         } catch (Exception $e) {
-            dcCore::app()->con->unlock();
+            App::con()->unlock();
 
             throw $e;
         }
@@ -185,7 +175,7 @@ class Utils
     public static function updPeriod(int $period_id, Cursor $cur): void
     {
         $cur->update(
-            "WHERE blog_id = '" . dcCore::app()->con->escapeStr((string) dcCore::app()->blog?->id) . "' " .
+            "WHERE blog_id = '" . App::con()->escapeStr(App::blog()->id()) . "' " .
             'AND periodical_id = ' . $period_id . ' '
         );
     }
@@ -207,8 +197,8 @@ class Utils
         }
 
         $sql = new DeleteStatement();
-        $sql->from(dcCore::app()->prefix . My::id())
-            ->where('blog_id = ' . $sql->quote((string) dcCore::app()->blog?->id))
+        $sql->from(App::con()->prefix() . My::id())
+            ->where('blog_id = ' . $sql->quote(App::blog()->id()))
             ->and('periodical_id = ' . $period_id)
             ->delete();
     }
@@ -235,7 +225,7 @@ class Utils
         }
 
         $sql = new DeleteStatement();
-        $sql->from(dcCore::app()->prefix . dcMeta::META_TABLE_NAME)
+        $sql->from(App::con()->prefix() . App::meta()::META_TABLE_NAME)
             ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id ' . $sql->in($ids))
             ->delete();
@@ -275,14 +265,14 @@ class Utils
             ->join(
                 (new JoinStatement())
                     ->left()
-                    ->from($sql->as(dcCore::app()->prefix . dcMeta::META_TABLE_NAME, 'R'))
+                    ->from($sql->as(App::con()->prefix() . App::meta()::META_TABLE_NAME, 'R'))
                     ->on('P.post_id = R.post_id')
                     ->statement()
             )
             ->join(
                 (new JoinStatement())
                     ->left()
-                    ->from($sql->as(dcCore::app()->prefix . My::id(), 'T'))
+                    ->from($sql->as(App::con()->prefix() . My::id(), 'T'))
                     ->on('CAST(T.periodical_id as char) = CAST(R.meta_id as char)')
                     ->statement()
             )
@@ -303,7 +293,7 @@ class Utils
             $sql->and('T.periodical_id ' . $sql->in($params['periodical_id']));
             unset($params['periodical_id']);
         }
-        if (dcCore::app()->auth?->check(dcCore::app()->auth->makePermissions([dcCore::app()->auth::PERMISSION_ADMIN]), dcCore::app()->blog?->id)) {
+        if (App::auth()->check(App::auth()->makePermissions([App::auth()::PERMISSION_ADMIN]), App::blog()->id())) {
             if (isset($params['post_status'])) {
                 if ($params['post_status'] != '') {
                     $sql->and('P.post_status = ' . (int) $params['post_status']);
@@ -311,12 +301,10 @@ class Utils
                 unset($params['post_status']);
             }
         } else {
-            $sql->and('P.post_status = ' . dcBlog::POST_PENDING);
+            $sql->and('P.post_status = ' . App::blog()::POST_PENDING);
         }
 
-        $rs = dcCore::app()->blog?->getPosts($params, $count_only, $sql);
-
-        return is_null($rs) ? MetaRecord::newFromArray([]) : $rs;
+        return App::blog()->getPosts($params, $count_only, $sql) ?? MetaRecord::newFromArray([]);
     }
 
     /**
@@ -337,17 +325,17 @@ class Utils
             return;
         }
 
-        $cur = dcCore::app()->con->openCursor(dcCore::app()->prefix . dcMeta::META_TABLE_NAME);
-        dcCore::app()->con->writeLock(dcCore::app()->prefix . dcMeta::META_TABLE_NAME);
+        $cur = App::meta()->openMetaCursor();
+        App::con()->writeLock(App::con()->prefix() . App::meta()::META_TABLE_NAME);
 
         try {
             $cur->setField('post_id', $post_id);
             $cur->setField('meta_id', $period_id);
             $cur->setField('meta_type', My::id());
             $cur->insert();
-            dcCore::app()->con->unlock();
+            App::con()->unlock();
         } catch (Exception $e) {
-            dcCore::app()->con->unlock();
+            App::con()->unlock();
 
             throw $e;
         }
@@ -361,7 +349,7 @@ class Utils
     public static function delPost(int $post_id): void
     {
         $sql = new DeleteStatement();
-        $sql->from(dcCore::app()->prefix . dcMeta::META_TABLE_NAME)
+        $sql->from(App::con()->prefix() . App::meta()::META_TABLE_NAME)
             ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id = ' . $post_id)
             ->delete();
@@ -374,10 +362,10 @@ class Utils
      */
     public static function cleanPosts(?int $period_id = null): void
     {
-        // hack post status of dcBlog::getPost()
+        // hack post status of App::blog()->getPost()
         $params = [
             'post_status' => '',
-            'sql'         => 'AND post_status != ' . dcBlog::POST_PENDING . ' ',
+            'sql'         => 'AND post_status != ' . App::blog()::POST_PENDING . ' ',
         ];
         if ($period_id !== null) {
             $params['periodical_id'] = $period_id;
@@ -394,7 +382,7 @@ class Utils
         }
 
         $sql = new DeleteStatement();
-        $sql->from(dcCore::app()->prefix . dcMeta::META_TABLE_NAME)
+        $sql->from(App::con()->prefix() . App::meta()::META_TABLE_NAME)
             ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id ' . $sql->in($ids))
             ->delete();
@@ -409,14 +397,14 @@ class Utils
     {
         try {
             # Cache writable ?
-            if (!is_writable(DC_TPL_CACHE)) {
+            if (!is_writable(App::config()->cacheRoot())) {
                 throw new Exception("Can't write in cache fodler");
             }
             # Set file path
-            $f_md5 = md5((string) dcCore::app()->blog?->id);
+            $f_md5 = md5(App::blog()->id());
             $file  = sprintf(
                 '%s/%s/%s/%s/%s.txt',
-                DC_TPL_CACHE,
+                App::config()->cacheRoot(),
                 My::id(),
                 substr($f_md5, 0, 2),
                 substr($f_md5, 2, 2),

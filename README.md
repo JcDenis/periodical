@@ -1,28 +1,25 @@
 # README
 
 [![Release](https://img.shields.io/badge/release-2023.08.15-a2cbe9.svg)](https://git.dotclear.watch/JcDenis/periodical/releases)
-[![Date](https://img.shields.io/badge/date-2023.08.15-c44d58.svg)](https://git.dotclear.watch/JcDenis/periodical/releases)
+![Date](https://img.shields.io/badge/date-2023.08.15-c44d58.svg)
 [![Dotclear](https://img.shields.io/badge/dotclear-v2.27-137bbb.svg)](https://fr.dotclear.org/download)
 [![Dotaddict](https://img.shields.io/badge/dotaddict-official-9ac123.svg)](https://plugins.dotaddict.org/dc2/details/periodical)
-[![License](https://img.shields.io/github/license/JcDenis/periodical)](https://git.dotclear.watch/JcDenis/periodical/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--2.0-ececec.svg)](https://git.dotclear.watch/JcDenis/periodical/src/branch/master/LICENSE)
 
-## WHAT IS PERIODICAL ?
+## ABOUT
 
-_Periodical_ is a plugin for the open-source 
-web publishing software called Dotclear.
+_periodical_ is a plugin for the open-source web publishing software called [Dotclear](https://www.dotclear.org).
 
-You can manage and publish automatically lists of posts 
+> Manage and publish automatically lists of posts 
 at regular periods. For exemple, you just need to add posts to a period 
 and they will be publish ones after the others every week.
 
 ## REQUIREMENTS
 
- _periodical_ requires: 
-
-* admin permissions to configure plugin
-* usage,contentadmin permissions to link feeds
-* Dotclear 2.27
+* Dotclear 2.28
 * PHP 8.1+
+* Dotclear admin permissions to configure plugin
+* Dotclear usage,contentadmin permissions to link feeds
 
 ## NOTICE
 
@@ -45,10 +42,11 @@ You can also add or remove period to multiple posts from posts actions page.
 
 ## LINKS
 
-* License : [GNU GPL v2](https://www.gnu.org/licenses/old-licenses/lgpl-2.0.html)
-* Source & contribution : [Gitea Page](https://git.dotclear.watch/JcDenis/periodical) or [GitHub Page](https://github.com/JcDenis/periodical)
-* Packages & details: [Gitea Page](https://git.dotclear.watch/JcDenis/periodical/releases) or [Dotaddict Page](https://plugins.dotaddict.org/dc2/details/periodical)
-* Discuss & help : [Dotclear Forum](https://forum.dotclear.org/viewtopic.php?id=42289)
+* [License](https://git.dotclear.watch/JcDenis/periodical/src/branch/master/LICENSE)
+* [Packages & details](https://git.dotclear.watch/JcDenis/periodical/releases) (or on [Dotaddict](https://plugins.dotaddict.org/dc2/details/periodical))
+* [Sources & contributions](https://git.dotclear.watch/JcDenis/periodical) (or on [GitHub](https://github.com/JcDenis/periodical))
+* [Issues & security](https://git.dotclear.watch/JcDenis/periodical/issues) (or on [GitHub](https://github.com/JcDenis/periodical/issues))
+* [Discuss & help](https://forum.dotclear.org/viewtopic.php?id=42289)
 
 ## CONTRIBUTORS
 

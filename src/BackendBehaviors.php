@@ -1,22 +1,11 @@
 <?php
-/**
- * @brief periodical, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
 use ArrayObject;
-use dcCore;
-use dcSettings;
+use Dotclear\App;
 use Dotclear\Core\Backend\{
     Favorites,
     Notices,
@@ -39,12 +28,15 @@ use Dotclear\Helper\Html\Form\{
     Text
 };
 use Dotclear\Helper\Html\Html;
+use Dotclear\Interface\Core\BlogSettingsInterface;
 use Exception;
 
 /**
- * @ingroup DC_PLUGIN_PERIODICAL
- * @brief Periodical - admin methods.
- * @since 2.6
+ * @brief       periodical backend behaviors class.
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
 class BackendBehaviors
 {
@@ -53,9 +45,9 @@ class BackendBehaviors
     /**
      * Add settings to blog preference.
      *
-     * @param   dcSettings  $blog_settings  dcSettings instance
+     * @param   BlogSettingsInterface  $blog_settings  BlogSettingsInterface instance
      */
-    public static function adminBlogPreferencesFormV2(dcSettings $blog_settings): void
+    public static function adminBlogPreferencesFormV2(BlogSettingsInterface $blog_settings): void
     {
         $s = $blog_settings->get(My::id());
 
@@ -87,9 +79,9 @@ class BackendBehaviors
     /**
      * Save blog settings.
      *
-     * @param   dcSettings  $blog_settings  dcSettings instance
+     * @param   BlogSettingsInterface  $blog_settings  BlogSettingsInterface instance
      */
-    public static function adminBeforeBlogSettingsUpdate(dcSettings $blog_settings): void
+    public static function adminBeforeBlogSettingsUpdate(BlogSettingsInterface $blog_settings): void
     {
         $blog_settings->get(My::id())->put('periodical_active', !empty($_POST['periodical_active']));
         $blog_settings->get(My::id())->put('periodical_upddate', !empty($_POST['periodical_upddate']));
@@ -180,9 +172,9 @@ class BackendBehaviors
             'url'         => My::manageUrl(),
             'small-icon'  => My::icons(),
             'large-icon'  => My::icons(),
-            'permissions' => dcCore::app()->auth->makePermissions([
-                dcCore::app()->auth::PERMISSION_USAGE,
-                dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
+            'permissions' => App::auth()->makePermissions([
+                App::auth()::PERMISSION_USAGE,
+                App::auth()::PERMISSION_CONTENT_ADMIN,
             ]),
         ]);
     }
@@ -216,16 +208,16 @@ class BackendBehaviors
     {
         $pa->addAction(
             [My::name() => [__('Add to periodical') => 'periodical_add']],
-            [self::class, 'callbackAdd']
+            self::callbackAdd(...)
         );
 
-        if (dcCore::app()->auth?->check(dcCore::app()->auth->makePermissions([
-            dcCore::app()->auth::PERMISSION_DELETE,
-            dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
-        ]), dcCore::app()->blog?->id)) {
+        if (App::auth()->check(App::auth()->makePermissions([
+            App::auth()::PERMISSION_DELETE,
+            App::auth()::PERMISSION_CONTENT_ADMIN,
+        ]), App::blog()->id())) {
             $pa->addAction(
                 [My::name() => [__('Remove from periodical') => 'periodical_remove']],
-                [self::class, 'callbackRemove']
+                self::callbackRemove(...)
             );
         }
     }
@@ -245,10 +237,10 @@ class BackendBehaviors
         }
 
         // No right
-        if (!dcCore::app()->auth?->check(dcCore::app()->auth->makePermissions([
-            dcCore::app()->auth::PERMISSION_DELETE,
-            dcCore::app()->auth::PERMISSION_CONTENT_ADMIN,
-        ]), dcCore::app()->blog?->id)) {
+        if (!App::auth()->check(App::auth()->makePermissions([
+            App::auth()::PERMISSION_DELETE,
+            App::auth()::PERMISSION_CONTENT_ADMIN,
+        ]), App::blog()->id())) {
             throw new Exception(__('No enough right'));
         }
 
@@ -292,9 +284,9 @@ class BackendBehaviors
         else {
             $pa->beginPage(
                 Page::breadcrumb([
-                    Html::escapeHTML((string) dcCore::app()->blog?->name) => '',
-                    $pa->getCallerTitle()                                 => $pa->getRedirection(true),
-                    __('Add a period to this selection')                  => '',
+                    Html::escapeHTML(App::blog()->name()) => '',
+                    $pa->getCallerTitle()                 => $pa->getRedirection(true),
+                    __('Add a period to this selection')  => '',
                 ])
             );
 
@@ -302,14 +294,12 @@ class BackendBehaviors
             (new Form('periodicaladd'))->method('post')->action($pa->getURI())->fields([
                 (new Text('', $pa->getCheckboxes())),
                 self::formPeriod(0),
-                (new Para())->items(array_merge(
-                    [
-                        dcCore::app()->formNonce(false),
-                        (new Hidden(['action'], 'periodical_add')),
-                        (new Submit(['do']))->value(__('Save')),
-                    ],
-                    $pa->hiddenFields()
-                )),
+                (new Para())->items([
+                    App::nonce()->formNonce(),
+                    (new Hidden(['action'], 'periodical_add')),
+                    (new Submit(['do']))->value(__('Save')),
+                    ... $pa->hiddenFields(),
+                ]),
             ])->render();
 
             $pa->endPage();

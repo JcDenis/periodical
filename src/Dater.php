@@ -1,25 +1,21 @@
 <?php
-/**
- * @brief periodical, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
 use DateTimeZone;
-use dcCore;
+use Dotclear\App;
 use Exception;
 
 /**
+ * @brief       periodical date helper.
+ * @ingroup     periodical
+ *
  * Tools to manupilate period date
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
 class Dater
 {
@@ -33,7 +29,7 @@ class Dater
      */
     public static function fromUser(string $date, string $format = 'Y-m-d H:i:00'): string
     {
-        $tz = dcCore::app()->auth?->getInfo('user_tz');
+        $tz = App::auth()->getInfo('user_tz');
         $d  = date_create($date, new DateTimeZone($tz ?? 'UTC'));
 
         return $d ? date_format($d->setTimezone(new DateTimeZone('UTC')), $format) : '';
@@ -49,7 +45,7 @@ class Dater
      */
     public static function toUser(string $date, string $format = 'Y-m-d\TH:i'): string
     {
-        $tz = dcCore::app()->auth?->getInfo('user_tz');
+        $tz = App::auth()->getInfo('user_tz');
         $d  = date_create($date, new DateTimeZone('UTC'));
 
         return $d ? date_format($d->setTimezone(new DateTimeZone($tz ?? 'UTC')), $format) : '';

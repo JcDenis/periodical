@@ -1,32 +1,25 @@
 <?php
-/**
- * @brief periodical, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use dcBlog;
-use dcCore;
+use Dotclear\App;
 use Dotclear\Core\Process;
 use Exception;
 
 /**
- * Update posts from periods on frontend
+ * @brief       periodical frontend class.
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
 class Frontend extends Process
 {
     public static function init(): bool
     {
-        return self::status(My::checkContext(My::FRONTEND) && in_array(dcCore::app()->url->type, ['default', 'feed']));
+        return self::status(My::checkContext(My::FRONTEND) && in_array((string) App::url()->type, ['default', 'feed']));
     }
 
     public static function process(): bool
@@ -35,8 +28,8 @@ class Frontend extends Process
             return false;
         }
 
-        dcCore::app()->addBehavior('publicBeforeDocumentV2', function (): void {
-            if (is_null(dcCore::app()->blog)) {
+        App::behavior()->addBehavior('publicBeforeDocumentV2', function (): void {
+            if (!App::blog()->isDefined()) {
                 return;
             }
 
@@ -46,7 +39,7 @@ class Frontend extends Process
                 Utils::lockUpdate();
 
                 // Get periods
-                $periods = dcCore::app()->auth->sudo([Utils::class, 'getPeriods']);
+                $periods = App::auth()->sudo(Utils::getPeriods(...));
 
                 // No period
                 if ($periods->isEmpty()) {
@@ -60,7 +53,7 @@ class Frontend extends Process
                 if (!preg_match('/^(post_dt|post_creadt|post_id) (asc|desc)$/', $posts_order)) {
                     $posts_order = 'post_dt asc';
                 }
-                $cur_period = dcCore::app()->con->openCursor(dcCore::app()->prefix . My::id());
+                $cur_period = App::con()->openCursor(App::con()->prefix() . My::id());
 
                 while ($periods->fetch()) {
                     // Check if period is ongoing
@@ -89,19 +82,19 @@ class Frontend extends Process
                             // Get posts to publish related to this period
                             $posts_params                  = [];
                             $posts_params['periodical_id'] = $periods->f('periodical_id');
-                            $posts_params['post_status']   = dcBlog::POST_PENDING;
+                            $posts_params['post_status']   = App::blog()::POST_PENDING;
                             $posts_params['order']         = $posts_order;
                             $posts_params['limit']         = $limit * $max_nb;
                             $posts_params['no_content']    = true;
-                            $posts                         = dcCore::app()->auth->sudo([Utils::class, 'getPosts'], $posts_params);
+                            $posts                         = App::auth()->sudo(Utils::getPosts(...), $posts_params);
 
                             if (!$posts->isEmpty()) {
-                                $cur_post = dcCore::app()->con->openCursor(dcCore::app()->prefix . dcBlog::POST_TABLE_NAME);
+                                $cur_post = App::blgo()->openPostCursor();
 
                                 while ($posts->fetch()) {
                                     // Publish post with right date
                                     $cur_post->clean();
-                                    $cur_post->setField('post_status', dcBlog::POST_PUBLISHED);
+                                    $cur_post->setField('post_status', App::blog()::POST_PUBLISHED);
 
                                     // Update post date with right date
                                     if ($s->get('periodical_upddate')) {
@@ -112,7 +105,7 @@ class Frontend extends Process
 
                                     // Also update post url with right date
                                     if ($s->get('periodical_updurl')) {
-                                        $cur_post->setField('post_url', dcCore::app()->blog->getPostURL(
+                                        $cur_post->setField('post_url', App::blog()->getPostURL(
                                             '',
                                             $cur_post->getField('post_dt'),
                                             $posts->f('post_title'),
@@ -122,7 +115,7 @@ class Frontend extends Process
 
                                     $cur_post->update(
                                         'WHERE post_id = ' . $posts->f('post_id') . ' ' .
-                                        "AND blog_id = '" . dcCore::app()->con->escapeStr(dcCore::app()->blog->id) . "' "
+                                        "AND blog_id = '" . App::con()->escapeStr(App::blog()->id()) . "' "
                                     );
 
                                     // Delete post relation to this period
@@ -137,9 +130,9 @@ class Frontend extends Process
                                     }
 
                                     // --BEHAVIOR-- periodicalAfterPublishedPeriodicalEntry
-                                    dcCore::app()->callBehavior('periodicalAfterPublishedPeriodicalEntry', $posts, $periods);
+                                    App::behavior()->callBehavior('periodicalAfterPublishedPeriodicalEntry', $posts, $periods);
                                 }
-                                dcCore::app()->blog->triggerBlog();
+                                App::blog()->triggerBlog();
                             }
                         }
 
@@ -148,7 +141,7 @@ class Frontend extends Process
                         $cur_period->setField('periodical_curdt', Dater::toDate($loop_ts, 'Y-m-d H:i:00'));
                         $cur_period->update(
                             'WHERE periodical_id = ' . $periods->f('periodical_id') . ' ' .
-                            "AND blog_id = '" . dcCore::app()->con->escapeStr(dcCore::app()->blog->id) . "' "
+                            "AND blog_id = '" . App::con()->escapeStr(App::blog()->id()) . "' "
                         );
                     }
                 }

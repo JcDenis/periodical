@@ -1,20 +1,10 @@
 <?php
-/**
- * @brief periodical, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use dcCore;
+use Dotclear\App;
 use Dotclear\Core\Process;
 use Dotclear\Core\Backend\{
     Notices,
@@ -29,7 +19,11 @@ use Dotclear\Helper\Network\Http;
 use Exception;
 
 /**
- * Admin page for periods
+ * @brief       periodical manage periods class.
+ * @ingroup     periodical
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
 class Manage extends Process
 {
@@ -77,7 +71,7 @@ class Manage extends Process
                     My::redirect(['part' => 'periods']);
                 }
             } catch (Exception $e) {
-                dcCore::app()->error->add($e->getMessage());
+                App::error()->add($e->getMessage());
             }
         }
 
@@ -98,7 +92,7 @@ class Manage extends Process
                     My::redirect(['part' => 'periods']);
                 }
             } catch (Exception $e) {
-                dcCore::app()->error->add($e->getMessage());
+                App::error()->add($e->getMessage());
             }
         }
 
@@ -133,7 +127,7 @@ class Manage extends Process
             $counter     = Utils::getPeriods($params, true);
             $period_list = new ManageList($periods, $counter->f(0));
         } catch (Exception $e) {
-            dcCore::app()->error->add($e->getMessage());
+            App::error()->add($e->getMessage());
         }
 
         // Display
@@ -150,7 +144,7 @@ class Manage extends Process
         Notices::getNotices() .
 
         '<p class="top-add">
-        <a class="button add" href="' . dcCore::app()->admin->getPageURL() . '&amp;part=period">' . __('New period') . '</a>
+        <a class="button add" href="' . My::manageUrl(['part' => 'period']) . '">' . __('New period') . '</a>
         </p>';
 
         if (isset($period_list)) {
@@ -160,7 +154,7 @@ class Manage extends Process
             // Periods list
             $period_list->periodDisplay(
                 $p_filter,
-                '<form action="' . dcCore::app()->admin->getPageURL() . '" method="post" id="form-periods">' .
+                '<form action="' . My::manageUrl() . '" method="post" id="form-periods">' .
 
                 '%s' .
 
