@@ -19,6 +19,7 @@ class My extends MyPlugin
     public static function checkCustomContext(int $context): ?bool
     {
         return match ($context) {
+            // Add usage perm to backend
             self::MANAGE, self::MENU => App::task()->checkContext('BACKEND')
             && App::auth()->check(App::auth()->makePermissions([
                 App::auth()::PERMISSION_USAGE,
