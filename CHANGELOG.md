@@ -1,3 +1,11 @@
+periodical 2023.11.04
+===========================================================
+* Require Dotclear 2.28
+* Require PHP 8.1
+* Fix typo
+* Fix perms
+* Code review (phpstan)
+
 periodical 2023.10.20
 ===========================================================
 * Require Dotclear 2.28
