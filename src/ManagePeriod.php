@@ -225,7 +225,7 @@ class ManagePeriod extends Process
             (new Form('periodicalbhv'))->method('post')->action(App::backend()->getPageURL())->fields([
                 (new Para())->items([
                     (new Label(__('Title:')))->for('period_title'),
-                    (new Input('period_title'))->size(65)->maxlenght(255)->class('maximal')->value(Html::escapeHTML($vars->period_title)),
+                    (new Input('period_title'))->size(65)->maxlength(255)->class('maximal')->value(Html::escapeHTML($vars->period_title)),
                 ]),
                 (new Div())->class('two-boxes')->items([
                     (new Div())->class('box odd')->items([
