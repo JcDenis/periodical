@@ -13,46 +13,102 @@ namespace Dotclear\Plugin\periodical;
  */
 class ManageVars
 {
-    /** @var    ManageVars  $container  Self instance  */
+    /**
+     * Self instance.
+     *
+     * @var     ManageVars  $container
+     */
     private static $container;
 
-    /** @var    string  $action     The post form action */
+    /**
+     * The post form action.
+     *
+     * @var     string  $action
+     */
     public readonly string $action;
 
-    /** @var    string  $redir      The post form redirection */
+    /**
+     * The post form redirection.
+     *
+     * @var     string  $redir
+     */
     public readonly string $redir;
 
-    /** @var    array   $periods    The post form periods */
+    /**
+     * The post form periods.
+     *
+     * @var     array<int, int>     $periods
+     */
     public readonly array $periods;
 
-    /** @var    array   $entries    The post form entries */
+    /**
+     * The post form entries.
+     *
+     * @var     array<int, int>     $entries
+     */
     public readonly array $entries;
 
-    /** @var    null|int    $period_id  The post form period id */
+    /**
+     * The post form period id.
+     *
+     * @var     null|int    $period_id
+     */
     public readonly ?int $period_id;
 
-    /** @var    string  $period_title   The psort form period title */
+    /**
+     * The psort form period title.
+     *
+     * @var     string  $period_title
+     */
     public readonly string $period_title;
 
-    /** @var    int    $period_pub_nb   The post form period publication number */
+    /**
+     * The post form period publication number.
+     *
+     * @var     int     $period_pub_nb
+     */
     public readonly int $period_pub_nb;
 
-    /** @var    string  $period_pub_int     The post form period publication interval */
+    /**
+     * The post form period publication interval.
+     *
+     * @var     string  $period_pub_int
+     */
     public readonly string $period_pub_int;
 
-    /** @var    string    $period_curdt     The post form period current date */
+    /**
+     * The post form period current date.
+     *
+     * @var     string  $period_curdt
+     */
     public readonly string $period_curdt;
 
-    /** @var    string    $period_curdt     The post form period end date */
+    /**
+     * The post form period end date.
+     *
+     * @var     string  $period_curdt
+     */
     public readonly string $period_enddt;
 
-    /** @var    bool    $bad_period_id  Is period ID wrong */
+    /**
+     * Is period ID wrong .
+     *
+     * @var     bool    $bad_period_id
+     */
     public readonly bool $bad_period_id;
 
-    /** @var    bool    $bad_period_curdt   Is period current date wrong */
+    /**
+     * Is period current date wrong.
+     *
+     * @var     bool    $bad_period_curdt
+     */
     public readonly bool $bad_period_curdt;
 
-    /** @var    bool    $bad_period_enddt   Is period end date wrong */
+    /**
+     * Is period end date wrong.
+     *
+     * @var     bool    $bad_period_enddt
+     */
     public readonly bool $bad_period_enddt;
 
     /**

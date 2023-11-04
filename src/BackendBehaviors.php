@@ -40,6 +40,11 @@ use Exception;
  */
 class BackendBehaviors
 {
+    /**
+     * Periods combo.
+     *
+     * @var     array<string, int>  $combo_period
+     */
     private static array $combo_period = [];
 
     /**
@@ -91,7 +96,7 @@ class BackendBehaviors
     /**
      * User pref for periods columns lists.
      *
-     * @param   ArrayObject     $cols   Columns
+     * @param   ArrayObject<string, mixed>  $cols   Columns
      */
     public static function adminColumnsListsV2(ArrayObject $cols): void
     {
@@ -112,7 +117,7 @@ class BackendBehaviors
     /**
      * User pref periods filters options.
      *
-     * @param   ArrayObject     $sorts  Sort options
+     * @param   ArrayObject<string, mixed>  $sorts  Sort options
      */
     public static function adminFiltersListsV2(ArrayObject $sorts): void
     {
@@ -128,8 +133,8 @@ class BackendBehaviors
     /**
      * Add columns period to posts list header.
      *
-     * @param   MetaRecord      $rs     record instance
-     * @param   ArrayObject     $cols   Columns
+     * @param   MetaRecord                  $rs     Record instance
+     * @param   ArrayObject<string, mixed>  $cols   Columns
      */
     public static function adminPostListHeaderV2(MetaRecord $rs, ArrayObject $cols): void
     {
@@ -141,8 +146,8 @@ class BackendBehaviors
     /**
      * Add columns period to posts list values.
      *
-     * @param   MetaRecord      $rs     record instance
-     * @param   ArrayObject     $cols   Columns
+     * @param   MetaRecord                  $rs     Record instance
+     * @param   ArrayObject<string, mixed>  $cols   Columns
      */
     public static function adminPostListValueV2(MetaRecord $rs, ArrayObject $cols): void
     {
@@ -225,8 +230,8 @@ class BackendBehaviors
     /**
      * Posts actions callback to remove period.
      *
-     * @param   ActionsPosts    $pa     ActionsPosts instance
-     * @param   ArrayObject     $post   _POST actions
+     * @param   ActionsPosts                $pa     ActionsPosts instance
+     * @param   ArrayObject<string, mixed>  $post   _POST actions
      */
     public static function callbackRemove(ActionsPosts $pa, ArrayObject $post): void
     {
@@ -246,7 +251,7 @@ class BackendBehaviors
 
         // Remove linked period
         foreach ($posts_ids as $post_id) {
-            self::delPeriod($post_id);
+            self::delPeriod((int) $post_id);
         }
 
         Notices::addSuccessNotice(__('Posts have been removed from periodical.'));
@@ -256,8 +261,8 @@ class BackendBehaviors
     /**
      * Posts actions callback to add period.
      *
-     * @param   ActionsPosts    $pa     ActionsPosts instance
-     * @param   ArrayObject     $post   _POST actions
+     * @param   ActionsPosts                $pa     ActionsPosts instance
+     * @param   ArrayObject<string, mixed>  $post   _POST actions
      */
     public static function callbackAdd(ActionsPosts $pa, ArrayObject $post): void
     {
@@ -272,8 +277,8 @@ class BackendBehaviors
         // Save action
         if (!empty($post['periodical'])) {
             foreach ($posts_ids as $post_id) {
-                self::delPeriod($post_id);
-                self::addPeriod($post_id, (int) $post['periodical']);
+                self::delPeriod((int) $post_id);
+                self::addPeriod((int) $post_id, (int) $post['periodical']);
             }
 
             Notices::addSuccessNotice(__('Posts have been added to periodical.'));
@@ -309,9 +314,9 @@ class BackendBehaviors
     /**
      * Add form to post sidebar.
      *
-     * @param   ArrayObject         $main_items     Main items
-     * @param   ArrayObject         $sidebar_items  Sidebar items
-     * @param   null|MetaRecord     $post           Post record or null
+     * @param   ArrayObject<string, mixed>  $main_items     Main items
+     * @param   ArrayObject<string, mixed>  $sidebar_items  Sidebar items
+     * @param   null|MetaRecord             $post           Post record or null
      */
     public static function adminPostFormItems(ArrayObject $main_items, ArrayObject $sidebar_items, ?MetaRecord $post): void
     {
@@ -365,7 +370,7 @@ class BackendBehaviors
     /**
      * Combo of available periods.
      *
-     * @return  array   List of period
+     * @return  array<string, int>  List of period
      */
     private static function comboPeriod(): array
     {

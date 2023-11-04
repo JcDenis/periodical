@@ -33,7 +33,7 @@ class My extends MyPlugin
     /**
      * Periods action combo.
      *
-     * @return  array<string,sting>
+     * @return  array<string, string>
      */
     public static function periodsActionCombo(): array
     {
@@ -46,7 +46,7 @@ class My extends MyPlugin
     /**
      * Period entries action combo.
      *
-     * @return  array<string,array{string,string}>
+     * @return  array<string, array<string, string>>
      */
     public static function entriesActionsCombo(): array
     {
@@ -64,7 +64,7 @@ class My extends MyPlugin
     /**
      * Periods sortby combo.
      *
-     * @return  array<string,string>
+     * @return  array<string, string>
      */
     public static function sortbyCombo(): array
     {
@@ -78,7 +78,7 @@ class My extends MyPlugin
     /**
      * Period combo.
      *
-     * @return  array<string,string>
+     * @return  array<string, string>
      */
     public static function periodCombo(): array
     {

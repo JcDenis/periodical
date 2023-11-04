@@ -30,8 +30,12 @@ use Exception;
  */
 class Utils
 {
-    /** @var null|string  $lock   File lock for update */
-    private static $lock = null;
+    /**
+     * File lock for update.
+     *
+     * @var     null|string     $lock
+     */
+    private static ?string $lock = null;
 
     /**
      * Get periodical table cursor.
@@ -46,9 +50,9 @@ class Utils
     /**
      * Get periods.
      *
-     * @param   array|ArrayObject   $params         Parameters
-     * @param   bool                $count_only     Only counts results
-     * @param   SelectStatement     $ext_sql        Optional SelectStatement instance
+     * @param   array<string, mixed>|ArrayObject<string, mixed>     $params         Parameters
+     * @param   bool                                                $count_only     Only counts results
+     * @param   SelectStatement                                     $ext_sql        Optional SelectStatement instance
      *
      * @return  MetaRecord  A record with some more capabilities
      */
@@ -234,9 +238,9 @@ class Utils
     /**
      * Get posts related to periods.
      *
-     * @param   array|ArrayObject   $params         Parameters
-     * @param   bool                $count_only     Only counts results
-     * @param   SelectStatement     $ext_sql        Optional SelectStatement instance
+     * @param   array<string, mixed>|ArrayObject<string, mixed>     $params         Parameters
+     * @param   bool                                                $count_only     Only counts results
+     * @param   SelectStatement                                     $ext_sql        Optional SelectStatement instance
      *
      * @return  MetaRecord  A record with some more capabilities
      */
@@ -304,7 +308,7 @@ class Utils
             $sql->and('P.post_status = ' . App::blog()::POST_PENDING);
         }
 
-        return App::blog()->getPosts($params, $count_only, $sql) ?? MetaRecord::newFromArray([]);
+        return App::blog()->getPosts($params, $count_only, $sql);
     }
 
     /**
