@@ -4,32 +4,14 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
-use ArrayObject;
+use ArrayObject, Exception;
 use Dotclear\App;
-use Dotclear\Core\Backend\{
-    Favorites,
-    Notices,
-    Page
-};
+use Dotclear\Core\Backend\{ Favorites, Notices, Page };
 use Dotclear\Core\Backend\Action\ActionsPosts;
-use Dotclear\Database\{
-    Cursor,
-    MetaRecord
-};
-use Dotclear\Helper\Html\Form\{
-    Checkbox,
-    Div,
-    Form,
-    Hidden,
-    Label,
-    Para,
-    Select,
-    Submit,
-    Text
-};
+use Dotclear\Database\{ Cursor, MetaRecord };
+use Dotclear\Helper\Html\Form\{ Checkbox, Div, Fieldset, Form, Hidden, Img, Label, Legend, None, Para, Select, Submit, Text };
 use Dotclear\Helper\Html\Html;
 use Dotclear\Interface\Core\BlogSettingsInterface;
-use Exception;
 
 /**
  * @brief       periodical backend behaviors class.
@@ -43,7 +25,7 @@ class BackendBehaviors
     /**
      * Periods combo.
      *
-     * @var     array<string, int>  $combo_period
+     * @var     array<string, string>  $combo_period
      */
     private static array $combo_period = [];
 
@@ -57,28 +39,41 @@ class BackendBehaviors
         $s = $blog_settings->get(My::id());
 
         echo
-        (new Div())->class('fieldset')->items([
-            (new Text('h4', __('Periodical')))->id('periodical_params'),
-            (new Div())->class('two-cols')->items([
-                (new Div())->class('col')->items([
-                    (new Para())->items([
-                        (new Checkbox('periodical_active', (bool) $s->get('periodical_active')))->value(1),
-                        (new Label(__('Enable periodical on this blog'), Label::OUTSIDE_LABEL_AFTER))->for('periodical_active')->class('classic'),
+        (new Fieldset(My::id() . '_params'))
+            ->legend(new Legend((new Img(My::icons()[0]))->class('icon-small')->render() . ' ' . My::name()))
+            ->items([
+                (new Div())
+                    ->class('two-cols')
+                    ->items([
+                        (new Div())
+                            ->class('col')
+                            ->items([
+                                (new Para())
+                                    ->items([
+                                        (new Checkbox(My::id() . 'active', (bool) $s->get('periodical_active')))
+                                            ->value(1)
+                                            ->label(new Label(__('Enable periodical on this blog'), Label::IL_FT)),
+                                    ]),
+                            ]),
+                        (new Div())
+                            ->class('col')
+                            ->items([
+                                (new Para())
+                                    ->items([
+                                        (new Checkbox(My::id() . 'upddate', (bool) $s->get('periodical_upddate')))
+                                            ->value(1)
+                                            ->label(new Label(__('Update post date when publishing it'), Label::IL_FT)),
+                                    ]),
+                                (new Para())
+                                    ->items([
+                                        (new Checkbox(My::id() . 'updurl', (bool) $s->get('periodical_updurl')))
+                                            ->value(1)
+                                            ->label(new Label(__('Update post url when publishing it'), Label::IL_FT)),
+                                    ]),
+                            ]),
                     ]),
-                ]),
-                (new Div())->class('col')->items([
-                    (new Para())->items([
-                        (new Checkbox('periodical_upddate', (bool) $s->get('periodical_upddate')))->value(1),
-                        (new Label(__('Update post date when publishing it'), Label::OUTSIDE_LABEL_AFTER))->for('periodical_upddate')->class('classic'),
-                    ]),
-                    (new Para())->items([
-                        (new Checkbox('periodical_updurl', (bool) $s->get('periodical_updurl')))->value(1),
-                        (new Label(__('Update post url when publishing it'), Label::OUTSIDE_LABEL_AFTER))->for('periodical_updurl')->class('classic'),
-                    ]),
-                ]),
-            ]),
-            (new Text('br'))->class('clear'),
-        ])->render();
+            ])
+            ->render();
     }
 
     /**
@@ -88,9 +83,9 @@ class BackendBehaviors
      */
     public static function adminBeforeBlogSettingsUpdate(BlogSettingsInterface $blog_settings): void
     {
-        $blog_settings->get(My::id())->put('periodical_active', !empty($_POST['periodical_active']));
-        $blog_settings->get(My::id())->put('periodical_upddate', !empty($_POST['periodical_upddate']));
-        $blog_settings->get(My::id())->put('periodical_updurl', !empty($_POST['periodical_updurl']));
+        $blog_settings->get(My::id())->put('periodical_active', !empty($_POST[My::id() . 'active']));
+        $blog_settings->get(My::id())->put('periodical_upddate', !empty($_POST[My::id() . 'upddate']));
+        $blog_settings->get(My::id())->put('periodical_updurl', !empty($_POST[My::id() . 'updurl']));
     }
 
     /**
@@ -328,7 +323,7 @@ class BackendBehaviors
         }
 
         // Set linked period form items
-        $sidebar_items['options-box']['items']['period'] = (string) self::formPeriod((int) $period)?->render();
+        $sidebar_items['options-box']['items']['period'] = (string) self::formPeriod((int) $period)->render();
     }
 
     /**
@@ -355,13 +350,13 @@ class BackendBehaviors
      *
      * @param   int         $period     Period
      *
-     * @return  null|Para   Period form object
+     * @return  None|Para   Period form object
      */
-    private static function formPeriod(int $period = 0): ?Para
+    private static function formPeriod(int $period = 0): None|Para
     {
         $combo = self::comboPeriod();
 
-        return empty($combo) ? null : (new Para())->items([
+        return empty($combo) ? new None() : (new Para())->items([
             (new Label(__('Period:')))->for('periodical'),
             (new Select('periodical'))->default((string) $period)->items($combo),
         ]);
@@ -370,7 +365,7 @@ class BackendBehaviors
     /**
      * Combo of available periods.
      *
-     * @return  array<string, int>  List of period
+     * @return  array<string, string>  List of period
      */
     private static function comboPeriod(): array
     {
@@ -380,7 +375,7 @@ class BackendBehaviors
             if (!$periods->isEmpty()) {
                 $combo = ['-' => ''];
                 while ($periods->fetch()) {
-                    $combo[Html::escapeHTML($periods->f('periodical_title'))] = $periods->f('periodical_id');
+                    $combo[Html::escapeHTML($periods->f('periodical_title'))] = (string) $periods->f('periodical_id');
                 }
                 self::$combo_period = $combo;
             }
