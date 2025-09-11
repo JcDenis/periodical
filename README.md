@@ -1,10 +1,10 @@
 # README
 
-[![Release](https://img.shields.io/badge/release-2023.11.04-a2cbe9.svg)](https://github.com/JcDenis/periodical/releases)
-![Date](https://img.shields.io/badge/date-2023.11.04-c44d58.svg)
-[![Dotclear](https://img.shields.io/badge/dotclear-v2.27-137bbb.svg)](https://fr.dotclear.org/download)
+[![Release](https://img.shields.io/github/v/release/jcdenis/periodical?color=lightblue)](https://github.com/JcDenis/periodical/releases)
+![Date](https://img.shields.io/github/release-date/jcdenis/periodical?color=red)
+[![Dotclear](https://img.shields.io/badge/dotclear-v2.36-137bbb.svg)](https://fr.dotclear.org/download)
 [![Dotaddict](https://img.shields.io/badge/dotaddict-official-9ac123.svg)](https://plugins.dotaddict.org/dc2/details/periodical)
-[![License](https://img.shields.io/badge/license-GPL--2.0-ececec.svg)](https://github.com/JcDenis/periodical/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/jcdenis/periodical?color=white)](https://github.com/JcDenis/periodical/blob/master/LICENSE)
 
 ## ABOUT
 
@@ -16,7 +16,7 @@ and they will be publish ones after the others every week.
 
 ## REQUIREMENTS
 
-* Dotclear 2.28
+* Dotclear 2.36
 * PHP 8.1+
 * Dotclear admin permissions to configure plugin
 * Dotclear usage,contentadmin permissions to link feeds

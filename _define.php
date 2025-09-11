@@ -17,9 +17,9 @@ $this->registerModule(
     'Periodical',
     'Published periodically entries',
     'Jean-Christian Denis and contributors',
-    '2025.06.26',
+    '2025.09.11',
     [
-        'requires'    => [['core', '2.28']],
+        'requires'    => [['core', '2.36']],
         'permissions' => 'My',
         'settings'    => ['blog' => '#params.' . $this->id . '_params'],
         'type'        => 'plugin',
