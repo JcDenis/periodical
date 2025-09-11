@@ -66,7 +66,7 @@ class Dater
             date_create_from_format('U', (string) $date, new DateTimeZone('UTC')) :
             date_create($date, new DateTimeZone('UTC'));
 
-        return $d ? date_format($d->setTimeZone(new DateTimeZone($to_tz)), $format) : '';
+        return $d ? date_format($d->setTimezone(new DateTimeZone($to_tz)), $format) : '';
     }
 
     /**

@@ -6,14 +6,10 @@ namespace Dotclear\Plugin\periodical;
 
 use ArrayObject;
 use Dotclear\App;
-use Dotclear\Core\Backend\Filter\{
-    Filters,
-    FilterPosts
-};
-use Dotclear\Core\Backend\Listing\{
-    Listing,
-    Pager
-};
+use Dotclear\Core\Backend\Filter\Filters;
+use Dotclear\Core\Backend\Filter\FilterPosts;
+use Dotclear\Core\Backend\Listing\Listing;
+use Dotclear\Core\Backend\Listing\Pager;
 use Dotclear\Helper\Date;
 use Dotclear\Helper\Html\Form\Checkbox;
 use Dotclear\Helper\Html\Html;
@@ -67,7 +63,7 @@ class ManageList extends Listing
                 'enddt'   => '<th scope="col" class="nowrap">' . __('End date') . '</th>',
             ]);
 
-            $this->userColumns(My::id(), $cols);
+            $this->userColumns(My::id(), $cols); // @phpstan-ignore-line
 
             $html_block .= '<tr>' . implode(iterator_to_array($cols)) . '</tr>%s</table>%s</div>';
             if ($enclose_block) {
@@ -110,7 +106,7 @@ class ManageList extends Listing
             'enddt'   => '<td class="nowrap count">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_enddt'), $tz ?? 'UTC') . '</td>',
         ]);
 
-        $this->userColumns(My::id(), $cols);
+        $this->userColumns(My::id(), $cols); // @phpstan-ignore-line
 
         echo
         '<tr class="line ' . ($nb_posts ? '' : ' offline') . '" id="p' . $this->rs->f('periodical_id') . '">' .

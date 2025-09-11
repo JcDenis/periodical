@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\periodical;
 
 use Dotclear\App;
-use Dotclear\Core\Process;
+use Dotclear\Helper\Process\TraitProcess;
 use Exception;
 
 /**
@@ -15,8 +15,10 @@ use Exception;
  * @author      Jean-Christian Denis
  * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-class Frontend extends Process
+class Frontend
 {
+    use TraitProcess;
+
     public static function init(): bool
     {
         return self::status(My::checkContext(My::FRONTEND) && in_array((string) App::url()->type, ['default', 'feed']));
@@ -53,7 +55,7 @@ class Frontend extends Process
                 if (!preg_match('/^(post_dt|post_creadt|post_id) (asc|desc)$/', $posts_order)) {
                     $posts_order = 'post_dt asc';
                 }
-                $cur_period = App::con()->openCursor(App::con()->prefix() . My::id());
+                $cur_period = App::db()->con()->openCursor(App::db()->con()->prefix() . My::id());
 
                 while ($periods->fetch()) {
                     // Check if period is ongoing
@@ -115,7 +117,7 @@ class Frontend extends Process
 
                                     $cur_post->update(
                                         'WHERE post_id = ' . $posts->f('post_id') . ' ' .
-                                        "AND blog_id = '" . App::con()->escapeStr(App::blog()->id()) . "' "
+                                        "AND blog_id = '" . App::db()->con()->escapeStr(App::blog()->id()) . "' "
                                     );
 
                                     // Delete post relation to this period
@@ -141,7 +143,7 @@ class Frontend extends Process
                         $cur_period->setField('periodical_curdt', Dater::toDate($loop_ts, 'Y-m-d H:i:00'));
                         $cur_period->update(
                             'WHERE periodical_id = ' . $periods->f('periodical_id') . ' ' .
-                            "AND blog_id = '" . App::con()->escapeStr(App::blog()->id()) . "' "
+                            "AND blog_id = '" . App::db()->con()->escapeStr(App::blog()->id()) . "' "
                         );
                     }
                 }

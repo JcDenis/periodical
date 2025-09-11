@@ -15,25 +15,21 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\periodical;
 
 use Dotclear\App;
-use Dotclear\Core\Process;
-use Dotclear\Core\Backend\{
-    Notices,
-    Page
-};
+use Dotclear\Helper\Process\TraitProcess;
+use Dotclear\Core\Backend\Notices;
+use Dotclear\Core\Backend\Page;
 use Dotclear\Core\Backend\Filter\FilterPosts;
-use Dotclear\Helper\Html\Form\{
-    Datetime,
-    Div,
-    Form,
-    Hidden,
-    Input,
-    Label,
-    Number,
-    Para,
-    Select,
-    Submit,
-    Text
-};
+use Dotclear\Helper\Html\Form\Datetime;
+use Dotclear\Helper\Html\Form\Div;
+use Dotclear\Helper\Html\Form\Form;
+use Dotclear\Helper\Html\Form\Hidden;
+use Dotclear\Helper\Html\Form\Input;
+use Dotclear\Helper\Html\Form\Label;
+use Dotclear\Helper\Html\Form\Number;
+use Dotclear\Helper\Html\Form\Para;
+use Dotclear\Helper\Html\Form\Select;
+use Dotclear\Helper\Html\Form\Submit;
+use Dotclear\Helper\Html\Form\Text;
 use Dotclear\Helper\Html\Html;
 use Dotclear\Helper\Network\Http;
 use Exception;
@@ -45,8 +41,10 @@ use Exception;
  * @author      Jean-Christian Denis
  * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-class ManagePeriod extends Process
+class ManagePeriod
 {
+    use TraitProcess;
+
     public static function init(): bool
     {
         return self::status(My::checkContext(My::MANAGE) && ($_REQUEST['part'] ?? 'periods') === 'period');

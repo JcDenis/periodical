@@ -6,19 +6,13 @@ namespace Dotclear\Plugin\periodical;
 
 use ArrayObject;
 use Dotclear\App;
-use Dotclear\Database\{
-    Cursor,
-    MetaRecord
-};
-use Dotclear\Database\Statement\{
-    DeleteStatement,
-    JoinStatement,
-    SelectStatement
-};
-use Dotclear\Helper\File\{
-    Files,
-    Path
-};
+use Dotclear\Database\Cursor;
+use Dotclear\Database\MetaRecord;
+use Dotclear\Database\Statement\DeleteStatement;
+use Dotclear\Database\Statement\JoinStatement;
+use Dotclear\Database\Statement\SelectStatement;
+use Dotclear\Helper\File\Files;
+use Dotclear\Helper\File\Path;
 use Exception;
 
 /**
@@ -44,7 +38,7 @@ class Utils
      */
     public static function openCursor(): Cursor
     {
-        return App::con()->openCursor(App::con()->prefix() . My::id());
+        return App::db()->con()->openCursor(App::db()->con()->prefix() . My::id());
     }
 
     /**
@@ -78,7 +72,7 @@ class Utils
             ]);
         }
 
-        $sql->from($sql->as(App::con()->prefix() . My::id(), 'T'), false, true);
+        $sql->from($sql->as(App::db()->con()->prefix() . My::id(), 'T'), false, true);
 
         if (!empty($params['join'])) {
             $sql->join($params['join']);
@@ -144,12 +138,12 @@ class Utils
      */
     public static function addPeriod(Cursor $cur): int
     {
-        App::con()->writeLock(App::con()->prefix() . My::id());
+        App::db()->con()->writeLock(App::db()->con()->prefix() . My::id());
 
         try {
             // get next id
             $sql = new SelectStatement();
-            $rs  = $sql->from(App::con()->prefix() . My::id())
+            $rs  = $sql->from(App::db()->con()->prefix() . My::id())
                 ->column($sql->max('periodical_id'))
                 ->select();
 
@@ -160,9 +154,9 @@ class Utils
             $cur->setField('blog_id', App::blog()->id());
             $cur->setField('periodical_type', 'post');
             $cur->insert();
-            App::con()->unlock();
+            App::db()->con()->unlock();
         } catch (Exception $e) {
-            App::con()->unlock();
+            App::db()->con()->unlock();
 
             throw $e;
         }
@@ -179,7 +173,7 @@ class Utils
     public static function updPeriod(int $period_id, Cursor $cur): void
     {
         $cur->update(
-            "WHERE blog_id = '" . App::con()->escapeStr(App::blog()->id()) . "' " .
+            "WHERE blog_id = '" . App::db()->con()->escapeStr(App::blog()->id()) . "' " .
             'AND periodical_id = ' . $period_id . ' '
         );
     }
@@ -201,7 +195,7 @@ class Utils
         }
 
         $sql = new DeleteStatement();
-        $sql->from(App::con()->prefix() . My::id())
+        $sql->from(App::db()->con()->prefix() . My::id())
             ->where('blog_id = ' . $sql->quote(App::blog()->id()))
             ->and('periodical_id = ' . $period_id)
             ->delete();
@@ -229,7 +223,7 @@ class Utils
         }
 
         $sql = new DeleteStatement();
-        $sql->from(App::con()->prefix() . App::meta()::META_TABLE_NAME)
+        $sql->from(App::db()->con()->prefix() . App::meta()::META_TABLE_NAME)
             ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id ' . $sql->in($ids))
             ->delete();
@@ -269,14 +263,14 @@ class Utils
             ->join(
                 (new JoinStatement())
                     ->left()
-                    ->from($sql->as(App::con()->prefix() . App::meta()::META_TABLE_NAME, 'R'))
+                    ->from($sql->as(App::db()->con()->prefix() . App::meta()::META_TABLE_NAME, 'R'))
                     ->on('P.post_id = R.post_id')
                     ->statement()
             )
             ->join(
                 (new JoinStatement())
                     ->left()
-                    ->from($sql->as(App::con()->prefix() . My::id(), 'T'))
+                    ->from($sql->as(App::db()->con()->prefix() . My::id(), 'T'))
                     ->on('CAST(T.periodical_id as char) = CAST(R.meta_id as char)')
                     ->statement()
             )
@@ -330,16 +324,16 @@ class Utils
         }
 
         $cur = App::meta()->openMetaCursor();
-        App::con()->writeLock(App::con()->prefix() . App::meta()::META_TABLE_NAME);
+        App::db()->con()->writeLock(App::db()->con()->prefix() . App::meta()::META_TABLE_NAME);
 
         try {
             $cur->setField('post_id', $post_id);
             $cur->setField('meta_id', $period_id);
             $cur->setField('meta_type', My::id());
             $cur->insert();
-            App::con()->unlock();
+            App::db()->con()->unlock();
         } catch (Exception $e) {
-            App::con()->unlock();
+            App::db()->con()->unlock();
 
             throw $e;
         }
@@ -353,7 +347,7 @@ class Utils
     public static function delPost(int $post_id): void
     {
         $sql = new DeleteStatement();
-        $sql->from(App::con()->prefix() . App::meta()::META_TABLE_NAME)
+        $sql->from(App::db()->con()->prefix() . App::meta()::META_TABLE_NAME)
             ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id = ' . $post_id)
             ->delete();
@@ -386,7 +380,7 @@ class Utils
         }
 
         $sql = new DeleteStatement();
-        $sql->from(App::con()->prefix() . App::meta()::META_TABLE_NAME)
+        $sql->from(App::db()->con()->prefix() . App::meta()::META_TABLE_NAME)
             ->where('meta_type = ' . $sql->quote(My::id()))
             ->and('post_id ' . $sql->in($ids))
             ->delete();

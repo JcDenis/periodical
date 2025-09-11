@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\periodical;
 
 use Dotclear\App;
-use Dotclear\Core\Process;
-use Dotclear\Database\Structure;
+use Dotclear\Helper\Process\TraitProcess;
 use Exception;
 
 /**
@@ -16,8 +15,10 @@ use Exception;
  * @author      Jean-Christian Denis
  * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-class Install extends Process
+class Install
 {
+    use TraitProcess;
+
     public static function init(): bool
     {
         return self::status(My::checkContext(My::INSTALL));
@@ -30,10 +31,10 @@ class Install extends Process
         }
 
         try {
-            $t = new Structure(App::con(), App::con()->prefix());
+            $t = App::db()->structure();
 
             // create database table
-            $t->__get(My::id())
+            $t->table(My::id())
                 ->field('periodical_id', 'bigint', 0, false)
                 ->field('blog_id', 'varchar', 32, false)
                 ->field('periodical_type', 'varchar', 32, false, "'post'")
@@ -46,7 +47,7 @@ class Install extends Process
                 ->primary('pk_periodical', 'periodical_id')
                 ->index('idx_periodical_type', 'btree', 'periodical_type');
 
-            (new Structure(App::con(), App::con()->prefix()))->synchronize($t);
+            App::db()->structure()->synchronize($t);
 
             // set default settings
             $s = My::settings();

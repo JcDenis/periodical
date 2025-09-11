@@ -18,7 +18,7 @@ class ManageVars
      *
      * @var     ManageVars  $container
      */
-    private static $container;
+    private static ManageVars $container;
 
     /**
      * The post form action.
@@ -211,7 +211,7 @@ class ManageVars
      */
     public static function init(): ManageVars
     {
-        if (!(self::$container instanceof self)) {
+        if (!isset(self::$container)) {
             self::$container = new self();
         }
 

@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\periodical;
 
 use Dotclear\App;
-use Dotclear\Core\Process;
-use Dotclear\Core\Backend\{
-    Notices,
-    Page
-};
+use Dotclear\Helper\Process\TraitProcess;
+use Dotclear\Core\Backend\Notices;
+use Dotclear\Core\Backend\Page;
 use Dotclear\Core\Backend\Filter\Filters;
-use Dotclear\Helper\Html\Form\{
-    Hidden,
-    Select
-};
+use Dotclear\Helper\Html\Form\Hidden;
+use Dotclear\Helper\Html\Form\Select;
 use Dotclear\Helper\Network\Http;
 use Exception;
 
@@ -25,8 +21,10 @@ use Exception;
  * @author      Jean-Christian Denis
  * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-class Manage extends Process
+class Manage
 {
+    use TraitProcess;
+
     public static function init(): bool
     {
         self::status(My::checkContext(My::MANAGE));
