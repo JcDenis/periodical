@@ -63,7 +63,7 @@ class ManageList extends Listing
                 'enddt'   => '<th scope="col" class="nowrap">' . __('End date') . '</th>',
             ]);
 
-            $this->userColumns(My::id(), $cols); // @phpstan-ignore-line
+            $this->userColumns(My::id(), $cols);
 
             $html_block .= '<tr>' . implode(iterator_to_array($cols)) . '</tr>%s</table>%s</div>';
             if ($enclose_block) {
@@ -106,7 +106,7 @@ class ManageList extends Listing
             'enddt'   => '<td class="nowrap count">' . Date::dt2str(__('%Y-%m-%d %H:%M'), $this->rs->f('periodical_enddt'), $tz ?? 'UTC') . '</td>',
         ]);
 
-        $this->userColumns(My::id(), $cols); // @phpstan-ignore-line
+        $this->userColumns(My::id(), $cols);
 
         echo
         '<tr class="line ' . ($nb_posts ? '' : ' offline') . '" id="p' . $this->rs->f('periodical_id') . '">' .
