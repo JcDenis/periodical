@@ -123,7 +123,7 @@ class Manage
         try {
             $periods     = Utils::getPeriods($params);
             $counter     = Utils::getPeriods($params, true);
-            $period_list = new ManageList($periods, $counter->f(0));
+            $period_list = new ManageList($periods, $counter->cardinal());
         } catch (Exception $e) {
             App::error()->add($e->getMessage());
         }
@@ -162,7 +162,7 @@ class Manage
                 '<p class="col right">' . __('Selected periods action:') . ' ' .
                 (new Select('action'))->items(My::periodsActionCombo())->render() .
                 '<input type="submit" value="' . __('ok') . '" /></p>' .
-                My::parsedHiddenFields($p_filter->values(true)) .
+                My::parsedHiddenFields(array_map(Utils::strVal(...), $p_filter->values(true))) .
                 '</div>' .
                 '</form>'
             );

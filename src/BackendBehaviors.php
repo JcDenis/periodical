@@ -66,7 +66,7 @@ class BackendBehaviors
                             ->items([
                                 (new Para())
                                     ->items([
-                                        (new Checkbox(My::id() . 'active', (bool) $s->get('periodical_active')))
+                                        (new Checkbox(My::id() . 'active', $s->getBool('periodical_active', false)))
                                             ->value(1)
                                             ->label(new Label(__('Enable periodical on this blog'), Label::IL_FT)),
                                     ]),
@@ -76,13 +76,13 @@ class BackendBehaviors
                             ->items([
                                 (new Para())
                                     ->items([
-                                        (new Checkbox(My::id() . 'upddate', (bool) $s->get('periodical_upddate')))
+                                        (new Checkbox(My::id() . 'upddate', $s->getBool('periodical_upddate', false)))
                                             ->value(1)
                                             ->label(new Label(__('Update post date when publishing it'), Label::IL_FT)),
                                     ]),
                                 (new Para())
                                     ->items([
-                                        (new Checkbox(My::id() . 'updurl', (bool) $s->get('periodical_updurl')))
+                                        (new Checkbox(My::id() . 'updurl', $s->getBool('periodical_updurl', false)))
                                             ->value(1)
                                             ->label(new Label(__('Update post url when publishing it'), Label::IL_FT)),
                                     ]),
@@ -122,6 +122,13 @@ class BackendBehaviors
             ],
         ];
 
+        if (!isset($cols['posts']) || !is_array($cols['posts'])) {
+            $cols['posts'] = [];
+        }
+        if (!isset($cols['posts'][1]) || !is_array($cols['posts'][1])) {
+            $cols['posts'][1] = [];
+        }
+
         $cols['posts'][1]['period'] = [true, __('Period')];
     }
 
@@ -149,7 +156,7 @@ class BackendBehaviors
      */
     public static function adminPostListHeaderV2(MetaRecord $rs, ArrayObject $cols): void
     {
-        if (My::settings()->get('periodical_active')) {
+        if (My::settings()->getBool('periodical_active', false)) {
             $cols['period'] = '<th scope="col">' . __('Period') . '</th>';
         }
     }
@@ -162,16 +169,16 @@ class BackendBehaviors
      */
     public static function adminPostListValueV2(MetaRecord $rs, ArrayObject $cols): void
     {
-        if (!My::settings()->get('periodical_active')) {
+        if (!My::settings()->getBool('periodical_active', false)) {
             return;
         }
 
-        $r = Utils::getPosts(['post_id' => $rs->f('post_id')]);
+        $r = Utils::getPosts(['post_id' => $rs->intField('post_id')]);
         if ($r->isEmpty()) {
             $name = '-';
         } else {
-            $url  = My::manageUrl(['part' => 'period', 'period_id' => $r->f('periodical_id')]);
-            $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($r->f('periodical_title')) . '</a>';
+            $url  = My::manageUrl(['part' => 'period', 'period_id' => $r->intField('periodical_id')]);
+            $name = '<a href="' . $url . '#period" title="' . __('edit period') . '">' . Html::escapeHTML($r->strField('periodical_title')) . '</a>';
         }
         $cols['period'] = '<td class="nowrap">' . $name . '</td>';
     }
@@ -249,7 +256,7 @@ class BackendBehaviors
         // No entry
         $posts_ids = $pa->getIDs();
         if (empty($posts_ids)) {
-            throw new Exception(__('No entry selected'));
+            throw new Exception(__('No entries selected'));
         }
 
         // No right
@@ -280,13 +287,13 @@ class BackendBehaviors
         // No entry
         $posts_ids = $pa->getIDs();
         if (empty($posts_ids)) {
-            throw new Exception(__('No entry selected'));
+            throw new Exception(__('No entries selected'));
         }
 
         //todo: check if selected posts is unpublished
 
         // Save action
-        if (!empty($post['periodical'])) {
+        if (!empty($post['periodical']) && is_numeric($post['periodical'])) {
             foreach ($posts_ids as $post_id) {
                 self::delPeriod((int) $post_id);
                 self::addPeriod((int) $post_id, (int) $post['periodical']);
@@ -332,14 +339,20 @@ class BackendBehaviors
     public static function adminPostFormItems(ArrayObject $main_items, ArrayObject $sidebar_items, ?MetaRecord $post): void
     {
         // Get existing linked period
-        $period = '';
+        $period = 0;
         if ($post !== null) {
-            $rs     = Utils::getPosts(['post_id' => $post->f('post_id')]);
-            $period = $rs->isEmpty() ? '' : $rs->f('periodical_id');
+            $rs     = Utils::getPosts(['post_id' => $post->intField('post_id')]);
+            $period = $rs->isEmpty() ? 0 : $rs->intField('periodical_id');
         }
 
         // Set linked period form items
-        $sidebar_items['options-box']['items']['period'] = (string) self::formPeriod((int) $period)->render();
+        if (!is_array($sidebar_items['options-box'])) {
+            $sidebar_items['options-box'] = [];
+        }
+        if (!is_array($sidebar_items['options-box']['items'])) {
+            $sidebar_items['options-box']['items'] = [];
+        }
+        $sidebar_items['options-box']['items']['period'] = (string) self::formPeriod($period)->render();
     }
 
     /**
@@ -350,15 +363,15 @@ class BackendBehaviors
      */
     public static function adminAfterPostSave(Cursor $cur, ?int $post_id): void
     {
-        if (!isset($_POST['periodical']) || $post_id === null) {
-            return;
+        if (is_int($post_id) && isset($_POST['periodical']) && is_numeric($_POST['periodical'])) {
+            $p = (int) $_POST['periodical'];
+
+            // Delete old linked period
+            self::delPeriod($post_id);
+
+            // Add new linked period
+            self::addPeriod($post_id, $p);
         }
-
-        // Delete old linked period
-        self::delPeriod($post_id);
-
-        // Add new linked period
-        self::addPeriod($post_id, (int) $_POST['periodical']);
     }
 
     /**
@@ -391,7 +404,7 @@ class BackendBehaviors
             if (!$periods->isEmpty()) {
                 $combo = ['-' => ''];
                 while ($periods->fetch()) {
-                    $combo[Html::escapeHTML($periods->f('periodical_title'))] = (string) $periods->f('periodical_id');
+                    $combo[Html::escapeHTML($periods->strField('periodical_title'))] = $periods->strField('periodical_id');
                 }
                 self::$combo_period = $combo;
             }

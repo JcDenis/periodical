@@ -29,8 +29,8 @@ class Dater
      */
     public static function fromUser(string $date, string $format = 'Y-m-d H:i:00'): string
     {
-        $tz = App::auth()->getInfo('user_tz');
-        $d  = date_create($date, new DateTimeZone($tz ?? 'UTC'));
+        $tz = is_string(App::auth()->getInfo('user_tz')) ? App::auth()->getInfo('user_tz') : 'UTC';
+        $d  = date_create($date, new DateTimeZone($tz));
 
         return $d ? date_format($d->setTimezone(new DateTimeZone('UTC')), $format) : '';
     }
@@ -45,10 +45,10 @@ class Dater
      */
     public static function toUser(string $date, string $format = 'Y-m-d\TH:i'): string
     {
-        $tz = App::auth()->getInfo('user_tz');
+        $tz = is_string(App::auth()->getInfo('user_tz')) ? App::auth()->getInfo('user_tz') : 'UTC';
         $d  = date_create($date, new DateTimeZone('UTC'));
 
-        return $d ? date_format($d->setTimezone(new DateTimeZone($tz ?? 'UTC')), $format) : '';
+        return $d ? date_format($d->setTimezone(new DateTimeZone($tz)), $format) : '';
     }
 
     /**

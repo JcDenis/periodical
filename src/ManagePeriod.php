@@ -80,7 +80,7 @@ class ManagePeriod
             ]);
             if (!$old_titles->isEmpty()) {
                 while ($old_titles->fetch()) {
-                    if (!$vars->period_id || $old_titles->f('periodical_id') != $vars->period_id) {
+                    if (!$vars->period_id || $old_titles->intField('periodical_id') != $vars->period_id) {
                         App::error()->add(__('Period title is already taken'));
                     }
                 }
@@ -190,7 +190,7 @@ class ManagePeriod
             try {
                 $posts     = Utils::getPosts($params);
                 $counter   = Utils::getPosts($params, true);
-                $post_list = new ManageList($posts, $counter->f(0));
+                $post_list = new ManageList($posts, $counter->cardinal());
             } catch (Exception $e) {
                 App::error()->add($e->getMessage());
             }
@@ -264,16 +264,16 @@ class ManagePeriod
             $base_url = App::backend()->getPageURL() .
                 '&amp;period_id=' . $vars->period_id .
                 '&amp;part=period' .
-                '&amp;user_id=' . $post_filter->value('user_id', '') .
-                '&amp;cat_id=' . $post_filter->value('cat_id', '') .
-                '&amp;status=' . $post_filter->value('status', '') .
-                '&amp;selected=' . $post_filter->value('selected', '') .
-                '&amp;attachment=' . $post_filter->value('attachment', '') .
-                '&amp;month=' . $post_filter->value('month', '') .
-                '&amp;lang=' . $post_filter->value('lang', '') .
-                '&amp;sortby=' . $post_filter->value('sortby', '') .
-                '&amp;order=' . $post_filter->value('order', '') .
-                '&amp;nb=' . $post_filter->value('nb', '') .
+                '&amp;user_id=' . Utils::strVal($post_filter->value('user_id')) .
+                '&amp;cat_id=' . Utils::strVal($post_filter->value('cat_id')) .
+                '&amp;status=' . Utils::strVal($post_filter->value('status')) .
+                '&amp;selected=' . Utils::strVal($post_filter->value('selected')) .
+                '&amp;attachment=' . Utils::strVal($post_filter->value('attachment')) .
+                '&amp;month=' . Utils::strVal($post_filter->value('month')) .
+                '&amp;lang=' . Utils::strVal($post_filter->value('lang')) .
+                '&amp;sortby=' . Utils::strVal($post_filter->value('sortby')) .
+                '&amp;order=' . Utils::strVal($post_filter->value('order')) .
+                '&amp;nb=' . Utils::strVal($post_filter->value('nb')) .
                 '&amp;page=%s' .
                 '#posts';
 
@@ -306,9 +306,9 @@ class ManagePeriod
                         (new Select(['action','post_action']))->items(My::entriesActionsCombo()),
                         (new Submit('do_post_action'))->value(__('ok')),
                         ... My::hiddenFields([
-                            ... $post_filter->values(),
+                            ... array_map(Utils::strVal(...), $post_filter->values()),
                             'period_id' => $vars->period_id,
-                            'redir'     => sprintf($base_url, $post_filter->value('page', '')),
+                            'redir'     => sprintf($base_url, Utils::strVal($post_filter->value('page', ''))),
                         ]),
                     ])
                     ->render() .

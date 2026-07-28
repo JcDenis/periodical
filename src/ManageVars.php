@@ -116,23 +116,17 @@ class ManageVars
      */
     protected function __construct()
     {
-        $this->action = $_POST['action'] ?? '';
-        $this->redir  = $_POST['redir']  ?? '';
+        $this->action = isset($_POST['action']) && is_string($_POST['action']) ? $_POST['action'] : '';
+        $this->redir  = isset($_POST['redir']) && is_string($_POST['redir']) ? $_POST['redir'] : '';
 
         // periods
-        $periods = $_POST['periods'] ?? [];
-        $periods = is_array($periods) ? $periods : [];
-        array_walk($periods, function (&$v) { if ($v !== null) { $v = (int) $v; } });
+        $periods = array_values(isset($_POST['periods']) && is_array($_POST['periods']) ? $_POST['periods'] : []);
+        array_walk($periods, function (&$v) { $v = ($v !== null && is_numeric($v)) ? (int) $v : 0; });
         $this->periods = $periods;
 
         // entries
-        $entries = $_POST['periodical_entries'] ?? [];
-        $entries = is_array($entries) ? $entries : [];
-        array_walk($entries, function (&$v) {
-            if ($v !== null) {
-                $v = (int) $v;
-            }
-        });
+        $entries = array_values(isset($_POST['perperiodical_entriesiods']) && is_array($_POST['periodical_entries']) ? $_POST['periodical_entries'] : []);
+        array_walk($entries, function (&$v) { $v = ($v !== null && is_numeric($v)) ? (int) $v : 0; });
         $this->entries = $entries;
 
         // period values from default
@@ -152,30 +146,28 @@ class ManageVars
                 'periodical_id' => $_REQUEST['period_id'],
             ]);
             if (!$rs->isEmpty()) {
-                $period_id      = (int) $rs->f('periodical_id');
-                $period_title   = $rs->f('periodical_title');
-                $period_pub_nb  = (int) $rs->f('periodical_pub_nb');
-                $period_pub_int = $rs->f('periodical_pub_int');
-                $period_curdt   = Dater::toDate($rs->f('periodical_curdt'), 'Y-m-d H:i:00');
-                $period_enddt   = Dater::toDate($rs->f('periodical_enddt'), 'Y-m-d H:i:00');
+                $period_id      = $rs->intField('periodical_id');
+                $period_title   = $rs->strField('periodical_title');
+                $period_pub_nb  = $rs->intField('periodical_pub_nb');
+                $period_pub_int = $rs->strField('periodical_pub_int');
+                $period_curdt   = Dater::toDate($rs->strField('periodical_curdt'), 'Y-m-d H:i:00');
+                $period_enddt   = Dater::toDate($rs->strField('periodical_enddt'), 'Y-m-d H:i:00');
             } else {
                 $bad_period_id = true;
             }
         }
 
         // period values from POST
-        if (!empty($_POST['period_title'])) {
+        if (isset($_POST['period_title']) && !empty($_POST['period_title']) && is_string($_POST['period_title'])) {
             $period_title = $_POST['period_title'];
         }
-        if (!empty($_POST['period_pub_nb'])) {
+        if (isset($_POST['period_pub_nb']) && !empty($_POST['period_pub_nb']) && is_numeric($_POST['period_pub_nb'])) {
             $period_pub_nb = abs((int) $_POST['period_pub_nb']);
         }
-        if (!empty($_POST['period_pub_int'])
-            && in_array($_POST['period_pub_int'], My::periodCombo())
-        ) {
+        if (isset($_POST['period_pub_int']) && !empty($_POST['period_pub_int']) && in_array($_POST['period_pub_int'], My::periodCombo()) && is_string($_POST['period_pub_int'])) {
             $period_pub_int = $_POST['period_pub_int'];
         }
-        if (!empty($_POST['period_curdt'])) {
+        if (isset($_POST['period_curdt']) && !empty($_POST['period_curdt']) && is_string($_POST['period_curdt'])) {
             $tmp_period_curdt = Dater::fromUser($_POST['period_curdt'], 'Y-m-d H:i:00');
             if (empty($tmp_period_curdt)) {
                 $bad_period_curdt = true;
@@ -183,7 +175,7 @@ class ManageVars
                 $period_curdt = $tmp_period_curdt;
             }
         }
-        if (!empty($_POST['period_enddt'])) {
+        if (isset($_POST['period_enddt']) && !empty($_POST['period_enddt']) && is_string($_POST['period_enddt'])) {
             $tmp_period_enddt = Dater::fromUser($_POST['period_enddt'], 'Y-m-d H:i:00');
             if (empty($tmp_period_enddt)) {
                 $bad_period_enddt = true;

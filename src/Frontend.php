@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\periodical;
 
 use Dotclear\App;
+use Dotclear\Database\MetaRecord;
 use Dotclear\Helper\Process\TraitProcess;
 use Exception;
 
@@ -21,7 +22,7 @@ class Frontend
 
     public static function init(): bool
     {
-        return self::status(My::checkContext(My::FRONTEND) && in_array((string) App::url()->type, ['default', 'feed']));
+        return self::status(My::checkContext(My::FRONTEND) && App::url()->isType(['default', 'feed']));
     }
 
     public static function process(): bool
@@ -44,14 +45,14 @@ class Frontend
                 $periods = App::auth()->sudo(Utils::getPeriods(...));
 
                 // No period
-                if ($periods->isEmpty()) {
+                if (!($periods instanceof MetaRecord) || $periods->isEmpty()) {
                     Utils::unlockUpdate();
 
                     return;
                 }
 
                 $now_ts      = (int) Dater::toDate('now', 'U');
-                $posts_order = $s->get('periodical_pub_order');
+                $posts_order = $s->getStr('periodical_pub_order', false);
                 if (!preg_match('/^(post_dt|post_creadt|post_id) (asc|desc)$/', $posts_order)) {
                     $posts_order = 'post_dt asc';
                 }
@@ -59,11 +60,11 @@ class Frontend
 
                 while ($periods->fetch()) {
                     // Check if period is ongoing
-                    $cur_ts = (int) Dater::toDate($periods->f('periodical_curdt'), 'U');
-                    $end_ts = (int) Dater::toDate($periods->f('periodical_enddt'), 'U');
+                    $cur_ts = (int) Dater::toDate($periods->strField('periodical_curdt'), 'U');
+                    $end_ts = (int) Dater::toDate($periods->strField('periodical_enddt'), 'U');
 
                     if ($cur_ts < $now_ts && $now_ts < $end_ts) {
-                        $max_nb  = (int) $periods->f('periodical_pub_nb');
+                        $max_nb  = $periods->intField('periodical_pub_nb');
                         $last_nb = 0;
                         $last_ts = $loop_ts = $cur_ts;
                         $limit   = 0;
@@ -73,7 +74,7 @@ class Frontend
                                 if ($loop_ts > $now_ts) {
                                     break;
                                 }
-                                $loop_ts = Dater::getNextTime($loop_ts, $periods->f('periodical_pub_int'));
+                                $loop_ts = Dater::getNextTime($loop_ts, $periods->strField('periodical_pub_int'));
                                 $limit += 1;
                             }
                         } catch (Exception $e) {
@@ -83,14 +84,14 @@ class Frontend
                         if ($limit > 0) {
                             // Get posts to publish related to this period
                             $posts_params                  = [];
-                            $posts_params['periodical_id'] = $periods->f('periodical_id');
+                            $posts_params['periodical_id'] = $periods->intField('periodical_id');
                             $posts_params['post_status']   = App::blog()::POST_PENDING;
                             $posts_params['order']         = $posts_order;
                             $posts_params['limit']         = $limit * $max_nb;
                             $posts_params['no_content']    = true;
                             $posts                         = App::auth()->sudo(Utils::getPosts(...), $posts_params);
 
-                            if (!$posts->isEmpty()) {
+                            if (($posts instanceof MetaRecord) && !$posts->isEmpty()) {
                                 $cur_post = App::blog()->openPostCursor();
 
                                 while ($posts->fetch()) {
@@ -100,34 +101,34 @@ class Frontend
 
                                     // Update post date with right date
                                     if ($s->get('periodical_upddate')) {
-                                        $cur_post->setField('post_dt', Dater::toDate($last_ts, 'Y-m-d H:i:00', $posts->post_tz));
+                                        $cur_post->setField('post_dt', Dater::toDate($last_ts, 'Y-m-d H:i:00', $posts->strField('post_tz')));
                                     } else {
-                                        $cur_post->setField('post_dt', $posts->f('post_dt'));
+                                        $cur_post->setField('post_dt', $posts->strField('post_dt'));
                                     }
 
                                     // Also update post url with right date
-                                    if ($s->get('periodical_updurl')) {
+                                    if ($s->get('periodical_updurl') && is_string($cur_post->getField('post_dt'))) {
                                         $cur_post->setField('post_url', App::blog()->getPostURL(
                                             '',
                                             $cur_post->getField('post_dt'),
-                                            $posts->f('post_title'),
-                                            $posts->f('post_id')
+                                            $posts->strField('post_title'),
+                                            $posts->intField('post_id')
                                         ));
                                     }
 
                                     $cur_post->update(
-                                        'WHERE post_id = ' . $posts->f('post_id') . ' ' .
+                                        'WHERE post_id = ' . $posts->intField('post_id') . ' ' .
                                         "AND blog_id = '" . App::db()->con()->escapeStr(App::blog()->id()) . "' "
                                     );
 
                                     // Delete post relation to this period
-                                    Utils::delPost((int) $posts->f('post_id'));
+                                    Utils::delPost($posts->intField('post_id'));
 
                                     $last_nb++;
 
                                     // Increment upddt if nb of publishing is to the max
                                     if ($last_nb == $max_nb) {
-                                        $last_ts = Dater::getNextTime($last_ts, $periods->f('periodical_pub_int'));
+                                        $last_ts = Dater::getNextTime($last_ts, $periods->strField('periodical_pub_int'));
                                         $last_nb = 0;
                                     }
 
@@ -142,7 +143,7 @@ class Frontend
                         $cur_period->clean();
                         $cur_period->setField('periodical_curdt', Dater::toDate($loop_ts, 'Y-m-d H:i:00'));
                         $cur_period->update(
-                            'WHERE periodical_id = ' . $periods->f('periodical_id') . ' ' .
+                            'WHERE periodical_id = ' . $periods->intField('periodical_id') . ' ' .
                             "AND blog_id = '" . App::db()->con()->escapeStr(App::blog()->id()) . "' "
                         );
                     }

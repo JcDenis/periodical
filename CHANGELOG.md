@@ -2,6 +2,11 @@ TODO
 ===========================================================
 * Move to Helper\Form
 
+periodical xxxx.xx.xx
+===========================================================
+* Bump Dotclear from 2.36 to 2.39
+* Code review (phpstan max)
+
 periodical 2025.09.11
 ===========================================================
 * Bump Dotclear from 2.28 to 2.36

@@ -40,7 +40,7 @@ class Backend
             'adminBeforePostDelete'         => BackendBehaviors::adminBeforePostDelete(...),
         ]);
 
-        if (My::settings()->get('periodical_active')) {
+        if (My::settings()->getBool('periodical_active', false)) {
             // add backend sidebar icon
             My::addBackendMenuItem();
 

@@ -1,176 +1,259 @@
+# Language: Français
+# Module: periodical - 2025.09.11
+# Date: 2026-07-28 07:45:54
+# Author: JcDeniss, contact@jcdenis.fr
+# Translated with translater 2025.09.11
+
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
-"Project-Id-Version: periodical 2021.10.23\n"
+"Project-Id-Version: periodical 2025.09.11\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-10-30T19:05:45+00:00\n"
-"Last-Translator: Jean-Christian Denis\n"
+"PO-Revision-Date: 2026-07-28T07:45:54+00:00\n"
+"Last-Translator: JcDeniss\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-msgid "Periodical"
-msgstr "Publications périodiques"
-
-msgid "Next update"
-msgstr "Prochaine mise à jour"
-
-msgid "End date"
-msgstr "Date de fin"
-
-msgid "Frequence"
-msgstr "Fréquence"
-
+#: src/BackendBehaviors.php:71
 msgid "Enable periodical on this blog"
 msgstr "Activer les publications périodiques sur ce blog"
 
+#: src/BackendBehaviors.php:81
 msgid "Update post date when publishing it"
 msgstr "Mettre à jour la date du billet lors de sa publication"
 
+#: src/BackendBehaviors.php:87
 msgid "Update post url when publishing it"
 msgstr "Mettre à jour l'URL du billet lors de sa publication"
 
+#: src/BackendBehaviors.php:117
+#: src/ManageList.php:72
+#: src/My.php:72
+msgid "Next update"
+msgstr "Prochaine mise à jour"
+
+#: src/BackendBehaviors.php:119
+#: src/ManageList.php:78
 msgid "Entries per update"
 msgstr "Billets par mise à jour"
 
+#: src/BackendBehaviors.php:121
+#: src/ManageList.php:84
+#: src/My.php:73
+msgid "End date"
+msgstr "Date de fin"
+
+#: src/BackendBehaviors.php:132
 msgid "Period"
 msgstr "Période"
 
+#: src/BackendBehaviors.php:147
 msgid "periods per page"
 msgstr "périodes par page"
 
+#: src/BackendBehaviors.php:181
+#: src/ManageList.php:132
 msgid "edit period"
 msgstr "modifier la période"
 
+#: src/BackendBehaviors.php:233
 msgid "Add to periodical"
 msgstr "Ajouter aux publications périodiques"
 
+#: src/BackendBehaviors.php:242
+#: src/My.php:59
 msgid "Remove from periodical"
 msgstr "Retirer des publications périodiques"
 
+#: src/BackendBehaviors.php:259
+msgid "No entries selected"
+msgstr "Aucun billet sélectionné"
+
+#: src/BackendBehaviors.php:267
 msgid "No enough right"
 msgstr "Privilèges insuffisants"
 
+#: src/BackendBehaviors.php:275
 msgid "Posts have been removed from periodical."
 msgstr "Billets retirés des publications périodiques."
 
+#: src/BackendBehaviors.php:302
 msgid "Posts have been added to periodical."
 msgstr "Billets ajoutés aux publications périodiques."
 
+#: src/BackendBehaviors.php:312
 msgid "Add a period to this selection"
 msgstr "Ajouter une période à cette liste"
 
-msgid "Hourly"
-msgstr "Toutes les heures"
+#: src/BackendBehaviors.php:389
+msgid "Period:"
+msgstr "Période :"
 
-msgid "twice a day"
-msgstr "Deux fois par jour"
-
-msgid "Daily"
-msgstr "Une fois par jour"
-
-msgid "Weekly"
-msgstr "Une fois par semaine"
-
-msgid "Monthly"
-msgstr "Un fois par mois"
-
+#: src/Dater.php:116
+#: src/ManageList.php:135
 msgid "Unknow frequence"
 msgstr "Fréquence inconnue"
 
-msgid "One post per day"
-msgstr "Un billet par jour"
-
-msgid "This period does not exist."
-msgstr "Cette période n'existe pas."
-
-msgid "Period title is already taken"
-msgstr "Le titre de la période est déjà pris"
-
-msgid "Period title is required"
-msgstr "Le titre de la période est requis"
-
-msgid "Start date must be older than end date"
-msgstr "La date de début doit être plus ancienne que la date de fin"
-
-msgid "Period successfully updated."
-msgstr "Période mise à jour."
-
-msgid "Period successfully created."
-msgstr "Période crée."
-
-msgid "Entries successfully published."
-msgstr "Billets publiés."
-
-msgid "Entries successfully unpublished."
-msgstr "Billets mis hors ligne."
-
-msgid "Entries successfully removed."
-msgstr "Billets retirés."
-
-msgid "New period"
-msgstr "Nouvelle période"
-
-msgid "Edit period"
-msgstr "Modifier la période"
-
-msgid "Next update:"
-msgstr "Prochaine mise à jour :"
-
-msgid "End date:"
-msgstr "Date de fin :"
-
-msgid "Publication frequency:"
-msgstr "Fréquence de publication :"
-
-msgid "Number of entries to publish every time:"
-msgstr "Nombre de billets à publier à chaque fois :"
-
-msgid "Entries linked to this period"
-msgstr "Billets liés à cette période"
-
+#: src/Manage.php:63
 msgid "Periods removed."
 msgstr "Périodes retirées."
 
+#: src/Manage.php:84
 msgid "Periods emptied."
 msgstr "Périodes vidées."
 
-msgid "empty periods"
-msgstr "vider les périodes"
+#: src/Manage.php:145
+#: src/ManagePeriod.php:215
+msgid "New period"
+msgstr "Nouvelle période"
 
-msgid "delete periods"
-msgstr "effacer les périodes"
-
+#: src/Manage.php:162
 msgid "Selected periods action:"
 msgstr "Action sur les périodes selectionnées :"
 
-msgid "No period matches the filter"
-msgstr "Aucune période correspondant au filtre"
+#: src/ManageList.php:42
+msgid "No periods match the filter"
+msgstr "Aucune période correspondante au filtre"
 
-msgid "No period"
-msgstr "Pas de période"
+#: src/ManageList.php:42
+msgid "No periods"
+msgstr "Aucune période"
 
+#: src/ManageList.php:108
 msgid "List of %s periods matching the filter."
 msgstr "Liste des %s périodes correspondant au filtre"
 
-msgid "List of %s periods."
-msgstr "Liste des %s périodes"
+#: src/ManageList.php:109
+msgid "List of periods. (%s)"
+msgstr "Liste des périodes. (%s)"
 
+#: src/ManageList.php:133
 msgid "view related entries"
 msgstr "voir les billets liés"
 
+#: src/ManageList.php:219
 msgid "Create date"
 msgstr "Date de création"
 
-msgid "List of %s entries."
-msgstr "Listes des %s billets"
+#: src/ManageList.php:245
+msgid "List of entries. (%s)"
+msgstr "Liste des billets. (%s)"
 
 msgid "protected"
 msgstr "protégé"
 
 msgid "selected"
 msgstr "sélectionné"
+
+#: src/ManagePeriod.php:68
+msgid "This period does not exist."
+msgstr "Cette période n'existe pas."
+
+#: src/ManagePeriod.php:84
+msgid "Period title is already taken"
+msgstr "Le titre de la période est déjà pris"
+
+#: src/ManagePeriod.php:89
+msgid "Period title is required"
+msgstr "Le titre de la période est requis"
+
+#: src/ManagePeriod.php:92
+msgid "Start date must be older than end date"
+msgstr "La date de début doit être plus ancienne que la date de fin"
+
+#: src/ManagePeriod.php:108
+msgid "Period successfully updated."
+msgstr "Période mise à jour."
+
+#: src/ManagePeriod.php:113
+msgid "Period successfully created."
+msgstr "Période crée."
+
+#: src/ManagePeriod.php:128
+msgid "Entries successfully published."
+msgstr "Billets publiés."
+
+#: src/ManagePeriod.php:142
+msgid "Entries successfully unpublished."
+msgstr "Billets mis hors ligne."
+
+#: src/ManagePeriod.php:155
+msgid "Entries successfully removed."
+msgstr "Billets retirés."
+
+#: src/ManagePeriod.php:215
+msgid "Edit period"
+msgstr "Modifier la période"
+
+#: src/ManagePeriod.php:231
+msgid "Next update:"
+msgstr "Prochaine mise à jour :"
+
+#: src/ManagePeriod.php:235
+msgid "End date:"
+msgstr "Date de fin :"
+
+#: src/ManagePeriod.php:241
+msgid "Publication frequency:"
+msgstr "Fréquence de publication :"
+
+#: src/ManagePeriod.php:245
+msgid "Number of entries to publish every time:"
+msgstr "Nombre de billets à publier à chaque fois :"
+
+#: src/ManagePeriod.php:281
+msgid "Entries linked to this period"
+msgstr "Billets liés à cette période"
+
+#: src/ManageVars.php:134
+msgid "One post per day"
+msgstr "Un billet par jour"
+
+#: src/My.php:41
+msgid "empty periods"
+msgstr "vider les périodes"
+
+#: src/My.php:42
+msgid "delete periods"
+msgstr "effacer les périodes"
+
+#: src/My.php:55
+msgid "Publish"
+msgstr "Publier"
+
+#: src/My.php:56
+msgid "Unpublish"
+msgstr "Retirer"
+
+#: src/My.php:58
+msgid "Periodical"
+msgstr "Publications périodiques"
+
+#: src/My.php:74
+msgid "Frequence"
+msgstr "Fréquence"
+
+#: src/My.php:86
+msgid "Hourly"
+msgstr "Toutes les heures"
+
+#: src/My.php:87
+msgid "twice a day"
+msgstr "Deux fois par jour"
+
+#: src/My.php:88
+msgid "Daily"
+msgstr "Une fois par jour"
+
+#: src/My.php:89
+msgid "Weekly"
+msgstr "Une fois par semaine"
+
+#: src/My.php:90
+msgid "Monthly"
+msgstr "Un fois par mois"
 
 msgid "Published periodically entries"
 msgstr "Publier périodiquement des billets"

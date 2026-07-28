@@ -59,7 +59,7 @@ class Utils
             $sql->column($sql->count('T.periodical_id'));
         } else {
             if (!empty($params['columns']) && is_array($params['columns'])) {
-                $sql->columns($params['columns']);
+                $sql->columns(array_filter($params['columns'], fn (mixed $v): bool => is_string($v)));
             }
             $sql->columns([
                 'T.periodical_id',
@@ -75,47 +75,63 @@ class Utils
         $sql->from($sql->as(App::db()->con()->prefix() . My::id(), 'T'), false, true);
 
         if (!empty($params['join'])) {
-            $sql->join($params['join']);
+            if (!is_array($params['join'])) {
+                $params['join'] = [$params['join']];
+            }
+            $sql->join(array_filter($params['join'], fn (mixed $v): bool => is_string($v)));
         }
 
         if (!empty($params['from'])) {
-            $sql->from($params['from']);
+            if (!is_array($params['from'])) {
+                $params['from'] = [$params['from']];
+            }
+            $sql->from(array_filter($params['from'], fn (mixed $v): bool => is_string($v)));
         }
 
         if (!empty($params['where'])) {
-            $sql->where($params['where']);
+            if (!is_array($params['where'])) {
+                $params['where'] = [$params['where']];
+            }
+            $sql->where(array_filter($params['where'], fn (mixed $v): bool => is_string($v)));
             $sql->and('T.blog_id = ' . $sql->quote(App::blog()->id()));
         } else {
             $sql->where('T.blog_id = ' . $sql->quote(App::blog()->id()));
         }
 
         if (isset($params['periodical_type'])) {
-            if (is_array($params['periodical_type']) || !empty($params['periodical_type'])) {
-                $sql->and('T.periodical_type ' . $sql->in($params['periodical_type']));
+            if (!empty($params['periodical_type'])) {
+                if (!is_array($params['periodical_type'])) {
+                    $params['periodical_type'] = [$params['periodical_type']];
+                }
+                $sql->and('T.periodical_type ' . $sql->in(array_filter($params['periodical_type'], fn (mixed $v): bool => is_string($v))));
             }
         } else {
             $sql->and("T.periodical_type = 'post' ");
         }
 
         if (!empty($params['periodical_id'])) {
-            if (is_array($params['periodical_id'])) {
-                array_walk($params['periodical_id'], function ($v) { if ($v !== null) { $v = (int) $v; } });
-            } else {
-                $params['periodical_id'] = [(int) $params['periodical_id']];
+            if (!is_array($params['periodical_id'])) {
+                $params['periodical_id'] = [$params['periodical_id']];
+            }
+            foreach ($params['periodical_id'] as $k => $v) {
+                $params['periodical_id'][$k] = is_numeric($v) ? (int) $v : 0;
             }
             $sql->and('T.periodical_id ' . $sql->in($params['periodical_id']));
         }
 
-        if (!empty($params['periodical_title'])) {
+        if (!empty($params['periodical_title']) && is_string($params['periodical_title'])) {
             $sql->and('T.periodical_title = ' . $sql->quote($params['periodical_title']));
         }
 
         if (!empty($params['sql'])) {
-            $sql->sql($params['sql']);
+            if (!is_array($params['sql'])) {
+                $params['sql'] = [$params['sql']];
+            }
+            $sql->sql(array_filter($params['sql'], fn (mixed $v): bool => is_string($v)));
         }
 
         if (!$count_only) {
-            if (!empty($params['order'])) {
+            if (!empty($params['order']) && is_string($params['order'])) {
                 $sql->order($sql->escape($params['order']));
             } else {
                 $sql->order('T.periodical_id ASC');
@@ -123,7 +139,21 @@ class Utils
         }
 
         if (!$count_only && !empty($params['limit'])) {
-            $sql->limit($params['limit']);
+            $values = is_array($params['limit']) ? array_values($params['limit']) : [$params['limit']];
+            // Make $values an array of integer values
+            $values = array_map(fn (mixed $v): int => is_numeric($v) ? (int) $v : 0, $values);
+
+            /**
+             * @var array{0: int, 1?: int}  $limit
+             */
+            $limit = [
+                $values[0],
+            ];
+            if (isset($values[1])) {
+                $limit[1] = $values[1];
+            }
+
+            $sql->limit($limit);
         }
 
         return $sql->select() ?? MetaRecord::newFromArray([]);
@@ -147,7 +177,7 @@ class Utils
                 ->column($sql->max('periodical_id'))
                 ->select();
 
-            $id = is_null($rs) || $rs->isEmpty() ? 1 : (int) $rs->f(0) + 1;
+            $id = is_null($rs) || $rs->isEmpty() ? 1 : (int) $rs->cardinal() + 1;
 
             // insert
             $cur->setField('periodical_id', $id);
@@ -219,7 +249,7 @@ class Utils
 
         $ids = [];
         while ($rs->fetch()) {
-            $ids[] = $rs->f('post_id');
+            $ids[] = $rs->intField('post_id');
         }
 
         $sql = new DeleteStatement();
@@ -279,21 +309,19 @@ class Utils
         ;
 
         if (!empty($params['periodical_id'])) {
-            if (is_array($params['periodical_id'])) {
-                array_walk($params['periodical_id'], function ($v) {
-                    if ($v !== null) {
-                        $v = (int) $v;
-                    }
-                });
-            } else {
-                $params['periodical_id'] = [(int) $params['periodical_id']];
+            if (!is_array($params['periodical_id'])) {
+                $params['periodical_id'] = [$params['periodical_id']];
             }
+            array_walk($params['periodical_id'], function (&$v) {
+                $v = ($v !== null && is_numeric($v)) ? (int) $v : 0;
+            });
+
             $sql->and('T.periodical_id ' . $sql->in($params['periodical_id']));
             unset($params['periodical_id']);
         }
         if (App::auth()->check(App::auth()->makePermissions([App::auth()::PERMISSION_ADMIN]), App::blog()->id())) {
             if (isset($params['post_status'])) {
-                if ($params['post_status'] != '') {
+                if ($params['post_status'] != '' && is_numeric($params['post_status'])) {
                     $sql->and('P.post_status = ' . (int) $params['post_status']);
                 }
                 unset($params['post_status']);
@@ -376,7 +404,7 @@ class Utils
 
         $ids = [];
         while ($rs->fetch()) {
-            $ids[] = (int) $rs->f('post_id');
+            $ids[] = $rs->intField('post_id');
         }
 
         $sql = new DeleteStatement();
@@ -431,5 +459,13 @@ class Utils
             Files::unlock(self::$lock);
             self::$lock = null;
         }
+    }
+
+    /**
+     * Get a string value.
+     */
+    public static function strVal(mixed $value): string
+    {
+        return is_string($value) || is_numeric($value) ? (string) $value : '';
     }
 }
