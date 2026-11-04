@@ -204,7 +204,6 @@ class ManagePeriod
             My::name(),
             My::jsLoad('dates') .
             $starting_script .
-            Page::jsDatePicker() .
             Page::jsPageTabs()
         );
 

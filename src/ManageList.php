@@ -150,7 +150,7 @@ class ManageList extends Listing
                 ->class('nowrap minimal'),
             'pub_int' => (new Text('td', Html::escapeHTML($interval)))
                 ->class('nowrap'),
-            'pub_nb' => (new Text('td', $this->rs->strField('periodical_pub_nb')))
+            'pub_nb' => (new Text('td', (string) $this->rs->intField('periodical_pub_nb')))
                 ->class('nowrap count'),
             'nbposts' => (new Text('td', $posts))
                 ->class('nowrap count'),
@@ -227,7 +227,7 @@ class ManageList extends Listing
             $lines[] = $this->postLine(isset($periodical_entries[$this->rs->intField('post_id')]));
         }
 
-        $img = '<img alt="%1$s" title="%1$s" src="images/%2$s" /> %1$s';
+        $img = '<img alt="%1$s" title="%1$s" src="images/%2$s" class="mark mark-%3$s">';
 
         echo
         $pager->getLinks() .
@@ -250,13 +250,13 @@ class ManageList extends Listing
                                 ->items($lines),
                         ]),
                     (new Text('p', __('Legend: ') . implode(' - ', [
-                        sprintf($img, __('Published'), 'check-on.png'),
-                        sprintf($img, __('Unpublished'), 'check-off.png'),
-                        sprintf($img, __('Scheduled'), 'scheduled.png'),
-                        sprintf($img, __('Pending'), 'check-wrn.png'),
-                        sprintf($img, __('Protected'), 'locker.png'),
-                        sprintf($img, __('Selected'), 'selected.png'),
-                        sprintf($img, __('Attachments'), 'attach.png'),
+                        App::status()->post()->image(App::status()->post()::PUBLISHED, true)->render(),
+                        App::status()->post()->image(App::status()->post()::UNPUBLISHED, true)->render(),
+                        App::status()->post()->image(App::status()->post()::SCHEDULED, true)->render(),
+                        App::status()->post()->image(App::status()->post()::PENDING, true)->render(),
+                        sprintf($img, __('Protected'), 'locker.svg', 'locked') . ' ' . __('Protected'),
+                        sprintf($img, __('Selected'), 'selected.svg', 'selected') . ' ' . __('Selected'),
+                        sprintf($img, __('Attachments'), 'attach.svg', 'attach') . ' ' . __('Attachments'),
                     ]))),
                 ])
                 ->render()
@@ -287,45 +287,24 @@ class ManageList extends Listing
             $cat_title = __('None');
         }
 
-        $img_status = '';
-        $img        = '<img alt="%1$s" title="%1$s" src="images/%2$s" />';
-        switch ((int) $this->rs->intField('post_status')) {
-            case App::blog()::POST_PUBLISHED:
-                $img_status = sprintf($img, __('Published'), 'check-on.png');
-
-                break;
-
-            case App::blog()::POST_UNPUBLISHED:
-                $img_status = sprintf($img, __('Unpublished'), 'check-off.png');
-
-                break;
-
-            case App::blog()::POST_SCHEDULED:
-                $img_status = sprintf($img, __('Scheduled'), 'scheduled.png');
-
-                break;
-
-            case App::blog()::POST_PENDING:
-                $img_status = sprintf($img, __('Pending'), 'check-wrn.png');
-
-                break;
-        }
+        $img        = '<img alt="%1$s" title="%1$s" src="images/%2$s" class="mark mark-%3$s">';
+        $img_status = App::status()->post()->image($this->rs->intField('post_status'))->render();
 
         $protected = '';
         if ($this->rs->strField('post_password')) {
-            $protected = sprintf($img, __('Protected'), 'locker.png');
+            $protected = sprintf($img, __('Protected'), 'locker.svg', 'locked');
         }
 
         $selected = '';
         if ($this->rs->intField('post_selected')) {
-            $selected = sprintf($img, __('Selected'), 'selected.png');
+            $selected = sprintf($img, __('Selected'), 'selected.svg', 'selected');
         }
 
         $attach   = '';
         $nb_media = $this->rs->countMedia();
         if ($nb_media > 0) {
             $attach_str = $nb_media == 1 ? __('%d attachment') : __('%d attachments');
-            $attach     = sprintf($img, sprintf($attach_str, $nb_media), 'attach.png');
+            $attach     = sprintf($img, sprintf($attach_str, $nb_media), 'attach.svg', 'attach');
         }
 
         $tz = is_string(App::auth()->getInfo('user_tz')) ? App::auth()->getInfo('user_tz') : 'UTC';

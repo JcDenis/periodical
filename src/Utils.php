@@ -327,7 +327,7 @@ class Utils
                 unset($params['post_status']);
             }
         } else {
-            $sql->and('P.post_status = ' . App::blog()::POST_PENDING);
+            $sql->and('P.post_status = ' . App::status()->post()::PENDING);
         }
 
         return App::blog()->getPosts($params, $count_only, $sql);
@@ -391,7 +391,7 @@ class Utils
         // hack post status of App::blog()->getPost()
         $params = [
             'post_status' => '',
-            'sql'         => 'AND post_status != ' . App::blog()::POST_PENDING . ' ',
+            'sql'         => 'AND post_status != ' . App::status()->post()::PENDING . ' ',
         ];
         if ($period_id !== null) {
             $params['periodical_id'] = $period_id;

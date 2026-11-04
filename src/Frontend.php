@@ -85,7 +85,7 @@ class Frontend
                             // Get posts to publish related to this period
                             $posts_params                  = [];
                             $posts_params['periodical_id'] = $periods->intField('periodical_id');
-                            $posts_params['post_status']   = App::blog()::POST_PENDING;
+                            $posts_params['post_status']   = App::status()->post()::PENDING;
                             $posts_params['order']         = $posts_order;
                             $posts_params['limit']         = $limit * $max_nb;
                             $posts_params['no_content']    = true;
@@ -97,7 +97,7 @@ class Frontend
                                 while ($posts->fetch()) {
                                     // Publish post with right date
                                     $cur_post->clean();
-                                    $cur_post->setField('post_status', App::blog()::POST_PUBLISHED);
+                                    $cur_post->setField('post_status', App::status()->post()::PUBLISHED);
 
                                     // Update post date with right date
                                     if ($s->get('periodical_upddate')) {

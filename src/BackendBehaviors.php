@@ -404,7 +404,7 @@ class BackendBehaviors
             if (!$periods->isEmpty()) {
                 $combo = ['-' => ''];
                 while ($periods->fetch()) {
-                    $combo[Html::escapeHTML($periods->strField('periodical_title'))] = $periods->strField('periodical_id');
+                    $combo[Html::escapeHTML($periods->strField('periodical_title'))] = (string) $periods->intField('periodical_id');
                 }
                 self::$combo_period = $combo;
             }
