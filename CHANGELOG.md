@@ -2,6 +2,10 @@ TODO
 ===========================================================
 * Move to Helper\Form
 
+periodical 2026.11.05
+===========================================================
+* Fix deprecated post status, date picker and images
+
 periodical 2026.08.12
 ===========================================================
 * Bump Dotclear from 2.36 to 2.39
