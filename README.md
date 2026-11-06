@@ -51,5 +51,6 @@ You can also add or remove period to multiple posts from posts actions page.
 ## CONTRIBUTORS
 
 * Jean-Christian Denis (author)
+* Claude (AI assistant by Anthropic)
 
 You are welcome to contribute to this code.
