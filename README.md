@@ -40,6 +40,10 @@ to link this post to a period.
 
 You can also add or remove period to multiple posts from posts actions page.
 
+With the plugin [ClaudetteMcp](https://github.com/JcDenis/ClaudetteMcp), an AI assistant connected to the blog 
+gets two more tools: `list_periods` to list periods and `set_post_period` to link a post to a period 
+or to remove it from its period. ClaudetteMcp is not required by _periodical_.
+
 ## LINKS
 
 * [License](https://github.com/JcDenis/periodical/blob/master/LICENSE)

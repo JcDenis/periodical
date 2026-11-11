@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\periodical;
 
+use ArrayObject;
 use Dotclear\App;
 use Dotclear\Database\MetaRecord;
 use Dotclear\Helper\Process\TraitProcess;
@@ -22,13 +23,24 @@ class Frontend
 
     public static function init(): bool
     {
-        return self::status(My::checkContext(My::FRONTEND) && App::url()->isType(['default', 'feed']));
+        return self::status(My::checkContext(My::FRONTEND));
     }
 
     public static function process(): bool
     {
         if (!self::status()) {
             return false;
+        }
+
+        // Tools for AI assistants connected to the blog with the plugin ClaudetteMcp
+        App::behavior()->addBehavior('ClaudetteMcpAddTool', function (ArrayObject $tools): void {
+            $tools->append(new ClaudetteMcp\ListPeriods());
+            $tools->append(new ClaudetteMcp\SetPostPeriod());
+        });
+
+        // Periods are only updated on these pages
+        if (!App::url()->isType(['default', 'feed'])) {
+            return true;
         }
 
         App::behavior()->addBehavior('publicBeforeDocumentV2', function (): void {
