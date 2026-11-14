@@ -330,7 +330,7 @@ class ManageList extends Listing
                 ->class('nowrap minimal'),
             'category' => (new Text('td', Html::escapeHTML($cat_title)))
                 ->class('nowrap minimal'),
-            'author' => (new Text('td', Html::escapeHTML($this->rs->getUserCN())))
+            'author' => (new Text('td', Html::escapeHTML($this->rs->getAuthorCN())))
                 ->class('nowrap minimal'),
             'status' => (new Text('td', $img_status . ' ' . $selected . ' ' . $protected . ' ' . $attach))
                 ->class('nowrap status'),
