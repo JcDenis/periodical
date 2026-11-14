@@ -167,7 +167,7 @@ class Manage
                 '</form>'
             );
         }
-        Page::helpBlock('periodical');
+        Page::helpBlock(My::id() . '-periods');
 
         Page::closeModule();
     }

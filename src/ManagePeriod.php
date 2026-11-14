@@ -319,7 +319,7 @@ class ManagePeriod
             '</div>';
         }
 
-        Page::helpBlock('periodical');
+        Page::helpBlock(My::id() . '-period');
 
         Page::closeModule();
     }
