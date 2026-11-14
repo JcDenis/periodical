@@ -2,6 +2,18 @@ TODO
 ===========================================================
 * Move to Helper\Form
 
+periodical 2026.11.14
+===========================================================
+* Add Claude to contributors
+* Add tools for the plugin ClaudetteMcp
+* Fix table creation on SQLite
+* Fix automatic publication of pending entries
+* Fix actions on entries of a period
+* Fix empty author in entries list of a period
+* Fix translations typos
+* Add a user guide in French, with screenshots
+* Add admin help in English and French, one block per page
+
 periodical 2026.11.05
 ===========================================================
 * Fix deprecated post status, date picker and images
