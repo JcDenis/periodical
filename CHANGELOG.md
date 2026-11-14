@@ -4,7 +4,6 @@ TODO
 
 periodical 2026.11.14
 ===========================================================
-* Add Claude to contributors
 * Add tools for the plugin ClaudetteMcp
 * Fix table creation on SQLite
 * Fix automatic publication of pending entries
