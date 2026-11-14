@@ -14,6 +14,8 @@ _periodical_ is a plugin for the open-source web publishing software called [Dot
 at regular periods. For exemple, you just need to add posts to a period 
 and they will be publish ones after the others every week.
 
+A user guide with screenshots is available in French: [guide d'utilisation](https://github.com/JcDenis/periodical/blob/master/docs/fr/utilisation.md).
+
 ## REQUIREMENTS
 
 * Dotclear 2.39
@@ -47,6 +49,7 @@ or to remove it from its period. ClaudetteMcp is not required by _periodical_.
 ## LINKS
 
 * [License](https://github.com/JcDenis/periodical/blob/master/LICENSE)
+* [User guide (in French)](https://github.com/JcDenis/periodical/blob/master/docs/fr/utilisation.md)
 * [Packages & details](https://github.com/JcDenis/periodical/releases) (or on [Repository](https://dotclear.org/plugin/detail/periodical))
 * [Sources & contributions](https://github.com/JcDenis/periodical)
 * [Issues & security](https://github.com/JcDenis/periodical/issues)
