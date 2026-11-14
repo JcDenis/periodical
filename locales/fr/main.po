@@ -111,7 +111,7 @@ msgstr "Nouvelle période"
 
 #: src/Manage.php:162
 msgid "Selected periods action:"
-msgstr "Action sur les périodes selectionnées :"
+msgstr "Action sur les périodes sélectionnées :"
 
 #: src/ManageList.php:42
 msgid "No periods match the filter"
@@ -169,7 +169,7 @@ msgstr "Période mise à jour."
 
 #: src/ManagePeriod.php:113
 msgid "Period successfully created."
-msgstr "Période crée."
+msgstr "Période créée."
 
 #: src/ManagePeriod.php:128
 msgid "Entries successfully published."
@@ -225,7 +225,7 @@ msgstr "Publier"
 
 #: src/My.php:56
 msgid "Unpublish"
-msgstr "Retirer"
+msgstr "Mettre hors ligne"
 
 #: src/My.php:58
 msgid "Periodical"
@@ -253,7 +253,7 @@ msgstr "Une fois par semaine"
 
 #: src/My.php:90
 msgid "Monthly"
-msgstr "Un fois par mois"
+msgstr "Une fois par mois"
 
 msgid "Published periodically entries"
 msgstr "Publier périodiquement des billets"
