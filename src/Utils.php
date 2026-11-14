@@ -323,8 +323,10 @@ class Utils
             if (isset($params['post_status'])) {
                 if ($params['post_status'] != '' && is_numeric($params['post_status'])) {
                     $sql->and('P.post_status = ' . (int) $params['post_status']);
+                    // Keep it in params: on frontend, blog getPosts() only adds given statuses to published one
+                } else {
+                    unset($params['post_status']);
                 }
-                unset($params['post_status']);
             }
         } else {
             $sql->and('P.post_status = ' . App::status()->post()::PENDING);
