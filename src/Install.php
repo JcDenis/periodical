@@ -39,7 +39,7 @@ class Install
                 ->field('blog_id', 'varchar', 32, false)
                 ->field('periodical_type', 'varchar', 32, false, "'post'")
                 ->field('periodical_title', 'varchar', 255, false, "''")
-                ->field('periodical_curdt', 'timestamp', 0, false, ' now()')
+                ->field('periodical_curdt', 'timestamp', 0, false, 'now()')
                 ->field('periodical_enddt', 'timestamp', 0, false, 'now()')
                 ->field('periodical_pub_int', 'varchar', 32, false, "'day'")
                 ->field('periodical_pub_nb', 'smallint', 0, false, 1)
