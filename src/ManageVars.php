@@ -125,7 +125,7 @@ class ManageVars
         $this->periods = $periods;
 
         // entries
-        $entries = array_values(isset($_POST['perperiodical_entriesiods']) && is_array($_POST['periodical_entries']) ? $_POST['periodical_entries'] : []);
+        $entries = array_values(isset($_POST['periodical_entries']) && is_array($_POST['periodical_entries']) ? $_POST['periodical_entries'] : []);
         array_walk($entries, function (&$v) { $v = ($v !== null && is_numeric($v)) ? (int) $v : 0; });
         $this->entries = $entries;
 
