@@ -18,7 +18,7 @@ A user guide with screenshots is available in French: [guide d'utilisation](http
 
 ## REQUIREMENTS
 
-* Dotclear 2.39
+* Dotclear 2.40
 * PHP 8.1+
 * Dotclear admin permissions to configure plugin
 * Dotclear usage,contentadmin permissions to link feeds

@@ -20,7 +20,7 @@ plugin les publie les uns après les autres.
 
 ## Installation et permissions
 
-Le plugin demande Dotclear 2.39 et PHP 8.1 ou plus récent. Installez-le comme n'importe quel plugin, depuis la
+Le plugin demande Dotclear 2.40 et PHP 8.1 ou plus récent. Installez-le comme n'importe quel plugin, depuis la
 page _Plugins_ de l'administration.
 
 Le plugin crée sa propre table dans la base de données pour ranger les périodes.

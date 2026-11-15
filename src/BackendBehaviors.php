@@ -10,6 +10,7 @@ use Dotclear\Core\Backend\Favorites;
 use Dotclear\Core\Backend\Notices;
 use Dotclear\Core\Backend\Page;
 use Dotclear\Core\Backend\Action\ActionsPosts;
+use Dotclear\Core\Backend\UserPrefFilter;
 use Dotclear\Database\Cursor;
 use Dotclear\Database\MetaRecord;
 use Dotclear\Helper\Html\Form\Checkbox;
@@ -135,17 +136,19 @@ class BackendBehaviors
     /**
      * User pref periods filters options.
      *
-     * @param   ArrayObject<string, mixed>  $sorts  Sort options
+     * @param   ArrayObject<array-key, UserPrefFilter>  $filters  Sort options
      */
-    public static function adminFiltersListsV2(ArrayObject $sorts): void
+    public static function adminFiltersListsV3(ArrayObject $filters): void
     {
-        $sorts[My::id()] = [
+        $filters->append(new UserPrefFilter(
+            My::id(),
             My::name(),
             My::sortbyCombo(),
             'periodical_curdt',
             'desc',
-            [__('periods per page'), 10],
-        ];
+            __('periods per page'),
+            10
+        ));
     }
 
     /**

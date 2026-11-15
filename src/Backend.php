@@ -33,7 +33,7 @@ class Backend
         App::behavior()->addBehaviors([
             'adminBlogPreferencesFormV2'    => BackendBehaviors::adminBlogPreferencesFormV2(...),
             'adminBeforeBlogSettingsUpdate' => BackendBehaviors::adminBeforeBlogSettingsUpdate(...),
-            'adminFiltersListsV2'           => BackendBehaviors::adminFiltersListsV2(...),
+            'adminFiltersListsV3'           => BackendBehaviors::adminFiltersListsV3(...),
             'adminColumnsListsV2'           => BackendBehaviors::adminColumnsListsV2(...),
             'adminPostListHeaderV2'         => BackendBehaviors::adminPostListHeaderV2(...),
             'adminPostListValueV2'          => BackendBehaviors::adminPostListValueV2(...),
