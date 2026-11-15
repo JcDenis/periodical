@@ -32,7 +32,7 @@ Required Dotclear and PHP versions: see `_define.php`.
 * `src/ClaudetteMcp/`: tools for an AI assistant connected through ClaudetteMcp, registered in `src/Frontend.php` with the behavior `ClaudetteMcpAddTool`.
 * `js/`: `checkbox.js`, `dates.js`, `toggle.js`.
 * Database table `periodical`.
-* Behaviors used: `ClaudetteMcpAddTool`, `publicBeforeDocumentV2`, `adminBlogPreferencesFormV2`, `adminBeforeBlogSettingsUpdate`, `adminFiltersListsV2`, `adminColumnsListsV2`, `adminPostListHeaderV2`, `adminPostListValueV2`, `adminBeforePostDelete`, `adminDashboardFavoritesV2`, `adminPostHeaders`, `adminPostsActions`, `adminPostFormItems`, `adminAfterPostUpdate`, `adminAfterPostCreate`.
+* Behaviors used: `ClaudetteMcpAddTool`, `publicBeforeDocumentV2`, `adminBlogPreferencesFormV2`, `adminBeforeBlogSettingsUpdate`, `adminFiltersListsV3`, `adminColumnsListsV2`, `adminPostListHeaderV2`, `adminPostListValueV2`, `adminBeforePostDelete`, `adminDashboardFavoritesV2`, `adminPostHeaders`, `adminPostsActions`, `adminPostFormItems`, `adminAfterPostUpdate`, `adminAfterPostCreate`.
 
 ## Pitfalls
 
