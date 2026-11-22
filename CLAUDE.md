@@ -38,7 +38,7 @@ Required Dotclear and PHP versions: see `_define.php`.
 
 * Its ClaudetteMcp tools in `src/ClaudetteMcp/` are the example followed by the author's other plugins: keep them simple and consistent with it.
 * Table structure changes need a migration in `src/Install.php` (version compare), and must work on MySQL, PostgreSQL and SQLite.
-* `Frontend::init()` must not be limited to some URL types, or the ClaudetteMcp tools are never registered. Never add ClaudetteMcp to `requires`.
+* `Frontend::init()` must not be limited to some URL types, or the ClaudetteMcp tools are never registered. ClaudetteMcp stays optional: `['ClaudetteMcp?', '0.5']` in `requires`, never without `?`.
 
 ## Testing
 
