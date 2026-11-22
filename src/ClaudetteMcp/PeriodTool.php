@@ -23,6 +23,14 @@ use Dotclear\Plugin\periodical\My;
 abstract class PeriodTool extends PostTool
 {
     /**
+     * Family of tools for the keys of ClaudetteMcp (string, not constant: older ClaudetteMcp versions have none).
+     */
+    public function family(): string
+    {
+        return 'posts';
+    }
+
+    /**
      * Like in backend: periodical must be enabled on the blog, and the user must be able to write entries.
      */
     public function available(): bool
