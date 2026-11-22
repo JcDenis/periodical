@@ -2,6 +2,10 @@ TODO
 ===========================================================
 * Move to Helper\Form
 
+periodical 2026.11.23
+===========================================================
+* [new] Family of the ClaudetteMcp tools, for the keys limited to some families
+
 periodical 2026.11.22
 ===========================================================
 * [compat] Use adminFiltersListsV3 behavior, require Dotclear 2.40
